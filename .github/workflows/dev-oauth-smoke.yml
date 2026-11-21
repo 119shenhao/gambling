@@ -49,11 +49,40 @@ jobs:
             if(p.get("client_id")!=="gambling-community-dev"||
                p.get("redirect_uri")!=="https://dev-gambling-community.119shenhao.workers.dev/api/auth/identity/callback"||
                p.get("response_type")!=="code"||p.get("code_challenge_method")!=="S256"||
+               p.get("provider_hint")!=="google"||
                !p.get("state")||!p.get("nonce")||!p.get("code_challenge"))process.exit(1);
-            console.log("Verified OAuth authorize redirect: isolated DEV issuer, client, callback, PKCE and state. No tokens shown.");
+            console.log("Verified OAuth authorize redirect: isolated DEV issuer, client, Google hint, callback, PKCE and state. No tokens shown.");
           '
           legacy=$(curl -sS --max-time 12 -o /dev/null -w '%{http_code}' "$PREVIEW_ORIGIN/api/auth/google")
           test "$legacy" = 410 || { echo '::error::Legacy direct Google endpoint must remain disabled'; exit 1; }
           no_state=$(curl -sS --max-time 12 -o /dev/null -w '%{http_code}' "$PREVIEW_ORIGIN/api/auth/identity/callback")
           test "$no_state" = 401 || { echo '::error::Callback without matching browser-bound state must return 401'; exit 1; }
           echo 'PASS: DEV OAuth pre-login checks; user browser Google sign-in remains to be tested.'
+
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const origin='https://dev-gambling-community.119shenhao.workers.dev';
+          let ok=false;
+          for(let attempt=1;attempt<=18;attempt++){
+            try{
+              const res=await fetch(origin+'/api/auth/identity?return_to=%2F',{redirect:'manual',signal:AbortSignal.timeout(12000)});
+              if(res.status!==302)throw Error('forum initiation unavailable');
+              const center=new URL(res.headers.get('location'));
+              if(center.origin!=='https://dev-identity-center.119shenhao.workers.dev'
+                ||center.pathname!=='/oauth/authorize'
+                ||center.searchParams.get('provider_hint')!=='google')throw Error('forum not yet deployed with Google hint');
+              const handoff=await fetch(center,{redirect:'manual',signal:AbortSignal.timeout(12000)});
+              if(handoff.status===302){
+                const google=new URL(handoff.headers.get('location'));
+                if(google.origin==='https://accounts.google.com'
+                   && google.pathname==='/o/oauth2/v2/auth'
+                   && (handoff.headers.get('set-cookie')||'').includes('__Host-ic_oauth_')){
+                  ok=true;console.log('PASS: Gambling DEV button → Identity Center DEV (no HTML page) → Google OAuth.');
+                  break;
+                }
+              }
+            }catch(e){ /* Dev builds may lag; never print OAuth state or nonce. */ }
+            if(attempt<18)await new Promise(resolve=>setTimeout(resolve,12000));
+          }
+          if(!ok)throw Error('DEV login flow still shows provider chooser or is not deployed');
+          NODE

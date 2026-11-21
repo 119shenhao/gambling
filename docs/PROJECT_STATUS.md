@@ -96,3 +96,9 @@
 - 认证中心开发客户端单独 Secret 安装及 SHA-256 摘要校验成功 [#44885090134](https://github.com/119shenhao/identity-center/actions/runs/44885090134)；应用启用成功 [#44885210412](https://github.com/119shenhao/identity-center/actions/runs/44885210412)。论坛开发登录开关 true，生产 false。
 - **剩余用户验收**：浏览器从 `https://dev-gambling-community.119shenhao.workers.dev/` 主动点击 Google 登录，观察是否回到论坛且显示已登录；在 Identity Center DEV 会话管理检查 `gambling-community-dev` 应用会话；测试退出、重新登录。该真人 Google OAuth 完整往返目前未自动执行、不能标记为通过。
 - 认证中心生产与论坛生产的应用客户端、数据库、域名没有切换；Azure Translator 和 R2 公开缓存未启用。
+
+## 2026-11-21 跳过 Identity Center 的提供商选择页（仅开发）
+
+用户实际完成 Google 登录，但要求戒赌社区点击登录后不再显示 Identity Center 的中间选择页。认证中心 DEV 已支持 `gambling-community-dev` 专用、严格约束客户端+Issuer+回调的 `provider_hint=google`；保留中心 SSO 复用、PKCE、Nonce、State、一次性授权码及后端验签和会话处理。认证中心线上真实跳转 [#44886399265](https://github.com/119shenhao/identity-center/actions/runs/44886399265) 成功，未提示时原选择页不变。
+
+本次新论坛 DEV `src/auth.ts` 仅在精确开发配置下传 `provider_hint=google`，不直接访问 Google OAuth，也不修改正式站。`dev-oauth-smoke.yml` 更新为验证论坛 → 身份中心 → Google 两次 HTTP 302 及证明 Cookie，全程不跟随到 Google 页面，不记录敏感查询参数。**仍需用户实际浏览器验收**。
