@@ -1,6 +1,6 @@
 # 戒赌社区 / Problem Gambling
 
-计划域名：`gambling.nbn369.com`。新仓库为 `119shenhao/gambing`（保持用户已创建的拼写），开发分支 `dev`。
+计划域名：`gambling.nbn369.com`。新仓库为 `119shenhao/gambling`，开发分支 `dev`。仓库地址：https://github.com/119shenhao/gambling 。
 
 从 `119shenhao/spine-community/main` 移植通用论坛框架：帖子、回复、用户互动、后台、多语言、搜索、可选翻译及 SEO。**不复制真实业务数据**。
 

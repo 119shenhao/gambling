@@ -28,7 +28,7 @@
 
 1. **已完成**：开发 UUID 写入 `wrangler.jsonc → previews.d1_databases[]` 的 `DB`；生产 UUID 写入根级 `d1_databases[]` 的 `DB`，并校验名称、UUID、环境各自唯一。
 2. **已完成**：独立迁移配置 `wrangler.preview-migrations.jsonc`，绑定 `PREVIEW_DB`，固定开发 D1 名称与 UUID；部署准备程序仅在 Cloudflare **dev Preview 构建**且 GitHub 分支为 `dev` 时可以运行 `migrations/v1`。无环境或 UUID 不匹配时拒绝；绝不连接正式 D1。
-3. 在 Cloudflare Worker Builds 中核对 GitHub 仓库 `119shenhao/gambing`、Production branch=`main`、Preview builds=on、Preview command=`npx wrangler preview`、Deploy command=`npx wrangler deploy`、Build command 留空、根目录 `/`。启用稳定 dev Preview URL。
+3. 在 Cloudflare Worker Builds 中核对 GitHub 仓库 `119shenhao/gambling`、Production branch=`main`、Preview builds=on、Preview command=`npx wrangler preview`、Deploy command=`npx wrangler deploy`、Build command 留空、根目录 `/`。启用稳定 dev Preview URL。
 4. 开发 Preview 部署后的 `/api/health` 必须返回 `status=ok` / `databaseReady=true`，实际论坛页面、公开帖子和登录前访问也要运行测试；如返回 503，先排查 Preview D1 绑定与迁移。
 5. Identity Center 开发环境先注册 disabled 的 `gambling-community-dev`、精确 HTTPS 回调为实际 Preview URL + `/api/auth/identity/callback`，配置专属服务器端 Secret 并验证后启用；不再设置网站自己的直连 Google 回调。
 6. 开发真实验收成功之后，另行批准生产迁移、配置 `gambling-community-prod` 和 `gambling.nbn369.com`。R2 公开 JSON 回填与 CDN 可后置开启。
@@ -45,3 +45,9 @@
 已实现 `scripts/preview-migrate.mjs`，由 `scripts/prepare-build.mjs` 在构建时调用。本地/GitHub CI/main 生产都不运行远端 SQL。只在 Cloudflare 的 `WORKERS_CI=1` 且 `WORKERS_CI_BRANCH=dev` 并且存在 `wrangler.preview-migrations.jsonc` 时，先确认 `gambling-community-dev` UUID、预览配置、R2 名称、与生产/源项目数据库隔离，再运行 Wrangler 的版本化 D1 迁移并验证 schema_version。缺少环境标识则安全跳过；在标识完整且配置不匹配时中止构建。只有 Cloudflare Preview 远程迁移成功并实际 /api/health 检查通过才可判定“数据库已准备好”。
 
 下一步收到两个真实 UUID 后，写入绑定并触发正常 `dev` 提交，由 Cloudflare Preview Build 自动执行；随后使用 `/api/health` 和迁移日志确认。若 Cloudflare 的 Build Token 缺少 D1 权限，会停止部署，届时需要受控 GitHub Actions Secret 配置，**不要在聊天里提交 Token 明文**。
+
+## GitHub 仓库更名后的 Cloudflare 构建核对
+
+GitHub 仓库规范地址已更正为 `https://github.com/119shenhao/gambling`，Cloudflare 的 Worker / D1 / R2 **不改名**。
+
+Cloudflare Dashboard → Workers & Pages → `gambling-community` → Settings → Builds / Git integration：确认已关联 `119shenhao/gambling`，正式分支仍是 `main`、预览分支仍是 `dev`，并检查更名后的首次 Preview 构建日志。若 GitHub 原地址重定向仍可用，也不能据此断言 Cloudflare webhook/build 一定正常；必须观察实际构建事件与预览部署。

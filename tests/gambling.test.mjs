@@ -8,3 +8,11 @@ test('localized product values',()=>{const s=read('public/i18n.js');assert.match
 test('new SSO maps center user ID without old Google identity',()=>{const s=read('src/auth.ts');assert.match(s,/direct_google_login_disabled/);assert.doesNotMatch(s,/claims\.spine_google_sub/);assert.match(s,/findOrCreateUser\(env\.DB,'identity_center',claims\.sub\)/);});
 
 test('remote migration cannot run without exact dev Preview gating and verified D1 mapping',()=>{const s=read('scripts/preview-migrate.mjs');assert.match(s,/WORKERS_CI_BRANCH==='dev'/);assert.match(s,/gambling-community-dev/);assert.match(s,/preview-migrations.jsonc/);assert.match(s,/production.some/);});
+
+test('repository rename links use canonical GitHub path',()=>{
+ for(const p of ['README.md','AGENTS.md','docs/START_HERE.md','docs/PROJECT_STATUS.md','docs/CLOUDFLARE_SETUP.md']){
+  const contents=read(p);
+  assert.doesNotMatch(contents,/119shenhao\\/gambing(?![a-z-])/,'outdated repository link in '+p);
+ }
+ assert.match(read('README.md'),/119shenhao\\/gambling/);
+});

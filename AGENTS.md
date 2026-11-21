@@ -1,5 +1,7 @@
 # Gambling Community — AI/Codex 项目规则
 
+唯一规范 GitHub 仓库：`119shenhao/gambling`。不要再引用原拼写的仓库路径；Cloudflare 的 Worker、D1、R2 名称不因仓库改名而更改。
+
 每次先阅读 docs/START_HERE.md → docs/PROJECT_STATUS.md → docs/REQUIREMENTS.md → 实际代码。
 
 - dev 只做开发；main 为生产基线。生产代码、生产 D1 写入和正式上线需要用户额外明确批准。
