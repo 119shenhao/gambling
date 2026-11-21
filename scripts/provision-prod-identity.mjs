@@ -50,7 +50,7 @@ if(admin.length!==1)throw Error('PROD verified Owner role not present; refusing 
 // ONLY the authorized Gambling production D1 before Worker Secret metadata.
 query("INSERT INTO settings(key,value) VALUES('gambling_prod_oauth_bootstrap_stage','d1_verified') ON CONFLICT(key) DO UPDATE SET value=excluded.value");
 const hasSecret=()=>{
- const list=JSON.parse(wrangler(['secret','list','--name','gambling-community','--json']));
+ const list=JSON.parse(wrangler(['secret','list','--name','gambling-community','--format','json']));
  if(!Array.isArray(list))throw Error('PROD Worker Secret metadata invalid');
  return list.some(x=>x.name==='IDENTITY_CLIENT_SECRET'&&x.type==='secret_text');
 };
