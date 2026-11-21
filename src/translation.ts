@@ -404,8 +404,20 @@ async function generate(env:Env,entry:Item,row:Row,locale:string,config:Settings
 // TEMPORARY DEV-ONLY, one-time Azure credential validation. Remove after success.
 // Fixed harmless test sentences only. D1 one-time claim prevents repeat billing.
 async function devAzureSmoke(req:Request,env:Env){
- if(env.APP_ENV!=='preview'||req.method!=='POST'||
-    req.headers.get('x-gambling-azure-smoke')!=='2026-11-21-test')fail(404,'not_found');
+ if(env.APP_ENV!=='preview')fail(404,'not_found');
+ if(req.method==='GET'){
+   const receipt=await one(env.DB,"SELECT value FROM settings WHERE key='azure_dev_smoke_20261121'");
+   const budget=await one(env.DB,'SELECT day_chars,month_chars,provider_blocked_at,cooldown_until FROM translation_budget WHERE id=1');
+   const limits=await translationProviderSettings(env);
+   return json({receipt:receipt?.value||'not_started',
+     dailyLimit:limits.azure.daily,monthlyLimit:limits.azure.monthly,
+     budgetDayCharacters:budget?.day_chars??null,
+     budgetMonthCharacters:budget?.month_chars??null,
+     providerBlocked:Boolean(budget?.provider_blocked_at),
+     cooldownActive:Number(budget?.cooldown_until)>now()});
+ }
+ if(req.method!=='POST'||req.headers.get('x-gambling-azure-smoke')!=='2026-11-21-test')
+   fail(404,'not_found');
  const config=azureConfiguration(env);
  if(!config)fail(503,'azure_config_not_ready');
  const selected=await translationProviderSettings(env);
