@@ -2,6 +2,7 @@ export interface Env {
   ASSETS: Fetcher; DB: D1Database; GOOGLE_CLIENT_ID?: string; GOOGLE_CLIENT_SECRET?: string;
   IDENTITY_LOGIN_ENABLED?: string; IDENTITY_ISSUER?: string; IDENTITY_REDIRECT_URI?: string;
   IDENTITY_CLIENT_ID?: string; IDENTITY_CLIENT_SECRET?: string;
+  ADMIN_CENTER_OWNER_SHA256?: string;
   ADMIN_GOOGLE_SUB?: string; TRANSLATOR_KEY?: string; TRANSLATOR_REGION?: string;
   TRANSLATOR_ENDPOINT?: string; TRANSLATOR_F0_VERIFIED_AT?: string;
   TRANSLATION_ENABLED?: string; TRANSLATION_DAILY_LIMIT?: string; TRANSLATION_MONTHLY_LIMIT?: string;
@@ -84,12 +85,45 @@ export async function apiRate(env:Env,req:Request):Promise<void>{
  await rate(env.DB,key,180);
 }
 
+/** Grant this forum's administrator role ONLY to a previously Center-verified owner. */
+export async function ensureVerifiedCenterOwnerAdmin(env:Env,uid:string,centerUserId:string):Promise<boolean>{
+ const ownerHash=env.ADMIN_CENTER_OWNER_SHA256;
+ const exactEnvironment=env.IDENTITY_LOGIN_ENABLED==='true'&&(
+   (env.APP_ENV==='preview'&&env.IDENTITY_CLIENT_ID==='gambling-community-dev'&&
+      env.IDENTITY_ISSUER==='https://dev-identity-center.119shenhao.workers.dev')||
+   (env.APP_ENV==='production'&&env.IDENTITY_CLIENT_ID==='gambling-community-prod'&&
+      env.IDENTITY_ISSUER==='https://idcenter.nbn369.com'));
+ if(!exactEnvironment||!ownerHash||!/^[0-9a-f]{64}$/.test(ownerHash)||
+    !/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(centerUserId)||
+    await hash(centerUserId)!==ownerHash)return false;
+ const granted=await one(env.DB,`INSERT OR IGNORE INTO user_roles(user_id,role)
+   SELECT u.id,'admin' FROM users u JOIN auth_identities ai
+     ON ai.user_id=u.id AND ai.provider='identity_center' AND ai.provider_subject=?
+   WHERE u.id=? AND u.status='active' AND u.is_system=0
+   RETURNING user_id`,centerUserId,uid);
+ if(granted)await stmt(env.DB,`INSERT INTO moderation_actions(id,actor_id,target_type,target_id,action,reason)
+   VALUES(?,?,'role',?,'grant_admin','identity_center_verified_owner')`,id(),uid,uid).run();
+ const role=await one(env.DB,`SELECT 1 yes FROM user_roles r JOIN users u ON u.id=r.user_id
+   JOIN auth_identities ai ON ai.user_id=u.id AND ai.provider='identity_center'
+   WHERE u.id=? AND u.status='active' AND u.is_system=0
+     AND ai.provider_subject=? AND r.role='admin'`,uid,centerUserId);
+ return Boolean(role);
+}
+
 export async function currentUser(req: Request, env: Env): Promise<Row|null> {
   const token=cookie(req,'gc_session');if(!token)return null;
   const user=await one(env.DB,`SELECT u.*,s.id session_id FROM user_sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND s.expires_at>? AND s.revoked_at IS NULL AND u.status='active' AND u.is_system=0`,await hash(token),now());
   if(!user)return null;
   const roles=await all(env.DB,'SELECT role FROM user_roles WHERE user_id=?',user.id);
-  user.role=roles.some(r=>r.role==='admin')?'admin':roles.some(r=>r.role==='moderator')?'moderator':'member';return user;
+  let isAdmin=roles.some(r=>r.role==='admin');
+  // A previously signed-in, Center-verified Owner receives the forum role
+  // upon the next authenticated API request; no new Google login required.
+  if(!isAdmin&&env.ADMIN_CENTER_OWNER_SHA256){
+    const linked=await one(env.DB,`SELECT provider_subject FROM auth_identities
+      WHERE provider='identity_center' AND user_id=?`,user.id);
+    if(linked)isAdmin=await ensureVerifiedCenterOwnerAdmin(env,user.id,linked.provider_subject);
+  }
+  user.role=isAdmin?'admin':roles.some(r=>r.role==='moderator')?'moderator':'member';return user;
 }
 export function requireUser(u: Row|null): Row {if(!u)fail(401,'login_required');return u;}
 export function requireRole(u: Row|null,admin=false): Row {const user=requireUser(u);if(admin?user.role!=='admin':!['admin','moderator'].includes(user.role))fail(403,'forbidden');return user;}

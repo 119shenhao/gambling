@@ -157,3 +157,13 @@
 - [独立本地 D1 + 真 Worker HTTP API + 浏览器译文组件验收 #44892478870](https://github.com/119shenhao/gambling/actions/runs/44892478870)：全部 PASS。自动创建**仅本地测试数据库**的已发布帖子、列表摘要和回帖及 D1 翻译缓存，不在 Cloudflare DEV/PROD 产生人工帖子；按要求验证匿名缓存读取、再次请求不触发 Azure、原文语言不翻译、原文/译文界面切换、缓存加密解密、非法 locale 与旧版本拒绝，以及编辑原文后旧译文失效。开发环境此前真实 Azure Key 英中双向测试通过 #44889928443。
 - 新增持续 `translation-local-e2e.yml`，源码/前端翻译代码修改时跑回归；本地测试脚本 `scripts/test-translation-local.mjs` 永远只使用 `wrangler.local.jsonc`（`APP_ENV=local`，假 D1 UUID）且不执行 `--remote`，所有固定文本和种子 SQL 在 `tests/fixtures/translation-local.sql`。
 - 新增 `translation-dev-live.yml`，对当前部署执行只读内容和缓存查询、检查 Azure Secret/D1 启用状态；无原文上传 Azure，不额外扣除翻译额度，也不打印用户帖内容。正式站未发布，生产翻译保持关闭。
+
+## 2026-11-21 管理员授权：已验证的统一身份认证中心 Owner（DEV + 生产预置）
+
+用户要求其 Google 账号成为戒赌论坛开发、生产管理员。此前同一用户已经分别在 Identity Center DEV 和 PROD 完成了经过验证的首位 Owner 授权，**两个环境的中心 User ID 不相同**（真实 UUID 不在本公开项目文档重复披露）。
+
+- `wrangler.jsonc` 新增非秘密 `ADMIN_CENTER_OWNER_SHA256`，DEV/PROD 分别保存与两套已验证 Owner 唯一对应的不同 SHA-256；不是 Google 邮箱或 sub，不能用于登录或伪造认证。
+- `src/auth.ts` 仅在**有效的中心签名 JWT + 精确 Issuer、Client、Nonce 校验后**通过 `claims.sub` 触发匹配；`src/core.ts` 还会让已登录的旧会话在其下一次 API 请求时自动补授。授予前严格校验合法的环境/Issuer/Client、中心 UUID 摘要和本地 `auth_identities(provider='identity_center')` 既有绑定。匹配时幂等写入 `user_roles('admin')`，以及一次 `moderation_actions` 审计记录。其他账号、邮箱碰撞和旧 Google 直连均无法触发。
+- **DEV** 当前 SSO 已启用，后续线上验收 `/api/me` 实际管理员角色（需要现有浏览器凭据，自动 CI 无法冒用用户 Cookie）；不要声称未检查远端 D1 时已经分配成功。
+- **PROD** 目前 `119shenhao/gambling/main` 仍只有 README、无生产应用发布，Worker 正式论坛的 `IDENTITY_LOGIN_ENABLED=false`。本次仅在 `dev` 的未来生产配置预置匹配值，**没有修改、迁移、发布生产 D1 或 Worker**。未来正式发布并启用生产统一登录后，用户首次以正式 Identity Center Owner 登录会自动获得论坛 admin。不得声称目前生产已生效。
+- 保留 Cloudflare Secrets、`keep_vars:true`、D1/R2 分离和全部已有站点功能。此功能只赋予已验证 Owner 一人管理员，不允许从用户提交的邮箱、昵称或账号 ID 自行授权。

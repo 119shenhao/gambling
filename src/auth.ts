@@ -1,4 +1,4 @@
-import {Env,Row,one,stmt,now,id,hash,b64,randomToken,cookie,fail,json} from './core';
+import {Env,Row,one,stmt,now,id,hash,b64,randomToken,cookie,fail,json,ensureVerifiedCenterOwnerAdmin} from './core';
 
 const googleJwks='https://www.googleapis.com/oauth2/v3/certs';
 const googleIssuers=['https://accounts.google.com','accounts.google.com'];
@@ -158,6 +158,8 @@ async function identityRoute(req:Request,env:Env,url:URL){
   if(!/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(claims.sub))fail(401,'invalid_identity');
   const uid=await findOrCreateUser(env.DB,'identity_center',claims.sub);
   await requireActiveMember(env.DB,uid);
+  // claims.sub was authenticated by signed Center JWT, exact issuer/audience and nonce.
+  await ensureVerifiedCenterOwnerAdmin(env,uid,claims.sub);
   const signedIn=await startSession(req,env.DB,uid,returnTo);
   signedIn.headers.append('set-cookie',flowCookie('',0));
   return signedIn;

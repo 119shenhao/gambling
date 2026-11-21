@@ -143,3 +143,25 @@ test('One-shot Azure validation endpoint is removed from running forum code afte
  assert.doesNotMatch(source,/function devAzureSmoke/);
  assert.doesNotMatch(source,/azure_dev_smoke_20261121/);
 });
+
+test('verified DEV and future PROD Identity Center Owners have separate hashed role selectors',()=>{
+ const c=JSON.parse(read('wrangler.jsonc'));
+ assert.equal(c.previews.vars.ADMIN_CENTER_OWNER_SHA256,'7df1b395981a31a651015a158eb1086264ecbea53b5dd41a34d62444ff29fa26');
+ assert.equal(c.vars.ADMIN_CENTER_OWNER_SHA256,'eb367b5a659205efbacd7dfa4964e0c2a9852c072237b668d3d885e334105ba4');
+ assert.notEqual(c.previews.vars.ADMIN_CENTER_OWNER_SHA256,c.vars.ADMIN_CENTER_OWNER_SHA256);
+ assert.equal(c.previews.vars.IDENTITY_LOGIN_ENABLED,'true');
+ assert.equal(c.vars.IDENTITY_LOGIN_ENABLED,'false','do not turn on PROD login prematurely');
+ assert.equal(c.keep_vars,true);
+ for(const v of [c.previews.vars,c.vars]){
+   assert.equal(v.ADMIN_GOOGLE_SUB,undefined);
+   assert.match(v.ADMIN_CENTER_OWNER_SHA256,/^[a-f0-9]{64}$/);
+ }
+ const src=read('src/core.ts');
+ assert.match(src,/await hash\(centerUserId\)!==ownerHash/);
+ assert.match(src,/ai\.provider='identity_center'/);
+ assert.match(src,/identity_center_verified_owner/);
+ assert.match(src,/env\.APP_ENV==='production'/);
+ assert.match(src,/env\.APP_ENV==='preview'/);
+ assert.match(src,/if\(!isAdmin&&env\.ADMIN_CENTER_OWNER_SHA256\)/);
+ assert.match(read('src/auth.ts'),/await ensureVerifiedCenterOwnerAdmin\(env,uid,claims\.sub\)/);
+});
