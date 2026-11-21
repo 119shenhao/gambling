@@ -90,3 +90,26 @@ test('dev-only Google provider hint preserves central OAuth validation, never by
  assert.match(auth,/return redirect\(config\.issuer\+'\/oauth\/authorize\?'\+params,flowCookie\(state\)\)/);
  assert.equal(JSON.parse(read('wrangler.jsonc')).vars.IDENTITY_LOGIN_ENABLED,'false');
 });
+
+test('Azure DEV shared-resource budget is protected by a hard 50k/month cap',()=>{
+ const c=JSON.parse(read('wrangler.jsonc'));
+ assert.equal(c.vars.TRANSLATION_ENABLED,'false');
+ assert.equal(c.previews.vars.TRANSLATION_ENABLED,'true');
+ assert.equal(c.previews.vars.TRANSLATOR_REGION,'eastus');
+ assert.equal(c.previews.vars.TRANSLATOR_F0_VERIFIED_AT,'2026-11-09T06:14:50Z');
+ assert.equal(c.previews.vars.TRANSLATOR_KEY,undefined);
+ assert.equal(c.vars.TRANSLATOR_KEY,undefined);
+ assert.equal(c.previews.vars.TRANSLATION_DAILY_LIMIT,'5000');
+ assert.equal(c.previews.vars.TRANSLATION_MONTHLY_LIMIT,'50000');
+ const tr=read('src/translation.ts');
+ assert.match(tr,/AZURE_SITE_MAX_MONTHLY=50000/);
+ assert.match(tr,/AZURE_DEFAULT_DAILY=5000/);
+ assert.match(tr,/AZURE_DEFAULT_MONTHLY=50000/);
+ assert.match(tr,/Math\.min\(Number\(raw\),max\)/);
+ const admin=read('src/admin.ts');
+ assert.match(admin,/monthly>AZURE_SITE_MAX_MONTHLY/);
+ assert.match(admin,/translation_credentials_not_ready/);
+ assert.match(admin,/env\.APP_ENV!=='preview'/);
+ assert.match(read('public/translation-admin.js'),/data-action="toggle-translation"/);
+ assert.match(read('public/app.js'),/if\(action==='toggle-translation'\)/);
+});

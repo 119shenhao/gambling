@@ -112,12 +112,13 @@ export async function readItems(db:D1Database,items:Item[],locale:string) {
   ) SELECT * FROM public_rows`,JSON.stringify(items),locale,SUMMARY_TRANSLATION_ENGINE,locale);
 }
 
-// This is a website-side safety budget, not the Azure account's live metering.
-// Azure F0 is advertised at 2 million characters/month; leave 10% headroom.
+// Shared Azure F0 account: the Spine forum permits up to 1.9m characters,
+// so cap this forum to 50,000/month, leaving 50,000 further headroom below
+// the advertised 2m allowance. Local caps are not real-time Azure metering.
 export const AZURE_F0_MONTHLY_CHARS=2000000;
-export const AZURE_SITE_MAX_MONTHLY=1900000;
-export const AZURE_DEFAULT_DAILY=200000;
-export const AZURE_DEFAULT_MONTHLY=1800000;
+export const AZURE_SITE_MAX_MONTHLY=50000;
+export const AZURE_DEFAULT_DAILY=5000;
+export const AZURE_DEFAULT_MONTHLY=50000;
 export const TRANSLATION_PROVIDER_CATALOG=[
   {id:'azure',name:'Microsoft Azure Translator',implemented:true,freeMonthly:AZURE_F0_MONTHLY_CHARS},
   {id:'aliyun',name:'Alibaba Cloud Machine Translation',implemented:false,freeMonthly:null}

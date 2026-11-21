@@ -437,7 +437,16 @@ async function clicked(el,event){const action=el.dataset.action,{id,type,active}
   rememberAnalyticsFilters();
   return;
  }
- if(action==='toggle-analytics'){if(state.user?.role!=='admin')throw new Error('forbidden');const enabled=el.dataset.enabled!=='true';await send('/api/admin/settings',{key:'analytics_enabled',value:String(enabled),reason:'Analytics '+(enabled?'enabled':'disabled')+' by administrator'});if(state.admin)state.admin.analyticsEnabled=enabled;if(state.health)state.health.analyticsEnabled=enabled;el.dataset.enabled=String(enabled);el.setAttribute('aria-pressed',String(enabled));el.classList.toggle('primary',!enabled);el.textContent=t(enabled?'analyticsDisable':'analyticsEnable');const status=$('[data-analytics-status]');if(status)status.textContent=t(enabled?'analyticsOn':'analyticsOff');toast(t('success'));return;}
+ if(action==='toggle-translation'){
+   if(state.user?.role!=='admin'||route().path!=='/admin'||route().params.get('tab')!=='translationProviders')throw new Error('forbidden');
+   const enabled=el.dataset.enabled!=='true';
+   await send('/api/admin/settings',{key:'translation_enabled',value:String(enabled),reason:'Shared Azure translation '+(enabled?'enabled':'paused')+' by administrator'});
+   state.health=await api('/api/health');
+   await renderTranslationAdmin($('#admin-content'),api,esc,locale);
+   toast(t('success'));
+   return;
+  }
+  if(action==='toggle-analytics'){if(state.user?.role!=='admin')throw new Error('forbidden');const enabled=el.dataset.enabled!=='true';await send('/api/admin/settings',{key:'analytics_enabled',value:String(enabled),reason:'Analytics '+(enabled?'enabled':'disabled')+' by administrator'});if(state.admin)state.admin.analyticsEnabled=enabled;if(state.health)state.health.analyticsEnabled=enabled;el.dataset.enabled=String(enabled);el.setAttribute('aria-pressed',String(enabled));el.classList.toggle('primary',!enabled);el.textContent=t(enabled?'analyticsDisable':'analyticsEnable');const status=$('[data-analytics-status]');if(status)status.textContent=t(enabled?'analyticsOn':'analyticsOff');toast(t('success'));return;}
   if(action==='admin-action'){const payload=JSON.parse(el.dataset.payload);modal(`<h2>${esc(el.textContent)}</h2><form id="admin-form" class="form-grid" data-endpoint="${esc(el.dataset.endpoint)}" data-payload="${esc(JSON.stringify(payload))}"><label>${t('reason')}<textarea class="short" name="reason" required maxlength="2000"></textarea></label><button class="button primary">${t('submit')}</button></form>`);return;}
  if(action==='add-term'||action==='edit-term'){const term=state.terms.find(x=>x.id===id);modal(`<h2>${t('taxonomy')}</h2><form id="term-form" class="form-grid" data-id="${esc(id||'')}"><label>Slug<input name="slug" required pattern="[a-z0-9-]+" maxlength="80" value="${esc(term?.slug||'')}"></label><label>${t('spaces')}<select name="term_type">${['category'].map(k=>`<option value="${k}" ${term?.term_type===k?'selected':''}>${t(k==='category'?'stories':k)}</option>`).join('')}</select></label><label>${t('title')} (${esc(locale)})<input name="label" required maxlength="120" value="${esc(term?.label||'')}"></label><label>${t('aliases')}<input name="aliases" maxlength="2000"></label><label>${t('reason')}<input name="reason" required maxlength="2000"></label><button class="button primary">${t('save')}</button></form>`);return;}
 }

@@ -39,6 +39,12 @@ export async function renderTranslationAdmin(target,api,esc,locale){
   <p>${tr('当前正在使用','Active provider')}：<strong>${esc(current?.name||response.activeProvider)}</strong></p>
   <div class="admin-grid">${summary}</div>
   ${bad?`<div class="notice">${tr('限制状态','Limits')}: ${bad}</div>`:''}
+  <h3>${tr('翻译启用状态','Translation activation')}</h3>
+  <div class="admin-row" id="translation-activation">
+   <p class="subtle">${tr('本论坛与颈椎论坛共用同一 Azure F0 资源。必须先配置开发 Worker Secret，实际用量请在 Azure 门户核对。','This forum shares Azure F0 with the Spine forum. Configure the DEV Worker Secret first, and check total Azure usage in Azure Portal.')}</p>
+   <strong>${azure.translationEnabled?tr('正在启用','Enabled'):tr('当前暂停','Paused')}</strong>
+   <button type="button" class="button ${azure.translationEnabled?'':'primary'}" data-action="toggle-translation" data-enabled="${azure.translationEnabled===true}" ${!azure.translationEnabled&&azure.status==='not_configured'?'disabled':''}>${azure.translationEnabled?tr('暂停自动翻译','Pause automatic translation'):tr('启用自动翻译','Enable automatic translation')}</button>
+  </div>
   <h3>${tr('Azure Translator 额度设置','Azure Translator quota settings')}</h3>
   <form class="form-grid" id="translation-provider-form">
    <input type="hidden" name="provider" value="azure"/>
@@ -55,7 +61,7 @@ export async function renderTranslationAdmin(target,api,esc,locale){
    </label>
    <div class="notice info">
     ${tr('Azure F0 官方免费月额度','Azure F0 advertised free monthly allowance')}: <strong>${num(azure.freeMonthly)}</strong>。
-    ${tr('为预留安全余量，网站每月最多允许设置','Website cap to leave safety headroom')}: <strong>${num(response.capMonthly)}</strong>。
+    ${tr('共享 F0 的本论坛每月硬性上限','This forum monthly hard cap on shared F0')}: <strong>${num(response.capMonthly)}</strong>。
     ${tr('计数仅代表本论坛用量，不代表 Azure 账户实时总用量。','These counters cover this website, not your full Azure account usage.')}
    </div>
    <p class="subtle">${tr('只修改额度，不会重置已累计字符数；如果当前已经超过新限额，将暂停新的翻译直到预算恢复。','Changes do not reset existing usage; lowering below current usage pauses new translation until budget is available.')}</p>

@@ -70,11 +70,15 @@
       "IDENTITY_LOGIN_ENABLED": "true",
       "IMPORT_ENABLED": "false",
       "COLLECT_ENABLED": "false",
-      "TRANSLATION_ENABLED": "false",
+      "TRANSLATION_ENABLED": "true",
       "IDENTITY_ISSUER": "https://dev-identity-center.119shenhao.workers.dev",
       "IDENTITY_CLIENT_ID": "gambling-community-dev",
       "IDENTITY_REDIRECT_URI": "https://dev-gambling-community.119shenhao.workers.dev/api/auth/identity/callback",
-      "PUBLIC_CONTENT_ORIGIN": "https://dev-gambling-community.119shenhao.workers.dev"
+      "PUBLIC_CONTENT_ORIGIN": "https://dev-gambling-community.119shenhao.workers.dev",
+      "TRANSLATOR_REGION": "eastus",
+      "TRANSLATOR_F0_VERIFIED_AT": "2026-11-09T06:14:50Z",
+      "TRANSLATION_DAILY_LIMIT": "5000",
+      "TRANSLATION_MONTHLY_LIMIT": "50000"
     },
     "r2_buckets": [
       {
