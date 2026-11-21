@@ -88,3 +88,11 @@
 - 已从 `scripts/prepare-build.mjs` 移除一次性 bootstrap 的自动调用，后续普通构建不会再次生成或轮换 Secret；保留脚本但不自动执行。
 - [Identity Center DEV 客户端激活 #44885210412](https://github.com/119shenhao/identity-center/actions/runs/44885210412) 成功：`gambling-community-dev` 已启用，有效摘要唯一、回调唯一且精确匹配。未动生产认证中心/论坛数据。
 - 将 `dev/wrangler.jsonc → previews.vars.IDENTITY_LOGIN_ENABLED` 开启，仅开发 Preview，正式站仍关闭。通过新工作流 `dev-oauth-smoke.yml` 在线验证 `/api/me`、授权码登录重定向和 PKCE、无状态回调拒绝、旧 Google 直连 410；**真人 Google 回跳尚待用户验收**。
+
+## 2026-11-21 DEV OAuth 线上预登录自动验收通过
+
+- [Gambling DEV OAuth pre-login smoke #44885314371](https://github.com/119shenhao/gambling/actions/runs/44885314371)：**通过**。真实访问开发站 `/api/me` 返回 `identityConfigured=true`；`/api/auth/identity` 返回 302 到 Identity Center DEV 的 `/oauth/authorize`；`client_id=gambling-community-dev`、精确回调、PKCE S256、state、nonce 全部正确；旧直连 Google 端点返回 410；未携带浏览器 state 的回调返回 401。
+- [最终开发 CI #44885336995](https://github.com/119shenhao/gambling/actions/runs/44885336995) 通过，含 TypeScript、本地数据库迁移和构建；[开发站只读健康 #44885337025](https://github.com/119shenhao/gambling/actions/runs/44885337025) 成功。
+- 认证中心开发客户端单独 Secret 安装及 SHA-256 摘要校验成功 [#44885090134](https://github.com/119shenhao/identity-center/actions/runs/44885090134)；应用启用成功 [#44885210412](https://github.com/119shenhao/identity-center/actions/runs/44885210412)。论坛开发登录开关 true，生产 false。
+- **剩余用户验收**：浏览器从 `https://dev-gambling-community.119shenhao.workers.dev/` 主动点击 Google 登录，观察是否回到论坛且显示已登录；在 Identity Center DEV 会话管理检查 `gambling-community-dev` 应用会话；测试退出、重新登录。该真人 Google OAuth 完整往返目前未自动执行、不能标记为通过。
+- 认证中心生产与论坛生产的应用客户端、数据库、域名没有切换；Azure Translator 和 R2 公开缓存未启用。
