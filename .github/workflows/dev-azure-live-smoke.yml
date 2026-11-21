@@ -1,0 +1,48 @@
+name: One-time DEV Azure real bilingual verification (fixed text only)
+on:
+  push:
+    branches: [dev]
+    paths:
+      - .github/workflows/dev-azure-live-smoke.yml
+permissions:
+  contents: read
+jobs:
+  azure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Execute guarded single-use live Azure EN -> Chinese -> EN check
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const origin='https://dev-gambling-community.119shenhao.workers.dev';
+          let tested=false;
+          for(let attempt=1;attempt<=24;attempt++){
+            try{
+              const res=await fetch(origin+'/api/dev/azure-smoke',{
+                method:'POST',redirect:'manual',headers:{
+                  origin,'content-type':'application/json',
+                  'x-gambling-azure-smoke':'2026-11-21-test'
+                },body:'{}',signal:AbortSignal.timeout(27000)
+              });
+              const data=await res.json();
+              if(res.status===404){
+                console.log('Attempt '+attempt+': waiting for Cloudflare DEV Preview deployment');
+              }else if(res.status===200 && ((data.ok===true&&data.bothDirections===true)||data.status==='pass')){
+                tested=true;
+                console.log('PASS: DEV Azure Translator key accepted: EN to zh-Hans and zh-Hans to EN, one-time D1 budget reservation recorded.');
+                if(data.reservedCharacters!==undefined)
+                  console.log('Budget-reserved characters: '+data.reservedCharacters);
+                break;
+              }else{
+                console.log('DEV Azure smoke status: HTTP '+res.status+' reason '+String(data.reason||data.status||'unknown'));
+                throw new Error('The real Azure translation was not accepted; stop and investigate, do not retry billed request.');
+              }
+            }catch(e){
+              if(String(e.message||'').includes('not accepted'))throw e;
+              console.log('Attempt '+attempt+': network unavailable');
+            }
+            if(attempt<24)await new Promise(r=>setTimeout(r,10000));
+          }
+          if(!tested)throw new Error('Dev Azure verification never reached the deployed guarded endpoint.');
+          NODE
