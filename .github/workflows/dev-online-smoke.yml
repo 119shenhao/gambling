@@ -1,0 +1,51 @@
+name: Development site online smoke (read-only)
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: gambling-dev-online-smoke
+  cancel-in-progress: true
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Confirm public development URLs and database health
+        shell: bash
+        env:
+          PREVIEW_URL: https://dev-gambling-community.119shenhao.workers.dev
+        run: |
+          set -euo pipefail
+          # A Cloudflare Preview build can trail the GitHub push. Retry harmless GETs.
+          for attempt in $(seq 1 12); do
+            code=$(curl --silent --show-error --location --max-time 12 -o /tmp/gambling-health.json -w '%{http_code}' "$PREVIEW_URL/api/health" || true)
+            echo "Attempt $attempt: /api/health HTTP $code"
+            if [ "$code" = 200 ] && node -e '
+              const fs=require("node:fs");
+              const v=JSON.parse(fs.readFileSync("/tmp/gambling-health.json","utf8"));
+              console.log(JSON.stringify({environment:v.environment,status:v.status,databaseConfigured:v.databaseConfigured,databaseReady:v.databaseReady,publicContentEnabled:v.publicContent?.enabled}));
+              if(v.environment!=="preview"||v.status!=="ok"||v.databaseReady!==true||v.databaseConfigured!==true)process.exit(1);
+            '; then
+              break
+            fi
+            if [ "$attempt" = 12 ]; then
+              echo '::error::Preview /api/health did not confirm ready development D1; check Cloudflare builds and Preview migrations.'
+              exit 1
+            fi
+            sleep 15
+          done
+          curl --fail-with-body --silent --show-error --max-time 15 "$PREVIEW_URL/" -o /tmp/gambling-home.html
+          node -e '
+            const s=require("node:fs").readFileSync("/tmp/gambling-home.html","utf8");
+            if(!s.includes("Problem Gambling"))process.exit(1);
+            console.log("Home page contains Problem Gambling branding");
+          '
+          curl --fail-with-body --silent --show-error --max-time 12 "$PREVIEW_URL/robots.txt" -o /tmp/gambling-robots.txt
+          grep -q '^Disallow: /$' /tmp/gambling-robots.txt
+          echo 'Preview robots.txt disallows all crawlers.'
+          old_google=$(curl --silent --show-error --max-time 12 -o /dev/null -w '%{http_code}' "$PREVIEW_URL/api/auth/google" || true)
+          test "$old_google" = 410 || { echo "::error::Legacy direct Google endpoint must return 410, got $old_google"; exit 1; }
+          echo 'Legacy Google direct endpoint securely disabled.'

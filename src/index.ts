@@ -1,0 +1,103 @@
+import {Env,HttpError,now,hash,apiRate,json,fail,sameOrigin,currentUser,one,all,stmt} from './core';
+import {healthSchema} from './health-schema';
+import {scheduleMaintenance} from './maintenance';
+import {authRoute} from './auth';
+import {contentRoute} from './content';
+import {searchRoute} from './search';
+import {communityRoute} from './community';
+import {contributorRoute} from './contributors';
+import {translationRoute,translationConfigured,translationSetup} from './translation';
+import {adminRoute} from './admin';
+import {projectionConfig} from './public-projection';
+import {drainPublicContent,requestProjection} from './projection-demand';
+import {projectionAdminRoute} from './projection-admin';
+import {projectionViewerRoute} from './projection-viewer';
+import {seoRoute} from './seo';
+
+function wakeProjection(env:Env,ctx:ExecutionContext|undefined) {
+ const config=projectionConfig(env);
+ if(!ctx||!config?.enabled||!config.purgeReady)return;
+ ctx.waitUntil(drainPublicContent(env).catch(()=>console.warn('public_projection_drain_failed')));
+}
+
+function changesProjection(path:string,method:string) {
+ if(method==='PATCH'&&path==='/api/me')return true;
+ if(method==='POST'&&['/api/admin/content','/api/admin/privacy','/api/admin/taxonomy','/api/admin/public-projection/repair','/api/admin/public-projection/retry','/api/admin/language-review'].includes(path))return true;
+ if(path.endsWith('/like'))return false; // Count updates are debounced in D1 and drained with the queue.
+ return ['POST','PATCH','PUT','DELETE'].includes(method)&&
+  (/^\/api\/topics(?:\/[^/]+(?:\/(?:comments|like))?)?$/.test(path)||/^\/api\/comments\/[^/]+(?:\/like)?$/.test(path));
+}
+
+export default {
+ async fetch(req:Request,env:Env,ctx?:ExecutionContext):Promise<Response>{
+  const url=new URL(req.url),path=url.pathname;
+  if(!path.startsWith('/api/')){
+   try{
+    const response=await seoRoute(req,env,path);
+    if(response)return response;
+    return env.ASSETS.fetch(req);
+   }catch{
+    return new Response('Service unavailable',{status:503,headers:{'cache-control':'no-store','x-robots-tag':'noindex, nofollow'}});
+   }
+  }
+  try{
+   if(path==='/api/import'||path.startsWith('/api/import/')||path==='/api/collect'||path.startsWith('/api/collect/'))fail(404,'not_found');
+   if(path==='/api/uploads'||path.startsWith('/api/uploads/'))fail(403,'image_feature_disabled');
+   if(path==='/api/health'){
+    let ready=false,projectionReady=false,translationReady=false,translationEnabled=false,translationCacheAvailable=false,languageSchemaReady=false,trafficEnabled=false;
+    const config=projectionConfig(env);
+    try{
+     if(env.DB){
+       const schema=await healthSchema(env.DB);
+       // Feature switches and cached-translation presence are live even when
+       // the immutable schema capability snapshot is cached.
+       const flags=await one(env.DB,`SELECT
+         (SELECT value FROM settings WHERE key='translation_enabled') translationEnabled,
+         (SELECT value FROM settings WHERE key='analytics_enabled') trafficEnabled,
+         EXISTS(SELECT 1 FROM topic_translations) OR EXISTS(SELECT 1 FROM comment_translations) cachedTranslations`);
+       languageSchemaReady=schema.languageSchema;ready=schema.ready;
+       translationReady=Boolean(schema.translation&&schema.languageSchema);
+       projectionReady=Boolean(schema.projection&&(!config?.onDemand||schema.demand));
+       translationEnabled=flags?.translationEnabled==='true';trafficEnabled=flags?.trafficEnabled==='true';
+       translationCacheAvailable=Boolean(flags?.cachedTranslations);
+     }
+    }catch{}
+    const projectionEnabled=Boolean(projectionReady&&config?.enabled&&config.purgeReady);
+    const publicContent={
+     baseUrl:projectionEnabled&&env.PUBLIC_CONTENT_READS==='true'?config!.base:null,
+     ...(projectionEnabled&&env.PUBLIC_CONTENT_READS==='true'?{signedIn:true,directTranslations:config!.directTranslations,separateTranslations:config!.separateTranslations,pageSize:config!.pageSize}:{}),
+     onDemand:projectionEnabled&&Boolean(config?.onDemand),
+     fallback:env.PUBLIC_CONTENT_FALLBACK==='true',
+     ready:projectionReady,enabled:Boolean(config?.enabled),purgeConfigured:Boolean(config?.purgeReady),
+     zoneConfigured:Boolean(config?.zoneConfigured),tokenConfigured:Boolean(config?.tokenConfigured)
+    };
+    return json({environment:env.APP_ENV==='preview'?'preview':'production',status:ready?'ok':'setup_required',stage:'v1-development',version:'0.5.0-language-detection-upgrade.1',publicContent,databaseConfigured:Boolean(env.DB),databaseReady:ready,imageUploadsEnabled:false,importEnabled:false,googleConfigured:Boolean(env.GOOGLE_CLIENT_ID&&env.GOOGLE_CLIENT_SECRET),translationReady,translationCacheAvailable,...(env.APP_ENV==='preview'?{translationSetup:{...translationSetup(env),databaseEnabled:translationEnabled},languageDetection:{engine:'tinyld-heavy',schemaReady:languageSchemaReady}}:{}),translationConfigured:translationReady&&translationEnabled&&translationConfigured(env),analyticsEnabled:trafficEnabled,analyticsConfigured:trafficEnabled},ready?200:503);
+   }
+   if(!env.DB)fail(503,'database_not_configured');
+   if(!['GET','HEAD'].includes(req.method))sameOrigin(req);
+   await apiRate(env,req);
+   scheduleMaintenance(env.DB,ctx);
+   const user=await currentUser(req,env);
+   for(const route of [authRoute,contributorRoute,communityRoute,contentRoute,searchRoute,translationRoute,projectionViewerRoute,projectionAdminRoute,adminRoute]){
+    const response=await route(req,env,user,path,ctx);
+    if(!response)continue;
+    if(response.ok){
+     if(changesProjection(path,req.method))wakeProjection(env,ctx);
+     if(ctx&&req.method==='GET'&&req.headers.has('x-gambling-projection-miss')){
+      ctx.waitUntil(requestProjection(env,req,path).catch(()=>console.warn('public_projection_request_failed')));
+     }
+    }
+    response.headers.set('x-content-type-options','nosniff');
+    response.headers.set('referrer-policy','no-referrer');
+    return response;
+   }
+   fail(404,'not_found');
+  }catch(error){
+   if(error instanceof HttpError)return json({error:error.message},error.status);
+   return json({error:'service_unavailable'},503);
+  }
+ },
+ async scheduled(_event:ScheduledController,env:Env,ctx:ExecutionContext) {
+  if(env.APP_ENV==='production')wakeProjection(env,ctx);
+ }
+} satisfies ExportedHandler<Env>;

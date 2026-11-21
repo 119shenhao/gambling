@@ -1,0 +1,167 @@
+import test from 'node:test';
+import {spawnSync} from 'node:child_process';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
+test('separate deployment and disabled integrations',()=>{const c=JSON.parse(read('wrangler.jsonc'));assert.equal(c.name,'gambling-community');assert.equal(c.d1_databases[0].database_name,'gambling-community-prod');assert.equal(c.d1_databases[0].database_id,'7bba9ada-589f-493b-8fcf-60265fc0efac');assert.equal(c.previews.d1_databases[0].database_name,'gambling-community-dev');assert.equal(c.previews.d1_databases[0].database_id,'a92cf620-2a0b-46e1-a0ff-2e0c94218f37');assert.notEqual(c.d1_databases[0].database_id,c.previews.d1_databases[0].database_id);assert.equal(c.vars.APP_ENV,'production');assert.equal(c.previews.vars.APP_ENV,'preview');assert.equal(c.r2_buckets[0].bucket_name,'gambling-community-public-prod');assert.equal(c.previews.r2_buckets[0].bucket_name,'gambling-community-public-dev');assert.equal(c.vars.IDENTITY_LOGIN_ENABLED,'false');assert.equal(c.vars.COLLECT_ENABLED,'false');});
+test('no inherited spine production bindings',()=>{for(const p of ['wrangler.jsonc','wrangler.local.jsonc','src/seo.ts','public/_headers'])assert.doesNotMatch(read(p),/spine\.nbn369\.com|spine-community-db|5919ff78-b8fc-46ab-85f0-01fe5e6a41b0/);});
+test('localized product values',()=>{const s=read('public/i18n.js');assert.match(s,/戒赌社区/);assert.match(s,/戒賭社區/);assert.match(s,/Real Stories\. Real Impacts\. Open Discussion\./);});
+test('new SSO maps center user ID without old Google identity',()=>{const s=read('src/auth.ts');assert.match(s,/direct_google_login_disabled/);assert.doesNotMatch(s,/claims\.spine_google_sub/);assert.match(s,/findOrCreateUser\(env\.DB,'identity_center',claims\.sub\)/);});
+
+test('remote migration cannot run without exact dev Preview gating and verified D1 mapping',()=>{const s=read('scripts/preview-migrate.mjs');assert.match(s,/WORKERS_CI_BRANCH==='dev'/);assert.match(s,/gambling-community-dev/);assert.match(s,/preview-migrations.jsonc/);assert.match(s,/production.some/);});
+
+test('repository rename links use canonical GitHub path',()=>{
+ for(const p of ['README.md','AGENTS.md','docs/START_HERE.md','docs/PROJECT_STATUS.md','docs/CLOUDFLARE_SETUP.md']){
+  const contents=read(p);
+  assert.doesNotMatch(contents,/119shenhao\/gambing(?![a-z-])/,'outdated repository link in '+p);
+ }
+ assert.match(read('README.md'),/119shenhao\/gambling/);
+});
+
+// Check every runtime URL, admin confirmation, and browser storage key after the repo rename.
+test('no references to previous medical forum infrastructure in active runtime',()=>{
+ for(const p of ['src/admin.ts','src/community.ts','src/public-projection.ts','src/projection-demand.ts','public/app.js','public/public-content.js','public/share-ui.js']){
+  assert.doesNotMatch(read(p),/spine-community|spine\.nbn369\.com|spine-data|x-spine-projection-miss|my-spine|spine-traffic-v1|SPINE COMMUNITY/,'stale medical forum reference in '+p);
+ }
+ const app=read('public/app.js'),admin=read('src/admin.ts');
+ assert.match(app,/preview_confirm:'gambling-community-dev'/);
+ assert.match(admin,/b\.preview_confirm!=='gambling-community-dev'/);
+ assert.match(read('src/projection-demand.ts'),/x-gambling-projection-miss/);
+ for(const p of ['public/app.js','public/locale.js'])assert.doesNotMatch(read(p),/sc_locale/);
+ assert.match(read('public/locale.js'),/gc_locale/);
+ assert.doesNotMatch(read('src/community.ts'),/sc_visitor/);
+ assert.doesNotMatch(read('public/reading-preferences.js'),/sc_reading_preferences/);
+});
+
+test('identity center clients remain separate and only dev login is enabled',()=>{
+ const cfg=JSON.parse(read('wrangler.jsonc'));
+ assert.equal(cfg.vars.IDENTITY_ISSUER,'https://idcenter.nbn369.com');
+ assert.equal(cfg.vars.IDENTITY_CLIENT_ID,'gambling-community-prod');
+ assert.equal(cfg.previews.vars.IDENTITY_ISSUER,'https://dev-identity-center.119shenhao.workers.dev');
+ assert.equal(cfg.previews.vars.IDENTITY_CLIENT_ID,'gambling-community-dev');
+ assert.equal(cfg.vars.IDENTITY_LOGIN_ENABLED,'false');
+ assert.equal(cfg.previews.vars.IDENTITY_LOGIN_ENABLED,'true');
+ for(const vars of [cfg.vars,cfg.previews.vars]){
+  assert.equal(vars.IDENTITY_CLIENT_SECRET,undefined);
+  assert.match(vars.IDENTITY_REDIRECT_URI,/^https:\/\//);
+ }
+});
+
+test('confirmed development and production hosts map to unique exact SSO callbacks',()=>{
+ const c=JSON.parse(read('wrangler.jsonc'));
+ assert.equal(c.previews.vars.IDENTITY_REDIRECT_URI,'https://dev-gambling-community.119shenhao.workers.dev/api/auth/identity/callback');
+ assert.equal(c.vars.IDENTITY_REDIRECT_URI,'https://gambling.nbn369.com/api/auth/identity/callback');
+ assert.equal(c.previews.vars.PUBLIC_CONTENT_ORIGIN,'https://dev-gambling-community.119shenhao.workers.dev');
+ assert.equal(c.previews.vars.IDENTITY_LOGIN_ENABLED,'true');
+ assert.equal(c.vars.IDENTITY_LOGIN_ENABLED,'false');
+ assert.equal(c.previews.vars.IDENTITY_CLIENT_SECRET,undefined);
+ assert.equal(c.vars.IDENTITY_CLIENT_SECRET,undefined);
+});
+
+test('Cloudflare public Worker fetch compatibility is configured before OAuth tests',()=>{
+ const c=JSON.parse(read('wrangler.jsonc'));
+ assert.ok(c.compatibility_flags.includes('global_fetch_strictly_public'));
+ assert.equal(c.previews.vars.IDENTITY_LOGIN_ENABLED,'true');
+});
+
+test('one-time DEV OAuth bootstrap is correctly scoped to Gambling Worker and DEV-only databases',()=>{
+ const result=spawnSync(process.execPath,['--check','scripts/provision-dev-identity.mjs'],{encoding:'utf8'});
+ assert.equal(result.status,0,result.stderr);
+ const s=read('scripts/provision-dev-identity.mjs'),c=JSON.parse(read('wrangler.identity-dev-provision.jsonc'));
+ assert.match(s,/WORKERS_CI_BRANCH!=="dev"/);
+ assert.match(s,/\["preview","secret","put",SECRET_NAME/);
+ assert.match(s,/gambling-community-dev/);
+ assert.match(s,/status!=="disabled"/);
+ assert.equal(c.d1_databases.length,1);
+ assert.equal(c.d1_databases[0].database_id,'66c36ee9-2cab-4e85-bc02-645819344297');
+ assert.equal(c.d1_databases[0].database_name,'identity-center-dev');
+});
+
+test('one-time provisioning is no longer invoked from ordinary Cloudflare builds',()=>{
+ assert.equal(read('scripts/prepare-build.mjs').includes("['scripts/provision-dev-identity.mjs']"),false);
+});
+
+test('Google login always requests account chooser through Identity Center, never bypasses center',()=>{
+  const auth=read('src/auth.ts');
+  assert.match(auth,/params\.set\('provider_hint','google'\)/);
+  assert.match(auth,/prompt:'select_account'/);
+  assert.match(auth,/return redirect\(config\.issuer\+'\/oauth\/authorize\?'\+params,flowCookie\(state\)\)/);
+  assert.equal(JSON.parse(read('wrangler.jsonc')).vars.IDENTITY_LOGIN_ENABLED,'false');
+});
+
+test('Azure DEV/PROD shared-key budget is protected by a 25k/month environment cap',()=>{
+ const c=JSON.parse(read('wrangler.jsonc'));
+ assert.equal(c.vars.TRANSLATION_ENABLED,'false');
+ assert.equal(c.previews.vars.TRANSLATION_ENABLED,'true');
+ assert.equal(c.previews.vars.TRANSLATOR_REGION,'eastus');
+ assert.equal(c.previews.vars.TRANSLATOR_F0_VERIFIED_AT,'2026-11-09T06:14:50Z');
+ assert.equal(c.previews.vars.TRANSLATOR_KEY,undefined);
+ assert.equal(c.vars.TRANSLATOR_KEY,undefined);
+ assert.equal(c.previews.vars.TRANSLATION_DAILY_LIMIT,'5000');
+ assert.equal(c.previews.vars.TRANSLATION_MONTHLY_LIMIT,'10000');
+ const tr=read('src/translation.ts');
+ assert.match(tr,/AZURE_SITE_MAX_MONTHLY=25000/);
+ assert.match(tr,/AZURE_DEFAULT_DAILY=5000/);
+ assert.match(tr,/AZURE_DEFAULT_MONTHLY=25000/);
+ assert.match(tr,/Math\.min\(Number\(raw\),max\)/);
+ const admin=read('src/admin.ts');
+ assert.match(admin,/monthly>AZURE_SITE_MAX_MONTHLY/);
+ assert.match(admin,/translation_credentials_not_ready/);
+ assert.match(admin,/env\.APP_ENV!=='preview'/);
+ assert.match(read('public/translation-admin.js'),/data-action="toggle-translation"/);
+ assert.match(read('public/app.js'),/if\(action==='toggle-translation'\)/);
+});
+
+test('translation provider status exposes database activation state to admin UI',()=>{
+ const source=read('src/translation.ts');
+ assert.match(source,/translationEnabled:budget\.translationEnabled/);
+ const ui=read('public/translation-admin.js');
+ assert.match(ui,/azure\.translationEnabled/);
+ assert.match(read('src/admin.ts'),/translation_requires_development_verification/);
+});
+
+test('Worker deployment never overwrites Cloudflare-managed secrets or isolates wrong resources',()=>{
+ const cfg=JSON.parse(read('wrangler.jsonc'));
+ assert.equal(cfg.keep_vars,true);
+ assert.equal(cfg.name,'gambling-community');
+ assert.equal(cfg.previews.vars.APP_ENV,'preview');
+ assert.equal(cfg.vars.APP_ENV,'production');
+ assert.equal(cfg.previews.vars.TRANSLATOR_KEY,undefined);
+ assert.equal(cfg.vars.TRANSLATOR_KEY,undefined);
+ assert.equal(cfg.previews.d1_databases[0].database_id,'a92cf620-2a0b-46e1-a0ff-2e0c94218f37');
+ assert.equal(cfg.d1_databases[0].database_id,'7bba9ada-589f-493b-8fcf-60265fc0efac');
+ const build=read('scripts/prepare-build.mjs');
+ assert.doesNotMatch(build,/wrangler[^\n]*secret\s+(?:put|delete|bulk)/);
+ assert.doesNotMatch(build,/secrets-file/);
+ assert.match(read('.github/workflows/dev-secret-persistence.yml'),/Workers Builds: gambling-community/);
+ assert.match(read('.github/workflows/dev-secret-persistence.yml'),/keyConfigured/);
+});
+
+test('One-shot Azure validation endpoint is removed from running forum code after successful verification',()=>{
+ const source=read('src/translation.ts');
+ assert.doesNotMatch(source,/api\/dev\/azure-smoke/);
+ assert.doesNotMatch(source,/function devAzureSmoke/);
+ assert.doesNotMatch(source,/azure_dev_smoke_20261121/);
+});
+
+test('verified DEV and future PROD Identity Center Owners have separate hashed role selectors',()=>{
+ const c=JSON.parse(read('wrangler.jsonc'));
+ assert.equal(c.previews.vars.ADMIN_CENTER_OWNER_SHA256,'7df1b395981a31a651015a158eb1086264ecbea53b5dd41a34d62444ff29fa26');
+ assert.equal(c.vars.ADMIN_CENTER_OWNER_SHA256,'eb367b5a659205efbacd7dfa4964e0c2a9852c072237b668d3d885e334105ba4');
+ assert.notEqual(c.previews.vars.ADMIN_CENTER_OWNER_SHA256,c.vars.ADMIN_CENTER_OWNER_SHA256);
+ assert.equal(c.previews.vars.IDENTITY_LOGIN_ENABLED,'true');
+ assert.equal(c.vars.IDENTITY_LOGIN_ENABLED,'false','do not turn on PROD login prematurely');
+ assert.equal(c.keep_vars,true);
+ for(const v of [c.previews.vars,c.vars]){
+   assert.equal(v.ADMIN_GOOGLE_SUB,undefined);
+   assert.match(v.ADMIN_CENTER_OWNER_SHA256,/^[a-f0-9]{64}$/);
+ }
+ const src=read('src/core.ts');
+ assert.match(src,/await hash\(centerUserId\)!==ownerHash/);
+ assert.match(src,/ai\.provider='identity_center'/);
+ assert.match(src,/identity_center_verified_owner/);
+ assert.match(src,/env\.APP_ENV==='production'/);
+ assert.match(src,/env\.APP_ENV==='preview'/);
+ assert.match(src,/if\(!isAdmin&&env\.ADMIN_CENTER_OWNER_SHA256\)/);
+ assert.match(read('src/auth.ts'),/await ensureVerifiedCenterOwnerAdmin\(env,uid,claims\.sub\)/);
+});

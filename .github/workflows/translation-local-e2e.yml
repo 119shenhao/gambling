@@ -1,0 +1,29 @@
+name: Translation UI and local D1 cache end-to-end acceptance
+on:
+  push:
+    branches: [dev]
+    paths:
+      - src/translation.ts
+      - public/translation-ui.js
+      - tests/translation-browser.test.mjs
+      - tests/fixtures/translation-local.sql
+      - scripts/test-translation-local.mjs
+      - .github/workflows/translation-local-e2e.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  translation-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Test client-side translation and original toggle
+        run: node --test tests/translation-browser.test.mjs
+      - name: Verify real Worker API against fully migrated LOCAL D1
+        run: node scripts/test-translation-local.mjs
