@@ -35,9 +35,13 @@ jobs:
               if(res.ok&&h.environment==='production'&&h.databaseReady===true&&h.status==='ok'){
                 checked=true;
                 if(origin==='https://gambling.nbn369.com'){
-                  if(h.identityConfigured!==false)throw Error('PROD login unexpectedly enabled before client activation');
-                  if(s.workerEnabled===true)throw Error('PROD translation unexpectedly enabled');
-                  console.log('PASS: exact production forum hostname is ready with D1; identity and translation gated.');
+                  const meResponse=await fetch(origin+'/api/me',{signal:AbortSignal.timeout(12000)});
+                  const me=await meResponse.json();
+                  if(!meResponse.ok||me.identityConfigured!==false||me.user!==null)
+                    throw Error('PROD sign-in must remain disabled before credential activation');
+                  if(h.translationConfigured!==false)
+                    throw Error('PROD translation should not be active');
+                  console.log('PASS: exact production forum hostname ready with PROD D1, identity and translation safely disabled.');
                   process.exit(0);
                 }
               }
