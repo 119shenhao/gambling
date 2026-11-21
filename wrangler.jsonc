@@ -74,6 +74,22 @@
         "binding": "PUBLIC_CONTENT_R2",
         "bucket_name": "gambling-community-public-dev"
       }
+    ],
+    "d1_databases": [
+      {
+        "binding": "DB",
+        "database_name": "gambling-community-dev",
+        "database_id": "a92cf620-2a0b-46e1-a0ff-2e0c94218f37",
+        "migrations_dir": "migrations/v1"
+      }
     ]
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "gambling-community-prod",
+      "database_id": "7bba9ada-589f-493b-8fcf-60265fc0efac",
+      "migrations_dir": "migrations/v1"
+    }
+  ]
 }

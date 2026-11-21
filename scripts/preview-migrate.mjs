@@ -18,9 +18,9 @@ if(!previewBuild){
  if(conf.name!=='gambling-community'||conf.vars?.APP_ENV!=='production'||conf.previews?.vars?.APP_ENV!=='preview'||
     p.length!==1||x.length!==1||!uuid.test(p[0].database_id)||
     p[0].database_name!=='gambling-community-dev'||x[0].database_name!=='gambling-community-dev'||
-    p[0].database_id!==x[0].database_id||p[0].migrations_dir!=='migrations/v1'||x[0].migrations_dir!=='migrations/v1'||
+    p[0].database_id!==x[0].database_id||p[0].database_id!=='a92cf620-2a0b-46e1-a0ff-2e0c94218f37'||production.length!==1||production[0].database_name!=='gambling-community-prod'||production[0].database_id!=='7bba9ada-589f-493b-8fcf-60265fc0efac'||p[0].migrations_dir!=='migrations/v1'||x[0].migrations_dir!=='migrations/v1'||
     production.some(d=>d.database_id===p[0].database_id)||
-    sourceDBs.has(p[0].database_id)||
+    sourceDBs.has(p[0].database_id)||sourceDBs.has(production[0].database_id)||
     (conf.previews?.r2_buckets||[]).filter(b=>b.binding==='PUBLIC_CONTENT_R2'&&b.bucket_name==='gambling-community-public-dev').length!==1||
     (conf.r2_buckets||[]).filter(b=>b.binding==='PUBLIC_CONTENT_R2'&&b.bucket_name==='gambling-community-public-prod').length!==1||
     conf.previews?.vars?.IMPORT_ENABLED!=='false'||conf.previews?.vars?.COLLECT_ENABLED!=='false')

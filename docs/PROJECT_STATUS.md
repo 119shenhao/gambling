@@ -25,3 +25,14 @@
 - 详细操作及避免手工运行的开发迁移流程见 [CLOUDFLARE_SETUP.md](CLOUDFLARE_SETUP.md)。
 
 - 2026-11-21 已准备预览 D1 自动迁移安全门禁 `scripts/preview-migrate.mjs`：仅 Cloudflare 的 dev Preview，核对 D1 UUID、名称及独立绑定后执行；UUID 尚未提供时不运行远程 SQL。生产迁移未授权。
+
+## 2026-11-21 D1 真实 ID 绑定
+
+用户提供的 Cloudflare D1 控制台截图明确显示：
+
+- 开发 D1：`gambling-community-dev`，UUID `a92cf620-2a0b-46e1-a0ff-2e0c94218f37`。
+- 生产 D1：`gambling-community-prod`，UUID `7bba9ada-589f-493b-8fcf-60265fc0efac`。
+
+两套 UUID 均已加入 `dev/wrangler.jsonc` 的对应 Preview 与 Production 分环境绑定。新建 `wrangler.preview-migrations.jsonc` 仅指向开发 D1 的 UUID；`scripts/preview-migrate.mjs` 以两个已确认的 UUID 和环境分支为白名单安全验证。
+
+**注意**：只完成源码配置/提交，并非已连接 Cloudflare API 实际迁移。开发远程迁移将在合规 Cloudflare dev Preview Build 中运行，待查看实际部署日志和数据库状态；生产库始终不执行迁移。
