@@ -1,0 +1,62 @@
+name: Translation DEV live API acceptance (read-only content)
+on:
+  push:
+    branches: [dev]
+    paths:
+      - .github/workflows/translation-dev-live.yml
+      - src/translation.ts
+      - public/translation-ui.js
+      - wrangler.jsonc
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Check real DEV translation and published content APIs without Azure usage
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const origin='https://dev-gambling-community.119shenhao.workers.dev';
+          const healthRes=await fetch(origin+'/api/health',{headers:{'cache-control':'no-cache'},signal:AbortSignal.timeout(12000)});
+          const h=await healthRes.json();
+          if(!healthRes.ok||h.environment!=='preview'||h.status!=='ok'||
+             h.databaseReady!==true||h.translationReady!==true||
+             h.translationConfigured!==true||h.translationSetup?.keyConfigured!==true||
+             h.translationSetup?.databaseEnabled!==true)throw Error('DEV translation/D1/Azure Secret not ready');
+          console.log('PASS: live DEV Azure configured, translation enabled, isolated D1 ready.');
+          const listing=await fetch(origin+'/api/topics',{signal:AbortSignal.timeout(12000)});
+          if(!listing.ok)throw Error('DEV topic list endpoint returned HTTP '+listing.status);
+          const data=await listing.json();
+          if(!Array.isArray(data.topics))throw Error('Published forum topics response missing topics array');
+          console.log('PASS: live topic list API; published entries observed: '+data.topics.length+'. No content logged.');
+          const query=async(payload)=>{
+            const res=await fetch(origin+'/api/translate',{method:'POST',redirect:'manual',
+              headers:{'content-type':'application/json','origin':origin},
+              body:JSON.stringify(payload),signal:AbortSignal.timeout(18000)});
+            const json=await res.json();return {status:res.status,result:json};
+          };
+          const missing=await query({locale:'zh-CN',items:[
+            {id:'nonexistent-translation-check-20261121',type:'topic',scope:'full',version:1}
+          ],generate:false});
+          if(missing.status!==200||missing.result.items?.[0]?.reason!=='not_found')
+            throw Error('Missing content must not trigger translation or expose data.');
+          console.log('PASS: live anonymous translation API safely handles missing content.');
+          const sample=data.topics.find(t=>t&&t.status==='published'&&
+            Number.isSafeInteger(t.content_version)&&t.id&&t.source_lang!=='und');
+          if(sample){
+            const locale=sample.source_lang?.toLowerCase().startsWith('zh')?'en':'zh-CN';
+            const check=await query({locale,items:[
+              {id:sample.id,type:'topic',scope:'full',version:sample.content_version}
+            ],generate:false});
+            const item=check.result.items?.[0];
+            if(check.status!==200||!item||!(item.translated===true||
+              ['translation_cache_miss','same_language'].includes(item.reason)))
+              throw Error('Existing DEV content cache-only lookup rejected.');
+            console.log('PASS: live published topic lookup follows cache-only path; no Azure request.');
+          }else{
+            console.log('NOTE: no eligible published DEV topic for live cache lookup. Local D1 E2E covers cache lifecycle.');
+          }
+          NODE

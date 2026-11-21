@@ -133,3 +133,9 @@ Cloudflare 文档：`https://developers.cloudflare.com/workers/previews/configur
 - [Cloudflare DEV 最终构建后 Secret 保留验收 #44891525065](https://github.com/119shenhao/gambling/actions/runs/44891525065)：Cloudflare build 完成后，Azure Key、开发 D1、Region、F0 标记及健康检查都正确。每次后续 DEV commit 的构建继续自动做这套 Secret 绑定验证；本次清理后的部署也必须通过。
 - 成功后**永久删除**临时 `/api/dev/azure-smoke` 诊断接口及一次性 GitHub Actions，避免公开测试接口留在部署中；保留既有诊断日志和 D1 计费记录作为审计事实，不能将39字符测试当作真实帖子 UI/译文缓存端到端验收。
 - 生产 `TRANSLATION_ENABLED=false` 仍然不变，且正式站尚未发布新论坛代码；不改动或导出生产密钥。
+
+## 2026-11-21 论坛 UI / D1 缓存端到端验收
+
+- [独立本地 D1 + 真 Worker HTTP API + 浏览器译文组件验收 #44892478870](https://github.com/119shenhao/gambling/actions/runs/44892478870)：全部 PASS。自动创建**仅本地测试数据库**的已发布帖子、列表摘要和回帖及 D1 翻译缓存，不在 Cloudflare DEV/PROD 产生人工帖子；按要求验证匿名缓存读取、再次请求不触发 Azure、原文语言不翻译、原文/译文界面切换、缓存加密解密、非法 locale 与旧版本拒绝，以及编辑原文后旧译文失效。开发环境此前真实 Azure Key 英中双向测试通过 #44889928443。
+- 新增持续 `translation-local-e2e.yml`，源码/前端翻译代码修改时跑回归；本地测试脚本 `scripts/test-translation-local.mjs` 永远只使用 `wrangler.local.jsonc`（`APP_ENV=local`，假 D1 UUID）且不执行 `--remote`，所有固定文本和种子 SQL 在 `tests/fixtures/translation-local.sql`。
+- 新增 `translation-dev-live.yml`，对当前部署执行只读内容和缓存查询、检查 Azure Secret/D1 启用状态；无原文上传 Azure，不额外扣除翻译额度，也不打印用户帖内容。正式站未发布，生产翻译保持关闭。

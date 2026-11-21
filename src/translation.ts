@@ -112,9 +112,10 @@ export async function readItems(db:D1Database,items:Item[],locale:string) {
   ) SELECT * FROM public_rows`,JSON.stringify(items),locale,SUMMARY_TRANSLATION_ENGINE,locale);
 }
 
-// Shared Azure F0 account: the Spine forum permits up to 1.9m characters,
-// so cap this forum to 50,000/month, leaving 50,000 further headroom below
-// the advertised 2m allowance. Local caps are not real-time Azure metering.
+// DEV and PROD use separate D1 budgets but share one Azure F0 account.
+// Hard-limit each of these environments to 25k/month; this is not combined
+// Azure usage metering. Check Spine DEV/PROD and any other Azure consumers
+// before raising either cap; never claim the site limits prevent billing.
 export const AZURE_F0_MONTHLY_CHARS=2000000;
 export const AZURE_SITE_MAX_MONTHLY=25000;
 export const AZURE_DEFAULT_DAILY=5000;
