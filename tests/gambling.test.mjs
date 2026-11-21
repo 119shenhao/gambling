@@ -12,7 +12,7 @@ test('remote migration cannot run without exact dev Preview gating and verified 
 test('repository rename links use canonical GitHub path',()=>{
  for(const p of ['README.md','AGENTS.md','docs/START_HERE.md','docs/PROJECT_STATUS.md','docs/CLOUDFLARE_SETUP.md']){
   const contents=read(p);
-  assert.doesNotMatch(contents,/119shenhao\\/gambing(?![a-z-])/,'outdated repository link in '+p);
+  assert.doesNotMatch(contents,/119shenhao\/gambing(?![a-z-])/,'outdated repository link in '+p);
  }
- assert.match(read('README.md'),/119shenhao\\/gambling/);
+ assert.match(read('README.md'),/119shenhao\/gambling/);
 });
