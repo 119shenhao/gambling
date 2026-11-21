@@ -40,7 +40,7 @@ const invoke=(args,input)=>{
  return r.stdout;
 };
 function meta(){
- const rows=JSON.parse(invoke(['secret','list','--name',worker,'--json']));
+ const rows=JSON.parse(invoke(['secret','list','--name',worker,'--format','json']));
  if(!Array.isArray(rows))throw Error('Production Worker Secret metadata malformed.');
  return new Set(rows.map(x=>x?.name).filter(x=>typeof x==='string'));
 }
