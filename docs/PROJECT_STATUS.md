@@ -75,3 +75,9 @@
 - [Identity Center DEV 客户端登记 #44884259846](https://github.com/119shenhao/identity-center/actions/runs/44884259846) 成功：`identity-center-dev` 中创建/校验 `gambling-community-dev`（web_confidential、status=disabled），唯一回调 `https://dev-gambling-community.119shenhao.workers.dev/api/auth/identity/callback`；没有创建 Secret、没有开启认证，也没有写入认证中心生产 D1。
 - 参考已验收 Spine 的跨 Worker OAuth 经验，为新论坛补上 `global_fetch_strictly_public` Worker 兼容选项（仅在 dev 源码上改动）。
 - **待办**：为客户端生成独立随机 Secret，原文只保存在新的开发 Worker Cloudflare Secret，Identity Center 开发库只保存摘要；验证匹配并启用开发客户端，最后才打开论坛 `IDENTITY_LOGIN_ENABLED`，检查真实 Google 登录与会话。禁止直接使用 Spine Client/Secret。开发用户真实验收之前不变更生产登录、生产 D1 或正式站发布。
+
+## 2026-11-21 One-time DEV OAuth Secret bootstrap 代码准备
+
+- 新增 `scripts/provision-dev-identity.mjs` 和仅指向 Identity Center DEV D1 的 `wrangler.identity-dev-provision.jsonc`。脚本只允许在 `WORKERS_CI=1` 且分支 `dev`、严格核对 Worker/两套环境 D1 ID/Client ID/Callback 并确认中心客户端 Disabled 后执行。
+- 用开发 Cloudflare Preview Worker Secret 命令安全保存随机 48 字节服务端凭据；不在 Git、聊天、日志或 D1 存储明文；在两个 DEV D1 仅保存 SHA-256 Base64URL 摘要，并在身份中心中注册一致摘要。**不启用客户端或登录，也不修改生产。**
+- 本提交仅准备脚本并加静态/语法测试，尚未挂到 Cloudflare 构建；下一步先看 CI 通过，再短暂启用一次性开发构建入口，取得真实 Cloudflare 回执，成功后移除一次性调用。若 Cloudflare build 权限不足则暂停，不索取明文 Secret。

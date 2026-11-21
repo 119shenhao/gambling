@@ -75,3 +75,7 @@ Wrangler 已设置公开配置：Preview `IDENTITY_ISSUER=https://dev-identity-c
 GitHub 只读在线验收：[#44883988827](https://github.com/119shenhao/gambling/actions/runs/44883988827)；开发 D1 Ready、HTTP 200、禁止索引、旧直连登录 410 均通过。
 
 开发 Identity Center 客户端已注册 Disabled：[#44884259846](https://github.com/119shenhao/identity-center/actions/runs/44884259846)。准确回调 `https://dev-gambling-community.119shenhao.workers.dev/api/auth/identity/callback`；不共享原站认证密钥；`IDENTITY_CLIENT_SECRET` 尚未设置。先完成密钥安全注入、中心匹配摘要、开发激活和线上 OAuth 真实测试，登录开关才允许更改。已设置 `global_fetch_strictly_public`，沿用 Spine 实测的跨 Worker 请求兼容方案。
+
+## 独立开发 OAuth Secret 引导（待 CI 与 Cloudflare Build 运行）
+
+基于 Spine 2026-11-20 已验收的 `wrangler preview secret put` 方案，新增 `scripts/provision-dev-identity.mjs`：仅为 `gambling-community` 的命名预览 `dev` 写入 `IDENTITY_CLIENT_SECRET`，而不是对普通生产 Worker 进行 `secret put`。仅以 `wrangler.identity-dev-provision.jsonc` 访问 `identity-center-dev`（固定 UUID），从新论坛开发 D1 读取已验证的授权迁移及收据；中心应用需保持 disabled。Secret 明文只入 Cloudflare 预览 Worker，中心 D1 存 SHA-256 Base64URL 校验摘要。所有代码和 SQL 操作必须先经 CI，运行一次后拆除构建调用。

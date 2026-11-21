@@ -61,3 +61,17 @@ test('Cloudflare public Worker fetch compatibility is configured before OAuth te
  assert.ok(c.compatibility_flags.includes('global_fetch_strictly_public'));
  assert.equal(c.previews.vars.IDENTITY_LOGIN_ENABLED,'false');
 });
+
+test('one-time DEV OAuth bootstrap is correctly scoped to Gambling Worker and DEV-only databases',()=>{
+ const {spawnSync}=require('node:child_process');
+ const result=spawnSync(process.execPath,['--check','scripts/provision-dev-identity.mjs'],{encoding:'utf8'});
+ assert.equal(result.status,0,result.stderr);
+ const s=read('scripts/provision-dev-identity.mjs'),c=JSON.parse(read('wrangler.identity-dev-provision.jsonc'));
+ assert.match(s,/WORKERS_CI_BRANCH!=="dev"/);
+ assert.match(s,/\["preview","secret","put",SECRET_NAME/);
+ assert.match(s,/gambling-community-dev/);
+ assert.match(s,/status!=="disabled"/);
+ assert.equal(c.d1_databases.length,1);
+ assert.equal(c.d1_databases[0].database_id,'66c36ee9-2cab-4e85-bc02-645819344297');
+ assert.equal(c.d1_databases[0].database_name,'identity-center-dev');
+});
