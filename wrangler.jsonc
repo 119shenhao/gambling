@@ -46,7 +46,8 @@
     "COLLECT_ENABLED": "false",
     "TRANSLATION_ENABLED": "false",
     "IDENTITY_ISSUER": "https://idcenter.nbn369.com",
-    "IDENTITY_CLIENT_ID": "gambling-community-prod"
+    "IDENTITY_CLIENT_ID": "gambling-community-prod",
+    "IDENTITY_REDIRECT_URI": "https://gambling.nbn369.com/api/auth/identity/callback"
   },
   "build": {
     "command": "node scripts/prepare-build.mjs"
@@ -71,7 +72,9 @@
       "COLLECT_ENABLED": "false",
       "TRANSLATION_ENABLED": "false",
       "IDENTITY_ISSUER": "https://dev-identity-center.119shenhao.workers.dev",
-      "IDENTITY_CLIENT_ID": "gambling-community-dev"
+      "IDENTITY_CLIENT_ID": "gambling-community-dev",
+      "IDENTITY_REDIRECT_URI": "https://dev-gambling-community.119shenhao.workers.dev/api/auth/identity/callback",
+      "PUBLIC_CONTENT_ORIGIN": "https://dev-gambling-community.119shenhao.workers.dev"
     },
     "r2_buckets": [
       {

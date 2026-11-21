@@ -19,3 +19,6 @@ npm run dev
 **当前仅开发基线**：未创建新 Cloudflare 预览/生产 D1、R2、Google OAuth 或 Identity Center 客户端；未部署、未开放真实登录或内容采集。不要将 Spine 的数据库、密钥、域名、旧授权连接到本项目。
 
 开发入口：[docs/START_HERE.md](docs/START_HERE.md)，需求：[docs/REQUIREMENTS.md](docs/REQUIREMENTS.md)，进度：[docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md)。
+
+- 开发预览入口（用户确认）：https://dev-gambling-community.119shenhao.workers.dev/
+- 生产域名入口（用户确认）：https://gambling.nbn369.com/（是否已上线需单独验收）

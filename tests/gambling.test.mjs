@@ -41,6 +41,17 @@ test('identity center client names are independent, while login is disabled unti
  for(const vars of [cfg.vars,cfg.previews.vars]){
   assert.equal(vars.IDENTITY_LOGIN_ENABLED,'false');
   assert.equal(vars.IDENTITY_CLIENT_SECRET,undefined);
-  assert.equal(vars.IDENTITY_REDIRECT_URI,undefined);
+  assert.match(vars.IDENTITY_REDIRECT_URI,/^https:\/\//);
  }
+});
+
+test('confirmed development and production hosts map to unique exact SSO callbacks',()=>{
+ const c=JSON.parse(read('wrangler.jsonc'));
+ assert.equal(c.previews.vars.IDENTITY_REDIRECT_URI,'https://dev-gambling-community.119shenhao.workers.dev/api/auth/identity/callback');
+ assert.equal(c.vars.IDENTITY_REDIRECT_URI,'https://gambling.nbn369.com/api/auth/identity/callback');
+ assert.equal(c.previews.vars.PUBLIC_CONTENT_ORIGIN,'https://dev-gambling-community.119shenhao.workers.dev');
+ assert.equal(c.previews.vars.IDENTITY_LOGIN_ENABLED,'false');
+ assert.equal(c.vars.IDENTITY_LOGIN_ENABLED,'false');
+ assert.equal(c.previews.vars.IDENTITY_CLIENT_SECRET,undefined);
+ assert.equal(c.vars.IDENTITY_CLIENT_SECRET,undefined);
 });

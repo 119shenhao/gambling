@@ -62,3 +62,7 @@
 ## 下一阶段：统一身份认证准备
 
 已在 `dev/wrangler.jsonc` 中分别声明公开的身份签发者与独立 Client ID：开发 `gambling-community-dev` 使用开发 Identity Center，正式 `gambling-community-prod` 使用生产 Identity Center。两套登录均保持 `IDENTITY_LOGIN_ENABLED=false`，不包含密钥或猜测的回调 URI。**这不是注册完成，也不是登录已可用**。需要先获得 Cloudflare 实际 Preview URL，确认新项目自动构建的成功日志，再注册开发 Identity Center Client，受控配置 Secret、开启登录并进行真人验证。不得复用 Spine 已登记的客户端及密钥。
+
+## 2026-11-21 开发与生产 URL 确认
+
+用户提供实际开发入口 `https://dev-gambling-community.119shenhao.workers.dev/`、生产入口 `https://gambling.nbn369.com/`。已写入 `wrangler.jsonc` 的独立 Identity Center 精确回调准备值，登录仍关闭，生产尚未部署。新增 GitHub Actions 在线只读开发站 Smoke，用于检查首页、`/api/health` 的 Preview+D1 Ready、robots 禁索引及旧 Google 登录禁用。等待实际运行结果，不得用 GitHub CI 本地 D1 成功冒充远程已迁移。

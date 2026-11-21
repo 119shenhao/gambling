@@ -10,7 +10,7 @@
 | D1 | `gambling-community-dev`（UUID 已从用户截图确认） | `gambling-community-prod`（UUID 已从用户截图确认） |
 | R2 | `gambling-community-public-dev` | `gambling-community-public-prod` |
 | Issuer | `https://dev-identity-center.119shenhao.workers.dev` | `https://idcenter.nbn369.com` |
-| Site | Cloudflare dev Preview 的实际 URL 待核对 | `https://gambling.nbn369.com`（计划域名） |
+| Site | `https://dev-gambling-community.119shenhao.workers.dev`（用户提供；线上状态待检测） | `https://gambling.nbn369.com`（用户确认生产访问地址；上线状态待核验） |
 
 用户表示上述 Cloudflare 资源已创建，**并不代表已通过在线授权读回验证**。切记旧 Spine 的 UUID 和 CDN 域名不能移植。
 
@@ -61,3 +61,9 @@ Cloudflare Dashboard → Workers & Pages → `gambling-community` → Settings �
 Wrangler 已设置公开配置：Preview `IDENTITY_ISSUER=https://dev-identity-center.119shenhao.workers.dev`, `IDENTITY_CLIENT_ID=gambling-community-dev`；Production `IDENTITY_ISSUER=https://idcenter.nbn369.com`, `IDENTITY_CLIENT_ID=gambling-community-prod`。`IDENTITY_LOGIN_ENABLED` 均为 false，尚未设置 `IDENTITY_REDIRECT_URI` 和 `IDENTITY_CLIENT_SECRET`，因为尚无已验收的真实 Preview URL 与客户端注册记录。
 
 确认 Preview URL 后按 `119shenhao/identity-center/docs/NEW_APP_INTEGRATION_GUIDE.md` 在开发中心以 disabled 状态注册精确回调，随后由服务器端受控配置一次性机密 Secret，验证后启用。**生产注册及启用不属于开发部署授权**。
+
+## 已明确的站点 URL（2026-11-21）
+
+用户确认开发 URL：`https://dev-gambling-community.119shenhao.workers.dev/`；正式 URL：`https://gambling.nbn369.com/`。开发、生产 OAuth 回调分别配置为 `https://dev-gambling-community.119shenhao.workers.dev/api/auth/identity/callback` 与 `https://gambling.nbn369.com/api/auth/identity/callback`。这些 URI 只用于**准备白名单**；尚未在 Identity Center 注册客户端，也没有启用登录和 Secret。
+
+`dev/.github/workflows/dev-online-smoke.yml` 在开发提交后从 GitHub Actions 的外网执行**只读** HTTP 检查：开发 `/api/health` 必须返回 Preview + D1 Ready、首页包含正确品牌、`robots.txt` 禁止抓取、旧 Google 直接登录返回 410。此流程不能代替 Cloudflare 构建日志、用户登录实测或生产验收；如果失败，先核对 Cloudflare Git 关联与 D1 迁移，不得改写生产库。
