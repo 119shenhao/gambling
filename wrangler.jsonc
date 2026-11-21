@@ -1,0 +1,52 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "gambling-community",
+  "keep_vars": true,
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-06",
+  "workers_dev": true,
+  "ratelimits": [
+    {
+      "name": "API_RATE_LIMITER",
+      "namespace_id": "2026112101",
+      "simple": {
+        "limit": 180,
+        "period": 60
+      }
+    }
+  ],
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": [
+      "/api/*",
+      "/",
+      "/index.html",
+      "/topic/*",
+      "/search",
+      "/me",
+      "/notifications",
+      "/admin",
+      "/privacy",
+      "/robots.txt",
+      "/sitemap.xml",
+      "/sitemaps/*"
+    ]
+  },
+  "vars": {
+    "APP_ENV": "preview",
+    "PUBLIC_CONTENT_ENABLED": "false",
+    "PUBLIC_CONTENT_READS": "false",
+    "PUBLIC_CONTENT_FALLBACK": "false",
+    "PUBLIC_CONTENT_ON_DEMAND": "false",
+    "PUBLIC_TRANSLATION_DIRECT": "false",
+    "PUBLIC_TRANSLATION_SEPARATE": "true",
+    "IDENTITY_LOGIN_ENABLED": "false",
+    "IMPORT_ENABLED": "false",
+    "COLLECT_ENABLED": "false",
+    "TRANSLATION_ENABLED": "false"
+  },
+  "build": {
+    "command": "node scripts/prepare-build.mjs"
+  }
+}
