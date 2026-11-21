@@ -10,19 +10,7 @@ for(const args of [['node_modules/typescript/bin/tsc','--noEmit'],['--test','tes
 // The optional remote migration script is gated by WORKERS_CI and the exact dev branch.
 const remote=spawnSync(process.execPath,['scripts/preview-migrate.mjs'],{stdio:'inherit'});
 if(remote.status!==0)throw Error('Isolated Preview D1 preparation failed');
-// One authorized PRODUCTION OAuth Secret bootstrap; remove immediately after verified receipt.
-// Never run from dev Previews, local tests, GitHub Actions, or a normal build.
-if (process.env.WORKERS_CI==='1' && process.env.WORKERS_CI_BRANCH==='main') {
-  const cfg=JSON.parse(readFileSync('wrangler.jsonc','utf8'));
-  if(cfg.name!=='gambling-community'||cfg.keep_vars!==true||
-     cfg.vars?.APP_ENV!=='production'||cfg.vars?.IDENTITY_LOGIN_ENABLED!=='false'||
-     cfg.vars?.IDENTITY_CLIENT_ID!=='gambling-community-prod'||
-     cfg.d1_databases?.[0]?.database_id!=='7bba9ada-589f-493b-8fcf-60265fc0efac') {
-    throw Error('One-time production OAuth request rejected: environment mismatch.');
-  }
-  const result=spawnSync(process.execPath,['scripts/provision-prod-identity-once.mjs'],{stdio:'inherit'});
-  if(result.status!==0)throw Error('One-time production OAuth Secret provisioning could not be verified; production login remains disabled.');
-}
+// One-time Gambling PROD OAuth bootstrap request completed; ordinary builds never create or rotate Secrets.
 
 // Verified DEV Owner role bootstrap completed. No D1 grants during ordinary builds.
 
