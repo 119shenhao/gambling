@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {spawnSync} from 'node:child_process';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
@@ -63,7 +64,6 @@ test('Cloudflare public Worker fetch compatibility is configured before OAuth te
 });
 
 test('one-time DEV OAuth bootstrap is correctly scoped to Gambling Worker and DEV-only databases',()=>{
- const {spawnSync}=require('node:child_process');
  const result=spawnSync(process.execPath,['--check','scripts/provision-dev-identity.mjs'],{encoding:'utf8'});
  assert.equal(result.status,0,result.stderr);
  const s=read('scripts/provision-dev-identity.mjs'),c=JSON.parse(read('wrangler.identity-dev-provision.jsonc'));
