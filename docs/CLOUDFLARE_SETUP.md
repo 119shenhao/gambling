@@ -79,3 +79,10 @@ GitHub 只读在线验收：[#44883988827](https://github.com/119shenhao/gamblin
 ## 独立开发 OAuth Secret 引导（待 CI 与 Cloudflare Build 运行）
 
 基于 Spine 2026-11-20 已验收的 `wrangler preview secret put` 方案，新增 `scripts/provision-dev-identity.mjs`：仅为 `gambling-community` 的命名预览 `dev` 写入 `IDENTITY_CLIENT_SECRET`，而不是对普通生产 Worker 进行 `secret put`。仅以 `wrangler.identity-dev-provision.jsonc` 访问 `identity-center-dev`（固定 UUID），从新论坛开发 D1 读取已验证的授权迁移及收据；中心应用需保持 disabled。Secret 明文只入 Cloudflare 预览 Worker，中心 D1 存 SHA-256 Base64URL 校验摘要。所有代码和 SQL 操作必须先经 CI，运行一次后拆除构建调用。
+
+## 2026-11-21 DEV SSO Secret 与客户端激活验证
+
+- DEV 论坛 Cloudflare Preview Build 安全运行一次性 Secret bootstrap。独立随机 Secret 原文仅写入预览 Worker，两个开发 D1 只存 SHA-256 Base64URL 摘要；[身份中心只读验收 #44885090134](https://github.com/119shenhao/identity-center/actions/runs/44885090134) 检查了唯一有效摘要和禁用状态，结果成功。
+- 已从 `scripts/prepare-build.mjs` 移除一次性 bootstrap 的自动调用，后续普通构建不会再次生成或轮换 Secret；保留脚本但不自动执行。
+- [Identity Center DEV 客户端激活 #44885210412](https://github.com/119shenhao/identity-center/actions/runs/44885210412) 成功：`gambling-community-dev` 已启用，有效摘要唯一、回调唯一且精确匹配。未动生产认证中心/论坛数据。
+- 将 `dev/wrangler.jsonc → previews.vars.IDENTITY_LOGIN_ENABLED` 开启，仅开发 Preview，正式站仍关闭。通过新工作流 `dev-oauth-smoke.yml` 在线验证 `/api/me`、授权码登录重定向和 PKCE、无状态回调拒绝、旧 Google 直连 410；**真人 Google 回跳尚待用户验收**。

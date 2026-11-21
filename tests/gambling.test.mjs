@@ -33,14 +33,15 @@ test('no references to previous medical forum infrastructure in active runtime',
  assert.doesNotMatch(read('public/reading-preferences.js'),/sc_reading_preferences/);
 });
 
-test('identity center client names are independent, while login is disabled until registered',()=>{
+test('identity center clients remain separate and only dev login is enabled',()=>{
  const cfg=JSON.parse(read('wrangler.jsonc'));
  assert.equal(cfg.vars.IDENTITY_ISSUER,'https://idcenter.nbn369.com');
  assert.equal(cfg.vars.IDENTITY_CLIENT_ID,'gambling-community-prod');
  assert.equal(cfg.previews.vars.IDENTITY_ISSUER,'https://dev-identity-center.119shenhao.workers.dev');
  assert.equal(cfg.previews.vars.IDENTITY_CLIENT_ID,'gambling-community-dev');
+ assert.equal(cfg.vars.IDENTITY_LOGIN_ENABLED,'false');
+ assert.equal(cfg.previews.vars.IDENTITY_LOGIN_ENABLED,'true');
  for(const vars of [cfg.vars,cfg.previews.vars]){
-  assert.equal(vars.IDENTITY_LOGIN_ENABLED,'false');
   assert.equal(vars.IDENTITY_CLIENT_SECRET,undefined);
   assert.match(vars.IDENTITY_REDIRECT_URI,/^https:\/\//);
  }
@@ -51,7 +52,7 @@ test('confirmed development and production hosts map to unique exact SSO callbac
  assert.equal(c.previews.vars.IDENTITY_REDIRECT_URI,'https://dev-gambling-community.119shenhao.workers.dev/api/auth/identity/callback');
  assert.equal(c.vars.IDENTITY_REDIRECT_URI,'https://gambling.nbn369.com/api/auth/identity/callback');
  assert.equal(c.previews.vars.PUBLIC_CONTENT_ORIGIN,'https://dev-gambling-community.119shenhao.workers.dev');
- assert.equal(c.previews.vars.IDENTITY_LOGIN_ENABLED,'false');
+ assert.equal(c.previews.vars.IDENTITY_LOGIN_ENABLED,'true');
  assert.equal(c.vars.IDENTITY_LOGIN_ENABLED,'false');
  assert.equal(c.previews.vars.IDENTITY_CLIENT_SECRET,undefined);
  assert.equal(c.vars.IDENTITY_CLIENT_SECRET,undefined);
@@ -60,7 +61,7 @@ test('confirmed development and production hosts map to unique exact SSO callbac
 test('Cloudflare public Worker fetch compatibility is configured before OAuth tests',()=>{
  const c=JSON.parse(read('wrangler.jsonc'));
  assert.ok(c.compatibility_flags.includes('global_fetch_strictly_public'));
- assert.equal(c.previews.vars.IDENTITY_LOGIN_ENABLED,'false');
+ assert.equal(c.previews.vars.IDENTITY_LOGIN_ENABLED,'true');
 });
 
 test('one-time DEV OAuth bootstrap is correctly scoped to Gambling Worker and DEV-only databases',()=>{
@@ -74,4 +75,8 @@ test('one-time DEV OAuth bootstrap is correctly scoped to Gambling Worker and DE
  assert.equal(c.d1_databases.length,1);
  assert.equal(c.d1_databases[0].database_id,'66c36ee9-2cab-4e85-bc02-645819344297');
  assert.equal(c.d1_databases[0].database_name,'identity-center-dev');
+});
+
+test('one-time provisioning is no longer invoked from ordinary Cloudflare builds',()=>{
+ assert.doesNotMatch(read('scripts/prepare-build.mjs'),/spawnSync\\(process\\.execPath,\\['scripts\\/provision-dev-identity\\.mjs'\\]/);
 });

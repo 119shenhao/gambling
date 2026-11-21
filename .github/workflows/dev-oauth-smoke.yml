@@ -1,0 +1,59 @@
+name: Gambling DEV OAuth pre-login smoke
+on:
+  push:
+    branches: [dev]
+    paths:
+      - wrangler.jsonc
+      - .github/workflows/dev-oauth-smoke.yml
+permissions:
+  contents: read
+concurrency:
+  group: gambling-dev-oauth
+  cancel-in-progress: true
+jobs:
+  oauth:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    env:
+      PREVIEW_ORIGIN: https://dev-gambling-community.119shenhao.workers.dev
+    steps:
+      - name: Confirm authenticated preview configuration without initiating Google sign-in
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 24); do
+            echo "Checking dev OAuth readiness (attempt $attempt)"
+            code=$(curl -sS --max-time 12 -o /tmp/gambling-me.json -w '%{http_code}' "$PREVIEW_ORIGIN/api/me" || true)
+            if [ "$code" = 200 ] && node -e '
+              const fs=require("node:fs");const a=JSON.parse(fs.readFileSync("/tmp/gambling-me.json","utf8"));
+              if(a.identityConfigured!==true)process.exit(1);
+              console.log("DEV forum reports identityConfigured=true.");
+            '; then
+              break
+            fi
+            if [ "$attempt" = 24 ]; then
+              echo '::error::Dev Preview is not serving the new Identity Center Secret+config; inspect Cloudflare build logs.'
+              exit 1
+            fi
+            sleep 10
+          done
+          code=$(curl -sS --max-time 15 -D /tmp/oauth-headers.txt -o /dev/null -w '%{http_code}' "$PREVIEW_ORIGIN/api/auth/identity?return_to=%2F")
+          test "$code" = 302 || { echo "::error::OAuth initiation must redirect (HTTP 302); got $code"; exit 1; }
+          node -e '
+            const fs=require("node:fs"),h=fs.readFileSync("/tmp/oauth-headers.txt","utf8");
+            const match=h.match(/^location:\s*(.+)\r?$/im);
+            if(!match)process.exit(1);
+            const url=new URL(match[1]);
+            if(url.origin!=="https://dev-identity-center.119shenhao.workers.dev"||url.pathname!=="/oauth/authorize")process.exit(1);
+            const p=url.searchParams;
+            if(p.get("client_id")!=="gambling-community-dev"||
+               p.get("redirect_uri")!=="https://dev-gambling-community.119shenhao.workers.dev/api/auth/identity/callback"||
+               p.get("response_type")!=="code"||p.get("code_challenge_method")!=="S256"||
+               !p.get("state")||!p.get("nonce")||!p.get("code_challenge"))process.exit(1);
+            console.log("Verified OAuth authorize redirect: isolated DEV issuer, client, callback, PKCE and state. No tokens shown.");
+          '
+          legacy=$(curl -sS --max-time 12 -o /dev/null -w '%{http_code}' "$PREVIEW_ORIGIN/api/auth/google")
+          test "$legacy" = 410 || { echo '::error::Legacy direct Google endpoint must remain disabled'; exit 1; }
+          no_state=$(curl -sS --max-time 12 -o /dev/null -w '%{http_code}' "$PREVIEW_ORIGIN/api/auth/identity/callback")
+          test "$no_state" = 401 || { echo '::error::Callback without matching browser-bound state must return 401'; exit 1; }
+          echo 'PASS: DEV OAuth pre-login checks; user browser Google sign-in remains to be tested.'
