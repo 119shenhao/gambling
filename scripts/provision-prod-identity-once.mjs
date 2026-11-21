@@ -66,9 +66,14 @@ const readKey=key=>{
  return rows[0]?.value||'';
 };
 const digestPattern=/^[A-Za-z0-9_-]{43}$/;
+// Diagnostic stage codes contain no credentials, identifiers, or customer data.
+sql("INSERT INTO settings(key,value) VALUES('gambling_prod_oauth_bootstrap_stage','prod_d1_ready') "+
+    "ON CONFLICT(key) DO UPDATE SET value=excluded.value");
 const names=meta();
+sql("UPDATE settings SET value='worker_secret_metadata_ready' WHERE key='gambling_prod_oauth_bootstrap_stage'");
 if(!names.has('TRANSLATOR_KEY'))
  throw Error('Existing PRODUCTION Azure Translator Secret missing; refuse any credential changes.');
+sql("UPDATE settings SET value='translator_secret_present' WHERE key='gambling_prod_oauth_bootstrap_stage'");
 let digest=readKey(receipt);
 let confirmed=readKey(verified);
 if(names.has(secretName)){
@@ -91,6 +96,7 @@ sql("INSERT INTO settings(key,value) VALUES('"+verified+"','"+digest+
  "') ON CONFLICT(key) DO UPDATE SET value=excluded.value");
 if(readKey(verified)!==digest||readKey(receipt)!==digest)
  throw Error('Production credential digest readback failed.');
+sql("UPDATE settings SET value='verified' WHERE key='gambling_prod_oauth_bootstrap_stage'");
 console.log('PASS: independent Gambling PROD OAuth Worker Secret configured with verified D1 receipt.');
 console.log('PASS: preexisting production Azure Translator Secret remained present.');
 console.log('Identity Center PROD client remains disabled until separate authorized activation.');
