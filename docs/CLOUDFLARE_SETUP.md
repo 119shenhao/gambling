@@ -92,3 +92,15 @@ GitHub 只读在线验收：[#44883988827](https://github.com/119shenhao/gamblin
 用户实际完成 Google 登录，但要求戒赌社区点击登录后不再显示 Identity Center 的中间选择页。认证中心 DEV 已支持 `gambling-community-dev` 专用、严格约束客户端+Issuer+回调的 `provider_hint=google`；保留中心 SSO 复用、PKCE、Nonce、State、一次性授权码及后端验签和会话处理。认证中心线上真实跳转 [#44886399265](https://github.com/119shenhao/identity-center/actions/runs/44886399265) 成功，未提示时原选择页不变。
 
 本次新论坛 DEV `src/auth.ts` 仅在精确开发配置下传 `provider_hint=google`，不直接访问 Google OAuth，也不修改正式站。`dev-oauth-smoke.yml` 更新为验证论坛 → 身份中心 → Google 两次 HTTP 302 及证明 Cookie，全程不跟随到 Google 页面，不记录敏感查询参数。**仍需用户实际浏览器验收**。
+
+## 共享 Azure F0 翻译准备：开发专用
+
+目前新论坛 DEV 的 `TRANSLATION_ENABLED=true` 只表示允许服务端按需启用；**不会自动生成翻译**，因为 D1 `settings.translation_enabled=false` 且新的 DEV Preview Worker 尚无 `TRANSLATOR_KEY`。Azure 密钥只允许以 Cloudflare Preview Worker Secret 保存，不允许放在 GitHub、聊天、D1 或前端。
+
+如果有权限配置本地 Wrangler CLI，可在已授权 Cloudflare 账户执行：
+
+```sh
+npx wrangler preview secret put TRANSLATOR_KEY --worker-name gambling-community --name dev
+```
+
+输入同一 Azure F0 资源的密钥时不要在终端命令参数里写明文。普通 `wrangler secret put` 面向正式 Worker 的操作，**不能替代**以上 Preview 方式。地区由 DEV Wrangler vars 设置为 `eastus`，账户免费 F0 核验记录有效期限为31天，过期前必须重新核实真实 Azure 配额和计划；不要自动刷新时间。配置后检查 `/api/health` 的 Preview `translationSetup.keyConfigured` 与 `freeTierVerified`，再由本站管理员在翻译服务管理中启用本论坛 D1 `translation_enabled`，进行真实多语言测试。

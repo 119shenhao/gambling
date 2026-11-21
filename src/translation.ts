@@ -217,7 +217,8 @@ export async function translationProvidersStatus(env:Env) {
         :'not_integrated',
       ...(provider.id==='azure'?{
         daily:budget.daily,monthly:budget.monthly,rolling31Day:budget.rolling31Day,
-        providerStatus:budget.provider,blockers:budget.blockers
+        providerStatus:budget.provider,blockers:budget.blockers,
+        translationEnabled:budget.translationEnabled
       }:{})
     })),
     capMonthly:AZURE_SITE_MAX_MONTHLY,

@@ -113,3 +113,11 @@ test('Azure DEV shared-resource budget is protected by a hard 50k/month cap',()=
  assert.match(read('public/translation-admin.js'),/data-action="toggle-translation"/);
  assert.match(read('public/app.js'),/if\(action==='toggle-translation'\)/);
 });
+
+test('translation provider status exposes database activation state to admin UI',()=>{
+ const source=read('src/translation.ts');
+ assert.match(source,/translationEnabled:budget\.translationEnabled/);
+ const ui=read('public/translation-admin.js');
+ assert.match(ui,/azure\.translationEnabled/);
+ assert.match(read('src/admin.ts'),/translation_requires_development_verification/);
+});

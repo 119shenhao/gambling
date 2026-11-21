@@ -109,3 +109,13 @@
 - 戒赌论坛 [完整在线 #44886496949](https://github.com/119shenhao/gambling/actions/runs/44886496949)：`/api/me` 的 `identityConfigured=true`，完整两段跳转 **论坛 → Identity Center DEV（不展示 HTML 页面）→ Google OAuth** 成功；回调缺少 state 拒绝和直连 Google 410 仍通过。
 - [完整 CI #44886496923](https://github.com/119shenhao/gambling/actions/runs/44886496923) 通过（TypeScript、本地 D1 和构建）；仅 DEV 分支部署。正式站域名及 Identity Center 生产端未修改。
 - 用户修改前实际完成 Google 登录；修改后需要用户再次从论坛点击 Google 登录，确认不会再出现中间选择页、成功返回论坛。若登录期间短暂显示 Identity Center URL 属于正常的 HTTP 302 中转，不应出现中间 HTML 页面。
+
+## 2026-11-21 Azure Translator 接入准备与开发 CI
+
+- 戒赌论坛 Azure 接口、D1 同版本译文缓存、语言识别和管理员额度页面来自既有脊椎论坛成熟方案，本次开发只接入独立 DEV 配置和安全预算。
+- [开发提交 416f1bde3dd9f7c27ab6ea9b05cf5063a24e483b](https://github.com/119shenhao/gambling/commit/416f1bde3dd9f7c27ab6ea9b05cf5063a24e483b)：DEV Worker 的 `TRANSLATION_ENABLED=true`、`TRANSLATOR_REGION=eastus`、`TRANSLATOR_F0_VERIFIED_AT=2026-11-09T06:14:50Z`，每日 5,000、每月 50,000 字符；正式 Worker 仍关闭。此日期源自共享 Azure 资源在 Spine DEV 的既有 F0 核验配置，后续过期必须重新核验，不得伪造新的确认时间。
+- 翻译硬上限 `AZURE_SITE_MAX_MONTHLY=50000`，管理员不能上调超过该值，月配额与滚动31天预算沿用原子 D1 预约机制。Spine 代码可上限 1.9m/月，两站组合最大 1.95m/月，只针对两站有效，不能当作 Azure 账户的实时计量或支出保证。
+- 新增管理员翻译启停按钮、仅在开发且已验证 Azure Secret/F0 时才允许打开 D1 `settings.translation_enabled`；修正 Azure provider 状态返回 `translationEnabled`，避免按钮显示和实际 D1 状态不一致。
+- [线上健康和 SSO 回归 #44888634541 / #44888634514](https://github.com/119shenhao/gambling/actions/runs/44888634541) 通过；[代码 CI #44888634510](https://github.com/119shenhao/gambling/actions/runs/44888634510) 通过。上述通过 **不等于** Azure 实际翻译成功。
+- **尚未完成**：为新论坛 DEV 命名 Preview Worker 注入现有 F0 资源的 `TRANSLATOR_KEY` Secret，检查云端配置状态，确认新论坛管理权限、启用 D1 开关并进行一条测试贴英⇄中翻译、同版本缓存复用和真实 Azure 用量对账。新旧 Worker Secrets 不能通过 GitHub 读取或自动导出，用户不用将任何密钥发给 ChatGPT。
+- R2 公开 JSON 仍禁用，生产 D1、生产 Worker 翻译开关均未更改。
