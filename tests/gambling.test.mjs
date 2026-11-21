@@ -16,3 +16,18 @@ test('repository rename links use canonical GitHub path',()=>{
  }
  assert.match(read('README.md'),/119shenhao\/gambling/);
 });
+
+// Check every runtime URL, admin confirmation, and browser storage key after the repo rename.
+test('no references to previous medical forum infrastructure in active runtime',()=>{
+ for(const p of ['src/admin.ts','src/community.ts','src/public-projection.ts','src/projection-demand.ts','public/app.js','public/public-content.js','public/share-ui.js']){
+  assert.doesNotMatch(read(p),/spine-community|spine\\.nbn369\\.com|spine-data|x-spine-projection-miss|my-spine|spine-traffic-v1|SPINE COMMUNITY/,'stale medical forum reference in '+p);
+ }
+ const app=read('public/app.js'),admin=read('src/admin.ts');
+ assert.match(app,/preview_confirm:'gambling-community-dev'/);
+ assert.match(admin,/b\\.preview_confirm!=='gambling-community-dev'/);
+ assert.match(read('src/projection-demand.ts'),/x-gambling-projection-miss/);
+ for(const p of ['public/app.js','public/locale.js'])assert.doesNotMatch(read(p),/sc_locale/);
+ assert.match(read('public/locale.js'),/gc_locale/);
+ assert.doesNotMatch(read('src/community.ts'),/sc_visitor/);
+ assert.doesNotMatch(read('public/reading-preferences.js'),/sc_reading_preferences/);
+});

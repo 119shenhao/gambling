@@ -4,19 +4,21 @@ import {projectTranslations} from './projection-translations';
 import {excerptText,FEED_EXCERPT_LIMIT} from './excerpt';
 
 export const FEED_LIMIT=501;
-const PREVIEW_ORIGIN='https://feature-v1-community-build-20261106-spine-community.119shenhao.workers.dev';
-const PRODUCTION_ORIGIN='https://spine.nbn369.com';
+// Preview origin is set only after the real gambling-community Preview URL is verified.
+const PRODUCTION_ORIGIN='https://gambling.nbn369.com';
 const TOPIC_ID=/^[A-Za-z0-9_-]{1,128}$/;
 
 export function projectionConfig(env:Env) {
   const preview=env.APP_ENV==='preview';
   if(!preview&&env.APP_ENV!=='production')return null;
-  const base=preview?'https://spine-data-dev.nbn369.com':'https://spine-data.nbn369.com';
-  if(env.PUBLIC_CONTENT_BASE_URL!==base||!env.PUBLIC_CONTENT_R2)return null;
+  // These CDN hosts are planned only; public projections stay disabled until configured.
+  const base=preview?'https://gambling-data-dev.nbn369.com':'https://gambling-data.nbn369.com';
+  const origin=preview?env.PUBLIC_CONTENT_ORIGIN:PRODUCTION_ORIGIN;
+  if(!origin||!/^https:\/\/[^/]+$/.test(origin)||env.PUBLIC_CONTENT_BASE_URL!==base||!env.PUBLIC_CONTENT_R2)return null;
   const zoneConfigured=/^[a-f0-9]{32}$/i.test(env.CDN_ZONE_ID||'');
   const tokenConfigured=Boolean(env.CDN_PURGE_API_TOKEN);
   return {
-    base, origin:preview?PREVIEW_ORIGIN:PRODUCTION_ORIGIN, bucket:env.PUBLIC_CONTENT_R2,
+    base, origin, bucket:env.PUBLIC_CONTENT_R2,
     enabled:env.PUBLIC_CONTENT_ENABLED==='true',
     directTranslations:env.PUBLIC_TRANSLATION_DIRECT==='true'||env.PUBLIC_TRANSLATION_SEPARATE==='true',
     separateTranslations:env.PUBLIC_TRANSLATION_SEPARATE==='true',

@@ -50,3 +50,11 @@
 - 本项目文档、GitHub Actions 历史链接与固定入口均更新为新仓库地址。
 - Cloudflare Worker `gambling-community`、两套 D1 和 R2 名称及 UUID 均保持原样，不能为了仓库更名重建。
 - Cloudflare Git 构建集成可能需核对仓库连接是否同步更新；仅仓库改名**不等于**已经验证 Cloudflare Preview 部署或远程迁移。
+
+## 2026-11-21 全仓库移植残留审计
+
+完整检查 `dev` 下全部 83 个文件，确认 GitHub 旧仓库拼写已移除（测试中禁止回归的正则除外）；额外发现并修复了旧站的后台预览确认值、网页侧栏品牌、公开 JSON CDN 备用主机、Projection 默认来源域名、失效 Header 名、公开分享站点名称、下载文件名、PV Cookie/哈希前缀及界面本地储存键。
+
+- `PUBLIC_CONTENT_ORIGIN` 仅在确认**实际**新论坛 Preview URL 后由开发环境配置；新的 `gambling-data-dev.nbn369.com` / `gambling-data.nbn369.com` 均为规划，不代表已建立 DNS/CDN。公开 JSON 功能继续关闭。
+- 现有 `public/i18n.js` 的旧词库基础字典包含少量脊椎/医疗专用旧字符串，实际主要页面采用后置 `gamblingCopy` 覆盖；在公开发布前仍需完成全语言键覆盖核对和专业人工校对，不得宣称国际化完全验收。
+- 已添加残留回归自动测试，并验证前后端 `gambling-community-dev` 的危险操作确认值保持一致。

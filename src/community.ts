@@ -56,15 +56,15 @@ export async function communityRoute(req:Request,env:Env,u:Row|null,path:string)
     await stmt(env.DB,'INSERT INTO privacy_requests(id,user_id,request_type) VALUES(?,?,?)',id(),user.id,b.type).run();return json({ok:true},201);
   }
   if(path==='/api/me/export'&&method==='GET'){
-    const user=requireUser(u);return json({profile:safeUser(user),topics:await all(env.DB,'SELECT id,title,body,source_lang,status,created_at FROM topics WHERE author_id=?',user.id),comments:await all(env.DB,'SELECT id,topic_id,body,source_lang,status,created_at FROM comments WHERE author_id=?',user.id)},200,{'content-disposition':'attachment; filename="my-spine-community-data.json"'});
+    const user=requireUser(u);return json({profile:safeUser(user),topics:await all(env.DB,'SELECT id,title,body,source_lang,status,created_at FROM topics WHERE author_id=?',user.id),comments:await all(env.DB,'SELECT id,topic_id,body,source_lang,status,created_at FROM comments WHERE author_id=?',user.id)},200,{'content-disposition':'attachment; filename="my-gambling-community-data.json"'});
   }
   if(path==='/api/pageview'&&method==='POST'){
     const agent=req.headers.get('user-agent')||'';if(/bot|spider|crawl|headless/i.test(agent))return json({ok:true,recorded:false});
     const b=await body(req);if(typeof b.path!=='string'||b.path.length>300)fail(400,'invalid_pageview');
     if(!await analyticsEnabled(env.DB))return json({ok:true,recorded:false,reason:'analytics_disabled'});
-    let token=cookie(req,'sc_visitor');if(!/^[A-Za-z0-9_-]{43}$/.test(token))token=randomToken();
+    let token=cookie(req,'gc_visitor');if(!/^[A-Za-z0-9_-]{43}$/.test(token))token=randomToken();
     // A cryptographically random 256-bit cookie is the secret; a daily hash prevents stored cross-day identifiers.
-    const day=new Date().toISOString().slice(0,10),visitor=await hash('spine-traffic-v1:'+day+':'+token);
+    const day=new Date().toISOString().slice(0,10),visitor=await hash('gambling-traffic-v1:'+day+':'+token);
     await rate(env.DB,'pv:'+visitor,300,86400);await rate(env.DB,'pv-global:'+day,10000,86400);
     const seen=await one(env.DB,'SELECT 1 FROM traffic_visitors WHERE day_utc=? AND visitor_hash=?',day,visitor),hour=Math.floor(now()/3600)*3600;
     await env.DB.batch([
@@ -72,7 +72,7 @@ export async function communityRoute(req:Request,env:Env,u:Row|null,path:string)
       stmt(env.DB,`INSERT INTO hourly_traffic_metrics VALUES(?,1) ON CONFLICT(hour_start_utc) DO UPDATE SET pv=pv+1`,hour),
       stmt(env.DB,`INSERT INTO daily_traffic_metrics(day_utc,uv_estimate,pv,peak_active_5m_estimate,peak_hour_utc,peak_hour_pv) VALUES(?,?,1,1,?,1) ON CONFLICT(day_utc) DO UPDATE SET uv_estimate=(SELECT count(*) FROM traffic_visitors WHERE day_utc=?),pv=pv+1,peak_active_5m_estimate=MAX(peak_active_5m_estimate,(SELECT count(*) FROM traffic_visitors WHERE day_utc=? AND last_seen>=?)),peak_hour_utc=CASE WHEN (SELECT pv FROM hourly_traffic_metrics WHERE hour_start_utc=?)>peak_hour_pv THEN ? ELSE peak_hour_utc END,peak_hour_pv=MAX(peak_hour_pv,(SELECT pv FROM hourly_traffic_metrics WHERE hour_start_utc=?))`,day,seen?0:1,Math.floor(hour/3600)%24,day,day,now()-300,hour,Math.floor(hour/3600)%24,hour)
     ]);
-    return json({ok:true,recorded:true},200,{'set-cookie':`sc_visitor=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=86400${url.protocol==='https:'?'; Secure':''}`});
+    return json({ok:true,recorded:true},200,{'set-cookie':`gc_visitor=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=86400${url.protocol==='https:'?'; Secure':''}`});
   }
   return null;
 }

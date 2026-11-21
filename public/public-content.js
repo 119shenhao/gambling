@@ -1,6 +1,6 @@
 const HOSTS={
- preview:'https://spine-data-dev.nbn369.com',
- production:'https://spine-data.nbn369.com'
+ preview:'https://gambling-data-dev.nbn369.com',
+ production:'https://gambling-data.nbn369.com'
 };
 const PUBLIC_ID=/^[A-Za-z0-9_-]{1,128}$/;
 

@@ -1,7 +1,7 @@
 import {Env,Row,id,now,one,stmt} from './core';
 import {buildProjection,drainProjection,objectKey,parseObjectKey,projectionConfig,purgeProjection,writeProjection} from './public-projection';
 
-const MISS_HEADER='x-spine-projection-miss';
+const MISS_HEADER='x-gambling-projection-miss';
 const MAX_ATTEMPTS=8;
 
 function onlyQueryKeys(query:URLSearchParams,allowed:string[]) {

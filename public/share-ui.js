@@ -10,7 +10,7 @@ export function topicShareUrl(topicId,origin){
 }
 
 export function socialShareTargets(title,url){
- const text=String(title||'Spine Community').trim();
+ const text=String(title||'Problem Gambling').trim();
  const link=String(url);
  const query=(base,values)=>{
   const result=new URL(base);
@@ -28,11 +28,11 @@ export function socialShareTargets(title,url){
   // Public QQ/Qzone/Weibo share pages take normal web URLs. WeChat,
   // Douyin and Bilibili do not expose a verified generic article-share URL.
   {name:'WeChat',method:'copy'},
-  {name:'QQ',href:query('https://connect.qq.com/widget/shareqq/index.html',{url:link,title:text,site:'Spine Community'})},
+  {name:'QQ',href:query('https://connect.qq.com/widget/shareqq/index.html',{url:link,title:text,site:'Problem Gambling'})},
   {name:'Douyin',method:'copy'},
   {name:'Bilibili',method:'copy'},
   {name:'Weibo',href:query('https://service.weibo.com/share/share.php',{url:link,title:text})},
-  {name:'Qzone',href:query('https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey',{url:link,title:text,site:'Spine Community'})}
+  {name:'Qzone',href:query('https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey',{url:link,title:text,site:'Problem Gambling'})}
  ];
 }
 

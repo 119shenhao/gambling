@@ -11,7 +11,7 @@ export function normalizeReadingPreferences(input = {}) {
 }
 export function loadReadingPreferences(storage) {
   try {
-    return normalizeReadingPreferences(JSON.parse(storage?.getItem('sc_reading_preferences') || '{}'));
+    return normalizeReadingPreferences(JSON.parse(storage?.getItem('gc_reading_preferences') || '{}'));
   } catch {
     return {...defaultReadingPreferences};
   }
@@ -25,7 +25,7 @@ export function applyReadingPreferences(root, preferences) {
 export function saveReadingPreferences(storage, root, preferences) {
   const safe = applyReadingPreferences(root, preferences);
   try {
-    storage?.setItem('sc_reading_preferences', JSON.stringify(safe));
+    storage?.setItem('gc_reading_preferences', JSON.stringify(safe));
   } catch {
     // Retain the current-page choice when storage is unavailable.
   }

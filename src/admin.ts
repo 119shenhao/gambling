@@ -39,9 +39,9 @@ export async function adminRoute(req:Request,env:Env,user:Row|null,path:string):
     const after=req.method==='GET'?url.searchParams.get('after')||'':b.after||'';
     if(typeof after!=='string'||(after&&!/^[A-Za-z0-9_-]{1,128}$/.test(after)))
       fail(400,'invalid_cursor');
-    if(b?.preview_confirm!==undefined&&b.preview_confirm!=='spine-community-db-preview')
+    if(b?.preview_confirm!==undefined&&b.preview_confirm!=='gambling-community-dev')
       fail(400,'invalid_preview_confirmation');
-    if(req.method==='POST'&&b.preview_confirm!=='spine-community-db-preview')
+    if(req.method==='POST'&&b.preview_confirm!=='gambling-community-dev')
       fail(400,'preview_confirmation_required');
     const table=type==='topic'?'topics':'comments';
     const rows=await all(env.DB,`SELECT c.id,${type==='topic'?'c.title':'NULL title'},c.body,c.source_lang,c.source_lang_mode,

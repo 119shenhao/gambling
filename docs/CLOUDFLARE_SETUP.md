@@ -51,3 +51,7 @@
 GitHub 仓库规范地址已更正为 `https://github.com/119shenhao/gambling`，Cloudflare 的 Worker / D1 / R2 **不改名**。
 
 Cloudflare Dashboard → Workers & Pages → `gambling-community` → Settings → Builds / Git integration：确认已关联 `119shenhao/gambling`，正式分支仍是 `main`、预览分支仍是 `dev`，并检查更名后的首次 Preview 构建日志。若 GitHub 原地址重定向仍可用，也不能据此断言 Cloudflare webhook/build 一定正常；必须观察实际构建事件与预览部署。
+
+## 源论坛 URL 与域名检查
+
+源码已经替换所有旧站的 Spine Worker 域名、公开 JSON 域名和投影 Header。规划的 CDN Host 为 `gambling-data-dev.nbn369.com` 与 `gambling-data.nbn369.com`，**尚未开启**公开 R2 JSON。Cloudflare Preview 真实 URL 未获验证，故禁止硬编码猜测 URL，未来仅在真实验证后设置开发变量 `PUBLIC_CONTENT_ORIGIN`。确认生产/开发的独立 D1 UUID 和 R2 bucket 均保持正确，不因 GitHub 更名改变。
