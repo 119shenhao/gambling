@@ -126,13 +126,10 @@ async function identityRoute(req:Request,env:Env,url:URL){
       stmt(env.DB,'INSERT INTO identity_login_states(state_hash,nonce,verifier,return_path,expires_at) VALUES(?,?,?,?,?)',await hash(state),nonce,verifier,returnTo,current+600)
     ]);
     const params=new URLSearchParams({client_id:config.clientId,redirect_uri:config.redirectUri,response_type:'code',scope:'openid',
-      state,nonce,code_challenge:await pkceChallenge(verifier),code_challenge_method:'S256'});
-    // On this isolated DEV client, the sign-in button explicitly requests Google.
-    // Identity Center still validates client/redirect/PKCE and handles Google itself.
-    if(env.APP_ENV==='preview' && config.clientId==='gambling-community-dev' &&
-       config.issuer==='https://dev-identity-center.119shenhao.workers.dev' &&
-       config.redirectUri==='https://dev-gambling-community.119shenhao.workers.dev/api/auth/identity/callback')
-      params.set('provider_hint','google');
+      state,nonce,code_challenge:await pkceChallenge(verifier),code_challenge_method:'S256',prompt:'select_account'});
+    // One Google sign-in button for every enabled environment; Google account
+    // selection is enforced by the Center without a provider chooser page.
+    params.set('provider_hint','google');
     return redirect(config.issuer+'/oauth/authorize?'+params,flowCookie(state));
   }
 
