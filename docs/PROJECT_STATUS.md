@@ -58,3 +58,7 @@
 - `PUBLIC_CONTENT_ORIGIN` 仅在确认**实际**新论坛 Preview URL 后由开发环境配置；新的 `gambling-data-dev.nbn369.com` / `gambling-data.nbn369.com` 均为规划，不代表已建立 DNS/CDN。公开 JSON 功能继续关闭。
 - 现有 `public/i18n.js` 的旧词库基础字典包含少量脊椎/医疗专用旧字符串，实际主要页面采用后置 `gamblingCopy` 覆盖；在公开发布前仍需完成全语言键覆盖核对和专业人工校对，不得宣称国际化完全验收。
 - 已添加残留回归自动测试，并验证前后端 `gambling-community-dev` 的危险操作确认值保持一致。
+
+## 下一阶段：统一身份认证准备
+
+已在 `dev/wrangler.jsonc` 中分别声明公开的身份签发者与独立 Client ID：开发 `gambling-community-dev` 使用开发 Identity Center，正式 `gambling-community-prod` 使用生产 Identity Center。两套登录均保持 `IDENTITY_LOGIN_ENABLED=false`，不包含密钥或猜测的回调 URI。**这不是注册完成，也不是登录已可用**。需要先获得 Cloudflare 实际 Preview URL，确认新项目自动构建的成功日志，再注册开发 Identity Center Client，受控配置 Secret、开启登录并进行真人验证。不得复用 Spine 已登记的客户端及密钥。

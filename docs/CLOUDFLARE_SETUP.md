@@ -55,3 +55,9 @@ Cloudflare Dashboard → Workers & Pages → `gambling-community` → Settings �
 ## 源论坛 URL 与域名检查
 
 源码已经替换所有旧站的 Spine Worker 域名、公开 JSON 域名和投影 Header。规划的 CDN Host 为 `gambling-data-dev.nbn369.com` 与 `gambling-data.nbn369.com`，**尚未开启**公开 R2 JSON。Cloudflare Preview 真实 URL 未获验证，故禁止硬编码猜测 URL，未来仅在真实验证后设置开发变量 `PUBLIC_CONTENT_ORIGIN`。确认生产/开发的独立 D1 UUID 和 R2 bucket 均保持正确，不因 GitHub 更名改变。
+
+## Identity Center 下一阶段准备
+
+Wrangler 已设置公开配置：Preview `IDENTITY_ISSUER=https://dev-identity-center.119shenhao.workers.dev`, `IDENTITY_CLIENT_ID=gambling-community-dev`；Production `IDENTITY_ISSUER=https://idcenter.nbn369.com`, `IDENTITY_CLIENT_ID=gambling-community-prod`。`IDENTITY_LOGIN_ENABLED` 均为 false，尚未设置 `IDENTITY_REDIRECT_URI` 和 `IDENTITY_CLIENT_SECRET`，因为尚无已验收的真实 Preview URL 与客户端注册记录。
+
+确认 Preview URL 后按 `119shenhao/identity-center/docs/NEW_APP_INTEGRATION_GUIDE.md` 在开发中心以 disabled 状态注册精确回调，随后由服务器端受控配置一次性机密 Secret，验证后启用。**生产注册及启用不属于开发部署授权**。

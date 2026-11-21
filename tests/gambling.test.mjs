@@ -31,3 +31,16 @@ test('no references to previous medical forum infrastructure in active runtime',
  assert.doesNotMatch(read('src/community.ts'),/sc_visitor/);
  assert.doesNotMatch(read('public/reading-preferences.js'),/sc_reading_preferences/);
 });
+
+test('identity center client names are independent, while login is disabled until registered',()=>{
+ const cfg=JSON.parse(read('wrangler.jsonc'));
+ assert.equal(cfg.vars.IDENTITY_ISSUER,'https://idcenter.nbn369.com');
+ assert.equal(cfg.vars.IDENTITY_CLIENT_ID,'gambling-community-prod');
+ assert.equal(cfg.previews.vars.IDENTITY_ISSUER,'https://dev-identity-center.119shenhao.workers.dev');
+ assert.equal(cfg.previews.vars.IDENTITY_CLIENT_ID,'gambling-community-dev');
+ for(const vars of [cfg.vars,cfg.previews.vars]){
+  assert.equal(vars.IDENTITY_LOGIN_ENABLED,'false');
+  assert.equal(vars.IDENTITY_CLIENT_SECRET,undefined);
+  assert.equal(vars.IDENTITY_REDIRECT_URI,undefined);
+ }
+});
