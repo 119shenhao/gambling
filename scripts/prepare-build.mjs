@@ -11,8 +11,7 @@ for(const args of [['node_modules/typescript/bin/tsc','--noEmit'],['--test','tes
 const remote=spawnSync(process.execPath,['scripts/preview-migrate.mjs'],{stdio:'inherit'});
 if(remote.status!==0)throw Error('Isolated Preview D1 preparation failed');
 // One-time OAuth Secret setup completed. Do not run it on ordinary builds.
-const ownerGrant=spawnSync(process.execPath,['scripts/grant-owner-dev-once.mjs'],{stdio:'inherit'});
-if(ownerGrant.status!==0)throw Error('Verified DEV Owner role grant failed; refusing preview build.');
+// Verified DEV Owner role bootstrap completed. No D1 grants during ordinary builds.
 
 
 function createVersionedFrontend() {

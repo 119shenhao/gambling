@@ -167,3 +167,12 @@
 - **DEV** 当前 SSO 已启用，后续线上验收 `/api/me` 实际管理员角色（需要现有浏览器凭据，自动 CI 无法冒用用户 Cookie）；不要声称未检查远端 D1 时已经分配成功。
 - **PROD** 目前 `119shenhao/gambling/main` 仍只有 README、无生产应用发布，Worker 正式论坛的 `IDENTITY_LOGIN_ENABLED=false`。本次仅在 `dev` 的未来生产配置预置匹配值，**没有修改、迁移、发布生产 D1 或 Worker**。未来正式发布并启用生产统一登录后，用户首次以正式 Identity Center Owner 登录会自动获得论坛 admin。不得声称目前生产已生效。
 - 保留 Cloudflare Secrets、`keep_vars:true`、D1/R2 分离和全部已有站点功能。此功能只赋予已验证 Owner 一人管理员，不允许从用户提交的邮箱、昵称或账号 ID 自行授权。
+
+## 2026-11-21 管理员角色实际授权：DEV 完成、生产预置
+
+- 本轮用户明确要求 Google 账号为戒赌论坛 DEV/PROD 管理员。按 Identity Center 之前验证的两个环境 Owner ID 独立计算摘要，Forum DEV/PROD 对应 SHA-256 已写入 `dev/wrangler.jsonc`（不公开中心原始身份 ID、邮箱或 Google sub）。原统一认证中心验证过程（签名、issuer/audience/nonce）及 `identity_center` 用户映射不变。
+- [权限回归 #44894045977](https://github.com/119shenhao/gambling/actions/runs/44894045977) PASS：本地隔离 D1 实测 Owner 旧会话自动领 admin、普通账号仍 member/拒绝管理接口、仅一次审计和幂等；未写生产。
+- 为避免任何“权限等你下次登录才生效”的不确定性，使用仅限 Cloudflare **dev Preview** 的临时脚本对既有 `auth_identities(provider='identity_center')` 做**摘要匹配**；仅当恰好一个已验证 Owner、用户处于 active、D1 UUID/Issuer/Client 均严格匹配，才幂等插入 `user_roles(admin)` 并立即回读。没有匹配用户时构建必须失败，不准假报已授予。
+- [Cloudflare Preview 强制回读构建 9b001975](https://github.com/119shenhao/gambling/commit/9b0019750d464ed4aba1c4f0b4c8531720406f9b) **success**；因为临时程序在构建阶段必须完成一次精确 OWNER 管理角色回读，否则构建报错，因此证实 **DEV D1 目标已验证 Owner 的 admin 角色存在**。生产 D1 未访问，其他用户未修改。
+- 完成后**删除**临时授权脚本和构建调用，永久保留正式的签名 JWT + hashed Center Owner 角色匹配逻辑，之后不再运行 D1 强制初始化。Cloudflare Secret/D1/R2 严格隔离和构建后密钥守护继续启用。
+- **生产仅预置代码配置，未完成真实授权**：仓库 `main` 目前只有 README，正式论坛尚未上线、生产 Identity Center 登录开关关闭。待用户单独确认正式发布并实际登录后，生产 Owner 通过相应摘要自动获得 admin，不跨库复制账号、不提前初始化生产管理员，也不得提前报告为已完成。
