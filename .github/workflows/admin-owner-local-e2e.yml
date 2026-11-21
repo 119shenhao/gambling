@@ -1,0 +1,26 @@
+name: Verify Center Owner grants only the designated forum admin (LOCAL)
+on:
+  push:
+    branches: [dev]
+    paths:
+      - src/core.ts
+      - src/auth.ts
+      - wrangler.jsonc
+      - scripts/test-admin-owner-local.mjs
+      - .github/workflows/admin-owner-local-e2e.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Confirm owner-only role grant with isolated local D1
+        run: node scripts/test-admin-owner-local.mjs

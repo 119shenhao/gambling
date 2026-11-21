@@ -1,0 +1,49 @@
+name: Azure Translator DEV Preview readiness (no secret disclosure)
+on:
+  push:
+    branches: [dev]
+    paths:
+      - .github/workflows/dev-azure-readiness.yml
+      - wrangler.jsonc
+      - src/translation.ts
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  readiness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Check translation settings in the running DEV Worker
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const url='https://dev-gambling-community.119shenhao.workers.dev/api/health';
+          let ok=false;
+          for(let i=1;i<=10;i++){
+            try{
+              const response=await fetch(url,{signal:AbortSignal.timeout(12000),headers:{'cache-control':'no-cache'}});
+              const data=await response.json();
+              if(response.ok&&data.environment==='preview'&&data.databaseReady===true){
+                const s=data.translationSetup||{};
+                console.log('DEV readiness '+JSON.stringify({
+                  environment:data.environment,databaseReady:data.databaseReady,
+                  translationReady:data.translationReady,
+                  translationCacheAvailable:data.translationCacheAvailable,
+                  workerEnabled:s.workerEnabled,
+                  keyConfigured:s.keyConfigured,
+                  regionConfigured:s.regionConfigured,
+                  freeTierVerified:s.freeTierVerified,
+                  databaseEnabled:s.databaseEnabled,
+                  translationConfigured:data.translationConfigured
+                }));
+                if(s.keyConfigured===true&&s.workerEnabled===true&&s.regionConfigured===true&&s.freeTierVerified===true&&data.translationReady===true){
+                  console.log('PASS: DEV Preview has nonempty Azure Translator Secret, configured region and translation schema.');
+                  ok=true;break;
+                }
+              }else console.log('Attempt '+i+': expected Preview D1 health not ready');
+            }catch(e){console.log('Attempt '+i+': cannot read DEV health');}
+            if(i<10)await new Promise(r=>setTimeout(r,10000));
+          }
+          if(!ok)throw Error('DEV Azure readiness failed. Check DEV Preview Secret TRANSLATOR_KEY and existing DEV Wrangler vars; no data modified.');
+          NODE

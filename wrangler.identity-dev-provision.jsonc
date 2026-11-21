@@ -1,0 +1,12 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "gambling-identity-dev-provision-only",
+  "compatibility_date": "2026-11-06",
+  "d1_databases": [
+    {
+      "binding": "IDENTITY_DEV_DB",
+      "database_name": "identity-center-dev",
+      "database_id": "66c36ee9-2cab-4e85-bc02-645819344297"
+    }
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "gambling-community",
+  "keep_vars": true,
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-06",
+  "workers_dev": true,
+  "ratelimits": [
+    {
+      "name": "API_RATE_LIMITER",
+      "namespace_id": "2026112101",
+      "simple": {
+        "limit": 180,
+        "period": 60
+      }
+    }
+  ],
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": [
+      "/api/*",
+      "/",
+      "/index.html",
+      "/topic/*",
+      "/search",
+      "/me",
+      "/notifications",
+      "/admin",
+      "/privacy",
+      "/robots.txt",
+      "/sitemap.xml",
+      "/sitemaps/*"
+    ]
+  },
+  "vars": {
+    "APP_ENV": "production",
+    "PUBLIC_CONTENT_ENABLED": "false",
+    "PUBLIC_CONTENT_READS": "false",
+    "PUBLIC_CONTENT_FALLBACK": "false",
+    "PUBLIC_CONTENT_ON_DEMAND": "false",
+    "PUBLIC_TRANSLATION_DIRECT": "false",
+    "PUBLIC_TRANSLATION_SEPARATE": "true",
+    "IDENTITY_LOGIN_ENABLED": "false",
+    "IMPORT_ENABLED": "false",
+    "COLLECT_ENABLED": "false",
+    "TRANSLATION_ENABLED": "false",
+    "IDENTITY_ISSUER": "https://idcenter.nbn369.com",
+    "IDENTITY_CLIENT_ID": "gambling-community-prod",
+    "IDENTITY_REDIRECT_URI": "https://gambling.nbn369.com/api/auth/identity/callback",
+    "TRANSLATOR_REGION": "eastus",
+    "TRANSLATOR_F0_VERIFIED_AT": "2026-11-09T06:14:50Z",
+    "TRANSLATION_DAILY_LIMIT": "5000",
+    "TRANSLATION_MONTHLY_LIMIT": "25000",
+    "ADMIN_CENTER_OWNER_SHA256": "eb367b5a659205efbacd7dfa4964e0c2a9852c072237b668d3d885e334105ba4"
+  },
+  "build": {
+    "command": "node scripts/prepare-build.mjs"
+  },
+  "r2_buckets": [
+    {
+      "binding": "PUBLIC_CONTENT_R2",
+      "bucket_name": "gambling-community-public-prod"
+    }
+  ],
+  "previews": {
+    "vars": {
+      "APP_ENV": "preview",
+      "PUBLIC_CONTENT_ENABLED": "false",
+      "PUBLIC_CONTENT_READS": "false",
+      "PUBLIC_CONTENT_FALLBACK": "false",
+      "PUBLIC_CONTENT_ON_DEMAND": "false",
+      "PUBLIC_TRANSLATION_DIRECT": "false",
+      "PUBLIC_TRANSLATION_SEPARATE": "true",
+      "IDENTITY_LOGIN_ENABLED": "true",
+      "IMPORT_ENABLED": "false",
+      "COLLECT_ENABLED": "false",
+      "TRANSLATION_ENABLED": "true",
+      "IDENTITY_ISSUER": "https://dev-identity-center.119shenhao.workers.dev",
+      "IDENTITY_CLIENT_ID": "gambling-community-dev",
+      "IDENTITY_REDIRECT_URI": "https://dev-gambling-community.119shenhao.workers.dev/api/auth/identity/callback",
+      "PUBLIC_CONTENT_ORIGIN": "https://dev-gambling-community.119shenhao.workers.dev",
+      "TRANSLATOR_REGION": "eastus",
+      "TRANSLATOR_F0_VERIFIED_AT": "2026-11-09T06:14:50Z",
+      "TRANSLATION_DAILY_LIMIT": "5000",
+      "TRANSLATION_MONTHLY_LIMIT": "10000",
+      "ADMIN_CENTER_OWNER_SHA256": "7df1b395981a31a651015a158eb1086264ecbea53b5dd41a34d62444ff29fa26"
+    },
+    "r2_buckets": [
+      {
+        "binding": "PUBLIC_CONTENT_R2",
+        "bucket_name": "gambling-community-public-dev"
+      }
+    ],
+    "d1_databases": [
+      {
+        "binding": "DB",
+        "database_name": "gambling-community-dev",
+        "database_id": "a92cf620-2a0b-46e1-a0ff-2e0c94218f37",
+        "migrations_dir": "migrations/v1"
+      }
+    ]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "gambling-community-prod",
+      "database_id": "7bba9ada-589f-493b-8fcf-60265fc0efac",
+      "migrations_dir": "migrations/v1"
+    }
+  ],
+  "compatibility_flags": [
+    "global_fetch_strictly_public"
+  ]
+}
