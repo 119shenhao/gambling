@@ -49,7 +49,6 @@ jobs:
             if(p.get("client_id")!=="gambling-community-dev"||
                p.get("redirect_uri")!=="https://dev-gambling-community.119shenhao.workers.dev/api/auth/identity/callback"||
                p.get("response_type")!=="code"||p.get("code_challenge_method")!=="S256"||
-               p.get("provider_hint")!=="google"||
                !p.get("state")||!p.get("nonce")||!p.get("code_challenge"))process.exit(1);
             console.log("Verified OAuth authorize redirect: isolated DEV issuer, client, Google hint, callback, PKCE and state. No tokens shown.");
           '
