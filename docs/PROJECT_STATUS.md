@@ -102,3 +102,10 @@
 用户实际完成 Google 登录，但要求戒赌社区点击登录后不再显示 Identity Center 的中间选择页。认证中心 DEV 已支持 `gambling-community-dev` 专用、严格约束客户端+Issuer+回调的 `provider_hint=google`；保留中心 SSO 复用、PKCE、Nonce、State、一次性授权码及后端验签和会话处理。认证中心线上真实跳转 [#44886399265](https://github.com/119shenhao/identity-center/actions/runs/44886399265) 成功，未提示时原选择页不变。
 
 本次新论坛 DEV `src/auth.ts` 仅在精确开发配置下传 `provider_hint=google`，不直接访问 Google OAuth，也不修改正式站。`dev-oauth-smoke.yml` 更新为验证论坛 → 身份中心 → Google 两次 HTTP 302 及证明 Cookie，全程不跟随到 Google 页面，不记录敏感查询参数。**仍需用户实际浏览器验收**。
+
+## 2026-11-21 Google 直达自动验收已通过
+
+- 开发中心 [在线 #44886399265](https://github.com/119shenhao/identity-center/actions/runs/44886399265)：`gambling-community-dev` 配合 `provider_hint=google`、固定回调时直接 302 到 Google，上游浏览器事务 Cookie 安全设置；未传参数的原选择页仍可用。
+- 戒赌论坛 [完整在线 #44886496949](https://github.com/119shenhao/gambling/actions/runs/44886496949)：`/api/me` 的 `identityConfigured=true`，完整两段跳转 **论坛 → Identity Center DEV（不展示 HTML 页面）→ Google OAuth** 成功；回调缺少 state 拒绝和直连 Google 410 仍通过。
+- [完整 CI #44886496923](https://github.com/119shenhao/gambling/actions/runs/44886496923) 通过（TypeScript、本地 D1 和构建）；仅 DEV 分支部署。正式站域名及 Identity Center 生产端未修改。
+- 用户修改前实际完成 Google 登录；修改后需要用户再次从论坛点击 Google 登录，确认不会再出现中间选择页、成功返回论坛。若登录期间短暂显示 Identity Center URL 属于正常的 HTTP 302 中转，不应出现中间 HTML 页面。
