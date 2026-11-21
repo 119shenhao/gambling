@@ -482,9 +482,17 @@ async function devAzureSmoke(req:Request,env:Env){
    if(metered>0)await stmt(env.DB,
      "UPDATE translation_usage_daily SET metered_characters=metered_characters+? WHERE provider='azure' AND day_utc=?",
      metered,day).run();
-   await stmt(env.DB,"UPDATE settings SET value='pass' WHERE key=?",key).run();
+   // Only a successful real bilingual Azure response may activate DEV D1.
+   // The Worker Secret is not copied to D1, logs, the browser or this request.
+   await env.DB.batch([
+     stmt(env.DB,"INSERT INTO settings(key,value) VALUES('translation_active_provider','azure') ON CONFLICT(key) DO UPDATE SET value=excluded.value"),
+     stmt(env.DB,"INSERT INTO settings(key,value) VALUES('translation_azure_daily_limit','5000') ON CONFLICT(key) DO UPDATE SET value=excluded.value"),
+     stmt(env.DB,"INSERT INTO settings(key,value) VALUES('translation_azure_monthly_limit','10000') ON CONFLICT(key) DO UPDATE SET value=excluded.value"),
+     stmt(env.DB,"UPDATE settings SET value='true' WHERE key='translation_enabled' AND value='false'"),
+     stmt(env.DB,"UPDATE settings SET value='pass' WHERE key=?",key)
+   ]);
    return json({ok:true,test:'azure_bilingual_smoke',bothDirections:true,
-     reservedCharacters:characters,meteredCharacters:metered,secretExposed:false});
+     reservedCharacters:characters,meteredCharacters:metered,devDatabaseEnabled:true,secretExposed:false});
  }catch{
    await stmt(env.DB,"UPDATE settings SET value='request_failed' WHERE key=?",key).run();
    return json({ok:false,reason:'request_failed'},502);

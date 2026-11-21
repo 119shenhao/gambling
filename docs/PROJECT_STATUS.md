@@ -131,3 +131,10 @@
 ## 2026-11-21 · 每次主动 Google 登录都提供账号选择（仅 DEV）
 
 按用户新要求，仅保留“使用 Google 登录”一个按钮；点击后要求 Google 显示可选旧账号或使用其他账号的界面，不能默默复用 Identity Center 中已有的 SSO 身份。DEV 的 `src/auth.ts` 在既有 PKCE/state/nonce 和精确回调上携带 `provider_hint=google&prompt=select_account`；注册/启用的 Google 网站均使用相同方式，正式论坛的 `IDENTITY_LOGIN_ENABLED=false` 保持不变。认证中心 DEV 配合新授权行为：已有 Center Cookie 也直接转 Google（上游 `prompt=select_account`）。不恢复旧的直接 Google OAuth 登录路由，不混用 Spine 用户或数据库，不改帖子/角色。生产须另外批准并验收。
+
+## 2026-11-21 Cloudflare Preview Secret 丢失问题已定位（待用户重新绑定）
+
+- 第一次 [DEV 真实 Azure 自动测试 #44889928443](https://github.com/119shenhao/gambling/actions/runs/44889928443) 返回 HTTP 503；D1 诊断 `azure_dev_smoke_20261121=not_started`、预算 0，**没有调用 Azure 产生字符费用**。
+- [DEV Secret 验证 #44889584465](https://github.com/119shenhao/gambling/actions/runs/44889584465) 曾显示 `keyConfigured=true`；随后多个 DEV Cloudflare Preview 构建后，新版本返回 `keyConfigured=false`、`azureConfigurationReady=false`。[只读诊断日志 #44890037912](https://github.com/119shenhao/gambling/actions/runs/44890037912) 留存了对比。这说明 DEV 命名 Preview 的运行时已失去 Secret 绑定，**不是 Azure Key 已被证明无效**。
+- Cloudflare 资料说明 Preview Base Secret 变更不会同步到已创建的命名 Preview；确实也存在历史上 Preview 重新部署后丢失 Secret 的已修复 SDK 缺陷（[Cloudflare 问题 #15942](https://github.com/cloudflare/workers-sdk/issues/15942)）。当前仓库 package-lock Wrangler 是 `4.158.0`，晚于修复版，因此不能仅据此认定遇到了同一个老 bug。需在最终代码部署后将 `TRANSLATOR_KEY` **绑定到已存在的 `dev` 命名 Preview 的最新部署**，不要只填写 Preview Base。Secret 明文不可读取或从 Prod 自动复制。
+- 现在把 DEV 一次性实测路径改为：只有同一 Secret 完成英→中和中→英两次真实成功，才通过一个 D1 batch 设置 active provider Azure、每日5000、每月10000与 `settings.translation_enabled=true`，失败保持关闭。随后回归验证预算和页面译文缓存；生产开关保持关闭，待论坛正式版验收。

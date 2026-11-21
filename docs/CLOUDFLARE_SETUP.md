@@ -104,3 +104,10 @@ npx wrangler preview secret put TRANSLATOR_KEY --worker-name gambling-community 
 ```
 
 输入同一 Azure F0 资源的密钥时不要在终端命令参数里写明文。普通 `wrangler secret put` 面向正式 Worker 的操作，**不能替代**以上 Preview 方式。地区由 DEV Wrangler vars 设置为 `eastus`，账户免费 F0 核验记录有效期限为31天，过期前必须重新核实真实 Azure 配额和计划；不要自动刷新时间。配置后检查 `/api/health` 的 Preview `translationSetup.keyConfigured` 与 `freeTierVerified`，再由本站管理员在翻译服务管理中启用本论坛 D1 `translation_enabled`，进行真实多语言测试。
+
+## 2026-11-21 Cloudflare Preview Secret 丢失问题已定位（待用户重新绑定）
+
+- 第一次 [DEV 真实 Azure 自动测试 #44889928443](https://github.com/119shenhao/gambling/actions/runs/44889928443) 返回 HTTP 503；D1 诊断 `azure_dev_smoke_20261121=not_started`、预算 0，**没有调用 Azure 产生字符费用**。
+- [DEV Secret 验证 #44889584465](https://github.com/119shenhao/gambling/actions/runs/44889584465) 曾显示 `keyConfigured=true`；随后多个 DEV Cloudflare Preview 构建后，新版本返回 `keyConfigured=false`、`azureConfigurationReady=false`。[只读诊断日志 #44890037912](https://github.com/119shenhao/gambling/actions/runs/44890037912) 留存了对比。这说明 DEV 命名 Preview 的运行时已失去 Secret 绑定，**不是 Azure Key 已被证明无效**。
+- Cloudflare 资料说明 Preview Base Secret 变更不会同步到已创建的命名 Preview；确实也存在历史上 Preview 重新部署后丢失 Secret 的已修复 SDK 缺陷（[Cloudflare 问题 #15942](https://github.com/cloudflare/workers-sdk/issues/15942)）。当前仓库 package-lock Wrangler 是 `4.158.0`，晚于修复版，因此不能仅据此认定遇到了同一个老 bug。需在最终代码部署后将 `TRANSLATOR_KEY` **绑定到已存在的 `dev` 命名 Preview 的最新部署**，不要只填写 Preview Base。Secret 明文不可读取或从 Prod 自动复制。
+- 现在把 DEV 一次性实测路径改为：只有同一 Secret 完成英→中和中→英两次真实成功，才通过一个 D1 batch 设置 active provider Azure、每日5000、每月10000与 `settings.translation_enabled=true`，失败保持关闭。随后回归验证预算和页面译文缓存；生产开关保持关闭，待论坛正式版验收。

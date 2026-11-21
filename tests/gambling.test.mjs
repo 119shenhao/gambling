@@ -133,3 +133,13 @@ test('Azure real-world smoke uses only fixed DEV text and a single budgeted exec
  assert.match(code,/translation_budget SET/);
  assert.match(code,/我正在迈向新的生活。/);
 });
+
+test('DEV translation activates only after successful live Azure bilingual result',()=>{
+ const t=read('src/translation.ts');
+ const pos=t.indexOf("await env.DB.batch([");
+ const sms=t.indexOf("async function devAzureSmoke");
+ assert.ok(sms>=0&&pos>sms);
+ assert.match(t,/UPDATE settings SET value='true' WHERE key='translation_enabled' AND value='false'/);
+ assert.match(t,/translation_azure_monthly_limit','10000'/);
+ assert.match(t,/bothDirections:true/);
+});
