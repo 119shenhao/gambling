@@ -111,3 +111,16 @@ npx wrangler preview secret put TRANSLATOR_KEY --worker-name gambling-community 
 - [DEV Secret 验证 #44889584465](https://github.com/119shenhao/gambling/actions/runs/44889584465) 曾显示 `keyConfigured=true`；随后多个 DEV Cloudflare Preview 构建后，新版本返回 `keyConfigured=false`、`azureConfigurationReady=false`。[只读诊断日志 #44890037912](https://github.com/119shenhao/gambling/actions/runs/44890037912) 留存了对比。这说明 DEV 命名 Preview 的运行时已失去 Secret 绑定，**不是 Azure Key 已被证明无效**。
 - Cloudflare 资料说明 Preview Base Secret 变更不会同步到已创建的命名 Preview；确实也存在历史上 Preview 重新部署后丢失 Secret 的已修复 SDK 缺陷（[Cloudflare 问题 #15942](https://github.com/cloudflare/workers-sdk/issues/15942)）。当前仓库 package-lock Wrangler 是 `4.158.0`，晚于修复版，因此不能仅据此认定遇到了同一个老 bug。需在最终代码部署后将 `TRANSLATOR_KEY` **绑定到已存在的 `dev` 命名 Preview 的最新部署**，不要只填写 Preview Base。Secret 明文不可读取或从 Prod 自动复制。
 - 现在把 DEV 一次性实测路径改为：只有同一 Secret 完成英→中和中→英两次真实成功，才通过一个 D1 batch 设置 active provider Azure、每日5000、每月10000与 `settings.translation_enabled=true`，失败保持关闭。随后回归验证预算和页面译文缓存；生产开关保持关闭，待论坛正式版验收。
+
+## 固定部署规则：Cloudflare Secret / Variables / D1 / R2 必须保留（2026-11-21）
+
+用户明确要求：后续任何代码构建或开发/生产发布**不得抹除已经在 Cloudflare 控制台设置的 Secret 和 Variables**。本规则适用于 `TRANSLATOR_KEY`、`IDENTITY_CLIENT_SECRET` 等任何敏感设置，以及 D1/R2/Issuer/Client 等环境隔离绑定。
+
+1. Cloudflare Secret **仅存 Cloudflare**，源码和 `wrangler.jsonc` 只能声明非秘密变量；**禁止**添加同名明文 `vars` 以覆盖 Secret。保留配置 `keep_vars:true`；任何删除或改动此配置都必须先审查；Cloudflare Preview 秘钥必须在实际 `dev` 命名 Preview 最新版本中存在，而不只是 Production 或 Previews Base。
+2. 禁止在普通构建/部署中执行 `wrangler secret put/delete/bulk` 或 `wrangler preview secret put/delete/bulk`；不得在 GitHub 日志或 `--secrets-file` 输出任何真实 Key；生产/预览 Secret 只由 Cloudflare 授权管理员管理。
+3. 在任意 `dev` 分支 push 后，新增 GitHub Actions `Guard Cloudflare DEV Preview secrets after every build`：先等待对应 SHA 的 Cloudflare Workers Preview 构建成功，后独立 GET 运行中的 `/api/health` 校验 `keyConfigured`、区域、F0有效性及开发D1。**任何缺失均标记失败，不把 GitHub CI 通过当作部署通过，也不擅自写入密钥。**
+4. 该机制是**发布后侦测和阻止错误验收**，不是在平台已经抹除密钥时自动恢复明文；Cloudflare Workers Preview 曾有已报告并修复的密钥继承缺陷（cloudflare/workers-sdk#15942 / #16102）。对命名 Preview 需要确保构建使用支持继承既有 Secret 的部署器版本，并在每次更换部署模式后重新做一次真实在线检查。若未来再现丢失，停止进一步发布并检查 Cloudflare Previews 名称、构建工具版本、`secrets.required` 支持性及实际 Preview 绑定。
+5. 生产代码发布时先检查生产 `TRANSLATOR_KEY` 是否仍绑定，并在正式站可用后验收（正式站尚未整体上线，不在本次为其开启翻译）。**生产和 dev 的 Secret 可以值相同但绑定独立**；绝不能通过修改 `wrangler.jsonc` 传递明文。
+6. 现有代码 `wrangler.jsonc` 的 `keep_vars:true` 已存在；新增静态测试禁止从构建脚本批量删除 Secret、明确隔离开发与生产 D1 ID。
+
+Cloudflare 文档：`https://developers.cloudflare.com/workers/previews/configuration/`，`https://developers.cloudflare.com/workers/wrangler/configuration/`，`https://github.com/cloudflare/workers-sdk/issues/15942`。

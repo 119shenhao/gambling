@@ -143,3 +143,20 @@ test('DEV translation activates only after successful live Azure bilingual resul
  assert.match(t,/translation_azure_monthly_limit','10000'/);
  assert.match(t,/bothDirections:true/);
 });
+
+test('Worker deployment never overwrites Cloudflare-managed secrets or isolates wrong resources',()=>{
+ const cfg=JSON.parse(read('wrangler.jsonc'));
+ assert.equal(cfg.keep_vars,true);
+ assert.equal(cfg.name,'gambling-community');
+ assert.equal(cfg.previews.vars.APP_ENV,'preview');
+ assert.equal(cfg.vars.APP_ENV,'production');
+ assert.equal(cfg.previews.vars.TRANSLATOR_KEY,undefined);
+ assert.equal(cfg.vars.TRANSLATOR_KEY,undefined);
+ assert.equal(cfg.previews.d1_databases[0].database_id,'a92cf620-2a0b-46e1-a0ff-2e0c94218f37');
+ assert.equal(cfg.d1_databases[0].database_id,'7bba9ada-589f-493b-8fcf-60265fc0efac');
+ const build=read('scripts/prepare-build.mjs');
+ assert.doesNotMatch(build,/wrangler[^\n]*secret\s+(?:put|delete|bulk)/);
+ assert.doesNotMatch(build,/secrets-file/);
+ assert.match(read('.github/workflows/dev-secret-persistence.yml'),/Workers Builds: gambling-community/);
+ assert.match(read('.github/workflows/dev-secret-persistence.yml'),/keyConfigured/);
+});
