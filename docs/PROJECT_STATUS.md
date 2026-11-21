@@ -189,3 +189,11 @@
 6. **绝对保留密钥与隔离规则**：`wrangler.jsonc.keep_vars=true`；开发/生产 D1、R2、Issuer 和机密客户端单独绑定。已有 `TRANSLATOR_KEY` 没有读取原文或手动修改，初次配置时校验了 Worker 上现存 Azure Secret 名称。**生产 `TRANSLATION_ENABLED=false` 仍保持关闭**，开发译文能力不受影响。内容采集/导入仍禁用。
 
 **验收边界**：已确认公网 OAuth 协议跳转和管理员数据库映射；未持有用户 Google 登录浏览器的实际 Cookie，因此**不能代替本人完成生产 Google 授权回跳、在生产管理员 UI 中实际浏览的最终人工验收**。这不影响上述自动化通过和生产权限已存在的事实。
+
+## 2026-11-21 最终人工验收：戒赌论坛生产管理员登录通过（用户确认）
+
+- **用户实际验收反馈**：在上述生产 SSO 发布和自动化验收后，用户明确回复“可以了，测试通过了”，确认戒赌论坛**生产环境**使用其既有 Google 账号的登录及管理员使用场景已通过；此前开发环境管理员已由用户确认成功。
+- 生产入口：`https://gambling.nbn369.com`；生产认证中心：`https://idcenter.nbn369.com`；认证客户端：`gambling-community-prod`。Google 登录仍经 Identity Center 跳转，不出现中间提供商选择页，主动登录走 Google 账号选择流程。
+- 管理员授权对象仍为**此前核实的 Identity Center PROD Owner 对应的唯一论坛账号**，生产 D1 权限回读见 [44895483517](https://github.com/119shenhao/identity-center/actions/runs/44895483517)，独立认证客户端启用见 [44897454960](https://github.com/119shenhao/identity-center/actions/runs/44897454960)，最后部署后的公网在线回归见 [44897775423](https://github.com/119shenhao/gambling/actions/runs/44897775423)。
+- **结论：正式站登录及管理员访问已获用户本人验收通过，本次生产认证和管理员授权任务结项。** 这是用户浏览器测试的反馈，不能冒充后台抓取的浏览器日志或逐条生产 D1 审计；独立的自动化证据仍按前述 Actions 记录。
+- 本次仅更新文档：未重新发布 Worker、未修改身份或论坛 D1、未轮换 Google / `IDENTITY_CLIENT_SECRET` / `TRANSLATOR_KEY`，未改变生产翻译开关、定时任务或开发/生产隔离。后续集成与发布应复用已验证路径，避免重新引入中间选择页、直连 Google 登录或构建覆盖 Secret。
