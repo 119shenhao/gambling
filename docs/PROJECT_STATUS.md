@@ -66,3 +66,12 @@
 ## 2026-11-21 开发与生产 URL 确认
 
 用户提供实际开发入口 `https://dev-gambling-community.119shenhao.workers.dev/`、生产入口 `https://gambling.nbn369.com/`。已写入 `wrangler.jsonc` 的独立 Identity Center 精确回调准备值，登录仍关闭，生产尚未部署。新增 GitHub Actions 在线只读开发站 Smoke，用于检查首页、`/api/health` 的 Preview+D1 Ready、robots 禁索引及旧 Google 登录禁用。等待实际运行结果，不得用 GitHub CI 本地 D1 成功冒充远程已迁移。
+
+## 2026-11-21 开发站在线 Smoke 与 Identity Center 客户端登记
+
+- 用户确认开发网址 `https://dev-gambling-community.119shenhao.workers.dev/`、生产网址 `https://gambling.nbn369.com/`，开发与生产精确回调 URI 已写入 `dev/wrangler.jsonc`，均**未启用登录**。
+- [在线 Smoke #44883988827](https://github.com/119shenhao/gambling/actions/runs/44883988827) 由 GitHub Actions Runner 对开发站真实 HTTP 访问：`/api/health` HTTP 200、`environment=preview`、`status=ok`、`databaseConfigured=true`、`databaseReady=true`；首页包含 Problem Gambling、robots.txt 为 `Disallow: /`、旧直连 Google 登录端点为 410；这些都**线上通过**。
+- [本地 CI #44883988728](https://github.com/119shenhao/gambling/actions/runs/44883988728) 成功，含 TypeScript、独立本地 D1 迁移和构建。
+- [Identity Center DEV 客户端登记 #44884259846](https://github.com/119shenhao/identity-center/actions/runs/44884259846) 成功：`identity-center-dev` 中创建/校验 `gambling-community-dev`（web_confidential、status=disabled），唯一回调 `https://dev-gambling-community.119shenhao.workers.dev/api/auth/identity/callback`；没有创建 Secret、没有开启认证，也没有写入认证中心生产 D1。
+- 参考已验收 Spine 的跨 Worker OAuth 经验，为新论坛补上 `global_fetch_strictly_public` Worker 兼容选项（仅在 dev 源码上改动）。
+- **待办**：为客户端生成独立随机 Secret，原文只保存在新的开发 Worker Cloudflare Secret，Identity Center 开发库只保存摘要；验证匹配并启用开发客户端，最后才打开论坛 `IDENTITY_LOGIN_ENABLED`，检查真实 Google 登录与会话。禁止直接使用 Spine Client/Secret。开发用户真实验收之前不变更生产登录、生产 D1 或正式站发布。

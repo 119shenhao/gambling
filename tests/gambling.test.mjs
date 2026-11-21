@@ -55,3 +55,9 @@ test('confirmed development and production hosts map to unique exact SSO callbac
  assert.equal(c.previews.vars.IDENTITY_CLIENT_SECRET,undefined);
  assert.equal(c.vars.IDENTITY_CLIENT_SECRET,undefined);
 });
+
+test('Cloudflare public Worker fetch compatibility is configured before OAuth tests',()=>{
+ const c=JSON.parse(read('wrangler.jsonc'));
+ assert.ok(c.compatibility_flags.includes('global_fetch_strictly_public'));
+ assert.equal(c.previews.vars.IDENTITY_LOGIN_ENABLED,'false');
+});

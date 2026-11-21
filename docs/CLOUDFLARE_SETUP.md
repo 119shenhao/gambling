@@ -67,3 +67,11 @@ Wrangler 已设置公开配置：Preview `IDENTITY_ISSUER=https://dev-identity-c
 用户确认开发 URL：`https://dev-gambling-community.119shenhao.workers.dev/`；正式 URL：`https://gambling.nbn369.com/`。开发、生产 OAuth 回调分别配置为 `https://dev-gambling-community.119shenhao.workers.dev/api/auth/identity/callback` 与 `https://gambling.nbn369.com/api/auth/identity/callback`。这些 URI 只用于**准备白名单**；尚未在 Identity Center 注册客户端，也没有启用登录和 Secret。
 
 `dev/.github/workflows/dev-online-smoke.yml` 在开发提交后从 GitHub Actions 的外网执行**只读** HTTP 检查：开发 `/api/health` 必须返回 Preview + D1 Ready、首页包含正确品牌、`robots.txt` 禁止抓取、旧 Google 直接登录返回 410。此流程不能代替 Cloudflare 构建日志、用户登录实测或生产验收；如果失败，先核对 Cloudflare Git 关联与 D1 迁移，不得改写生产库。
+
+## 开发站线上与身份中心登记核验
+
+实际开发论坛：`https://dev-gambling-community.119shenhao.workers.dev/`，生产入口：`https://gambling.nbn369.com/`。生产当前是否部署可用并未验收。
+
+GitHub 只读在线验收：[#44883988827](https://github.com/119shenhao/gambling/actions/runs/44883988827)；开发 D1 Ready、HTTP 200、禁止索引、旧直连登录 410 均通过。
+
+开发 Identity Center 客户端已注册 Disabled：[#44884259846](https://github.com/119shenhao/identity-center/actions/runs/44884259846)。准确回调 `https://dev-gambling-community.119shenhao.workers.dev/api/auth/identity/callback`；不共享原站认证密钥；`IDENTITY_CLIENT_SECRET` 尚未设置。先完成密钥安全注入、中心匹配摘要、开发激活和线上 OAuth 真实测试，登录开关才允许更改。已设置 `global_fetch_strictly_public`，沿用 Spine 实测的跨 Worker 请求兼容方案。
