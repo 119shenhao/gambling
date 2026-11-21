@@ -41,7 +41,7 @@
     "PUBLIC_CONTENT_ON_DEMAND": "false",
     "PUBLIC_TRANSLATION_DIRECT": "false",
     "PUBLIC_TRANSLATION_SEPARATE": "true",
-    "IDENTITY_LOGIN_ENABLED": "false",
+    "IDENTITY_LOGIN_ENABLED": "true",
     "IMPORT_ENABLED": "false",
     "COLLECT_ENABLED": "false",
     "TRANSLATION_ENABLED": "false",

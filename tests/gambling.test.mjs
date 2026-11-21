@@ -3,7 +3,7 @@ import {spawnSync} from 'node:child_process';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-test('separate deployment and disabled integrations',()=>{const c=JSON.parse(read('wrangler.jsonc'));assert.equal(c.name,'gambling-community');assert.equal(c.d1_databases[0].database_name,'gambling-community-prod');assert.equal(c.d1_databases[0].database_id,'7bba9ada-589f-493b-8fcf-60265fc0efac');assert.equal(c.previews.d1_databases[0].database_name,'gambling-community-dev');assert.equal(c.previews.d1_databases[0].database_id,'a92cf620-2a0b-46e1-a0ff-2e0c94218f37');assert.notEqual(c.d1_databases[0].database_id,c.previews.d1_databases[0].database_id);assert.equal(c.vars.APP_ENV,'production');assert.equal(c.previews.vars.APP_ENV,'preview');assert.equal(c.r2_buckets[0].bucket_name,'gambling-community-public-prod');assert.equal(c.previews.r2_buckets[0].bucket_name,'gambling-community-public-dev');assert.equal(c.vars.IDENTITY_LOGIN_ENABLED,'false');assert.equal(c.vars.COLLECT_ENABLED,'false');});
+test('separate deployment with authenticated SSO and disabled collection',()=>{const c=JSON.parse(read('wrangler.jsonc'));assert.equal(c.name,'gambling-community');assert.equal(c.d1_databases[0].database_name,'gambling-community-prod');assert.equal(c.d1_databases[0].database_id,'7bba9ada-589f-493b-8fcf-60265fc0efac');assert.equal(c.previews.d1_databases[0].database_name,'gambling-community-dev');assert.equal(c.previews.d1_databases[0].database_id,'a92cf620-2a0b-46e1-a0ff-2e0c94218f37');assert.notEqual(c.d1_databases[0].database_id,c.previews.d1_databases[0].database_id);assert.equal(c.vars.APP_ENV,'production');assert.equal(c.previews.vars.APP_ENV,'preview');assert.equal(c.r2_buckets[0].bucket_name,'gambling-community-public-prod');assert.equal(c.previews.r2_buckets[0].bucket_name,'gambling-community-public-dev');assert.equal(c.vars.IDENTITY_LOGIN_ENABLED,'true');assert.equal(c.vars.COLLECT_ENABLED,'false');});
 test('no inherited spine production bindings',()=>{for(const p of ['wrangler.jsonc','wrangler.local.jsonc','src/seo.ts','public/_headers'])assert.doesNotMatch(read(p),/spine\.nbn369\.com|spine-community-db|5919ff78-b8fc-46ab-85f0-01fe5e6a41b0/);});
 test('localized product values',()=>{const s=read('public/i18n.js');assert.match(s,/戒赌社区/);assert.match(s,/戒賭社區/);assert.match(s,/Real Stories\. Real Impacts\. Open Discussion\./);});
 test('new SSO maps center user ID without old Google identity',()=>{const s=read('src/auth.ts');assert.match(s,/direct_google_login_disabled/);assert.doesNotMatch(s,/claims\.spine_google_sub/);assert.match(s,/findOrCreateUser\(env\.DB,'identity_center',claims\.sub\)/);});
@@ -33,13 +33,13 @@ test('no references to previous medical forum infrastructure in active runtime',
  assert.doesNotMatch(read('public/reading-preferences.js'),/sc_reading_preferences/);
 });
 
-test('identity center clients remain separate and only dev login is enabled',()=>{
+test('identity center clients remain separate and dev and production login are enabled',()=>{
  const cfg=JSON.parse(read('wrangler.jsonc'));
  assert.equal(cfg.vars.IDENTITY_ISSUER,'https://idcenter.nbn369.com');
  assert.equal(cfg.vars.IDENTITY_CLIENT_ID,'gambling-community-prod');
  assert.equal(cfg.previews.vars.IDENTITY_ISSUER,'https://dev-identity-center.119shenhao.workers.dev');
  assert.equal(cfg.previews.vars.IDENTITY_CLIENT_ID,'gambling-community-dev');
- assert.equal(cfg.vars.IDENTITY_LOGIN_ENABLED,'false');
+ assert.equal(cfg.vars.IDENTITY_LOGIN_ENABLED,'true');
  assert.equal(cfg.previews.vars.IDENTITY_LOGIN_ENABLED,'true');
  for(const vars of [cfg.vars,cfg.previews.vars]){
   assert.equal(vars.IDENTITY_CLIENT_SECRET,undefined);
@@ -53,7 +53,7 @@ test('confirmed development and production hosts map to unique exact SSO callbac
  assert.equal(c.vars.IDENTITY_REDIRECT_URI,'https://gambling.nbn369.com/api/auth/identity/callback');
  assert.equal(c.previews.vars.PUBLIC_CONTENT_ORIGIN,'https://dev-gambling-community.119shenhao.workers.dev');
  assert.equal(c.previews.vars.IDENTITY_LOGIN_ENABLED,'true');
- assert.equal(c.vars.IDENTITY_LOGIN_ENABLED,'false');
+ assert.equal(c.vars.IDENTITY_LOGIN_ENABLED,'true');
  assert.equal(c.previews.vars.IDENTITY_CLIENT_SECRET,undefined);
  assert.equal(c.vars.IDENTITY_CLIENT_SECRET,undefined);
 });
@@ -86,7 +86,7 @@ test('Google login always requests account chooser through Identity Center, neve
   assert.match(auth,/params\.set\('provider_hint','google'\)/);
   assert.match(auth,/prompt:'select_account'/);
   assert.match(auth,/return redirect\(config\.issuer\+'\/oauth\/authorize\?'\+params,flowCookie\(state\)\)/);
-  assert.equal(JSON.parse(read('wrangler.jsonc')).vars.IDENTITY_LOGIN_ENABLED,'false');
+  assert.equal(JSON.parse(read('wrangler.jsonc')).vars.IDENTITY_LOGIN_ENABLED,'true');
 });
 
 test('Azure DEV/PROD shared-key budget is protected by a 25k/month environment cap',()=>{
@@ -144,13 +144,13 @@ test('One-shot Azure validation endpoint is removed from running forum code afte
  assert.doesNotMatch(source,/azure_dev_smoke_20261121/);
 });
 
-test('verified DEV and future PROD Identity Center Owners have separate hashed role selectors',()=>{
+test('verified DEV and PROD Identity Center Owners have separate hashed role selectors',()=>{
  const c=JSON.parse(read('wrangler.jsonc'));
  assert.equal(c.previews.vars.ADMIN_CENTER_OWNER_SHA256,'7df1b395981a31a651015a158eb1086264ecbea53b5dd41a34d62444ff29fa26');
  assert.equal(c.vars.ADMIN_CENTER_OWNER_SHA256,'eb367b5a659205efbacd7dfa4964e0c2a9852c072237b668d3d885e334105ba4');
  assert.notEqual(c.previews.vars.ADMIN_CENTER_OWNER_SHA256,c.vars.ADMIN_CENTER_OWNER_SHA256);
  assert.equal(c.previews.vars.IDENTITY_LOGIN_ENABLED,'true');
- assert.equal(c.vars.IDENTITY_LOGIN_ENABLED,'false','do not turn on PROD login prematurely');
+ assert.equal(c.vars.IDENTITY_LOGIN_ENABLED,'true','production login requires separately verified Center client and Worker Secret');
  assert.equal(c.keep_vars,true);
  for(const v of [c.previews.vars,c.vars]){
    assert.equal(v.ADMIN_GOOGLE_SUB,undefined);

@@ -1,4 +1,4 @@
-name: Gambling production site and Worker Secret readiness (read-only)
+name: Gambling production SSO and Worker Secret readiness (read-only)
 on:
   push:
     branches: [main]
@@ -9,44 +9,63 @@ on:
       - src/index.ts
 permissions:
   contents: read
+concurrency:
+  group: gambling-prod-oauth-readiness
+  cancel-in-progress: true
 jobs:
   inspect:
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 10
     steps:
-      - name: Inspect live PROD hostname and Worker runtime without mutation
+      - name: Verify live production Google account chooser and D1 without credentials
         shell: bash
         run: |
           node --input-type=module <<'NODE'
-          const urls=['https://gambling.nbn369.com','https://gambling-community.119shenhao.workers.dev'];
-          let checked=false;
-          for(const origin of urls){
-            try{
-              const res=await fetch(origin+'/api/health',{redirect:'manual',signal:AbortSignal.timeout(13000)});
-              const raw=await res.text();
-              let h;try{h=JSON.parse(raw)}catch{console.log('Origin '+origin+' HTTP '+res.status+' non-JSON; unready');continue;}
-              const s=h.translationSetup||{};
-              console.log('Production host readiness '+JSON.stringify({
-                origin,HTTP:res.status,env:h.environment,status:h.status,
-                databaseConfigured:h.databaseConfigured,databaseReady:h.databaseReady,
-                identityConfigured:h.identityConfigured,workerTranslationEnabled:s.workerEnabled,
-                translatorSecretConfigured:s.keyConfigured,regionConfigured:s.regionConfigured
-              }));
-              if(res.ok&&h.environment==='production'&&h.databaseReady===true&&h.status==='ok'){
-                checked=true;
-                if(origin==='https://gambling.nbn369.com'){
-                  const meResponse=await fetch(origin+'/api/me',{signal:AbortSignal.timeout(12000)});
-                  const me=await meResponse.json();
-                  if(!meResponse.ok||me.identityConfigured!==false||me.user!==null)
-                    throw Error('PROD sign-in must remain disabled before credential activation');
-                  if(h.translationConfigured!==false)
-                    throw Error('PROD translation should not be active');
-                  console.log('PASS: exact production forum hostname ready with PROD D1, identity and translation safely disabled.');
-                  process.exit(0);
-                }
-              }
-            }catch(e){console.log('Origin '+origin+' not currently serving required production health');}
+          const origin='https://gambling.nbn369.com';
+          const issuer='https://idcenter.nbn369.com';
+          const get=(url)=>fetch(url,{redirect:'manual',signal:AbortSignal.timeout(12000)});
+          let passed=false;
+          for(let attempt=1;attempt<=24;attempt++){
+            try {
+              const healthResp=await get(origin+'/api/health');
+              const h=await healthResp.json();
+              if(!healthResp.ok||h.environment!=='production'||h.status!=='ok'||h.databaseReady!==true)
+                throw Error('production D1 or Worker not ready');
+              const meResp=await get(origin+'/api/me');
+              const me=await meResp.json();
+              if(!meResp.ok||me.identityConfigured!==true||me.user!==null)
+                throw Error('production confidential SSO secret/config not ready');
+              if(h.translationConfigured!==false)throw Error('production translation gate changed unexpectedly');
+              const sign=await get(origin+'/api/auth/identity?return_to=%2F');
+              if(sign.status!==302)throw Error('forum OAuth start not redirecting');
+              const center=new URL(sign.headers.get('location')||'');
+              const q=center.searchParams;
+              if(center.origin!==issuer||center.pathname!=='/oauth/authorize'||
+                 q.get('client_id')!=='gambling-community-prod'||
+                 q.get('redirect_uri')!==origin+'/api/auth/identity/callback'||
+                 q.get('code_challenge_method')!=='S256'||
+                 q.get('provider_hint')!=='google'||q.get('prompt')!=='select_account'||
+                 !q.get('state')||!q.get('nonce')||!q.get('code_challenge'))
+                throw Error('production issuer/client/callback/PKCE/chooser mismatch');
+              const handoff=await get(center);
+              if(handoff.status!==302)throw Error('Identity Center did not directly hand off to Google');
+              const google=new URL(handoff.headers.get('location')||'');
+              if(google.origin!=='https://accounts.google.com'||
+                 google.pathname!=='/o/oauth2/v2/auth'||
+                 google.searchParams.get('prompt')!=='select_account'||
+                 !(handoff.headers.get('set-cookie')||'').includes('__Host-ic_oauth_'))
+                throw Error('Google account chooser or protected session proof unavailable');
+              const legacy=await get(origin+'/api/auth/google');
+              if(legacy.status!==410)throw Error('legacy Google OAuth is not disabled');
+              const callback=await get(origin+'/api/auth/identity/callback');
+              if(callback.status!==401)throw Error('unbound OAuth callback is not rejected');
+              console.log('PASS: Gambling PROD Worker+D1; isolated confidential SSO configured; Google chooser 302+302; PKCE, state, nonce, callback, cookie, legacy 410, unbound callback 401; translation remains disabled.');
+              passed=true;
+              break;
+            }catch(e){
+              console.log('Production OAuth readiness attempt '+attempt+': '+String(e.message).replace(/[?#].*/,'').slice(0,125));
+            }
+            if(attempt<24)await new Promise(resolve=>setTimeout(resolve,12000));
           }
-          if(!checked)throw Error('Production Worker or D1 cannot yet be verified from either hostname');
-          throw Error('Production Worker available via workers.dev but custom gambling.nbn369.com hostname not confirmed');
+          if(!passed)throw Error('Gambling PROD OAuth flow not fully available after retries. Do not report user login as verified.');
           NODE
