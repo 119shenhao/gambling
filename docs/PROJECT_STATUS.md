@@ -23,3 +23,5 @@
 - 新 D1 的 UUID 仍必须取自 Cloudflare D1 详情页面；获得两个真实 UUID 后，单独绑定两套数据库并在开发预览执行版本化迁移。**开发验证前不做生产迁移**。
 - R2 只是绑定到环境；公开 JSON 读取/回填仍关闭，待开发端流程和 CDN 域名验收后才开启。
 - 详细操作及避免手工运行的开发迁移流程见 [CLOUDFLARE_SETUP.md](CLOUDFLARE_SETUP.md)。
+
+- 2026-11-21 已准备预览 D1 自动迁移安全门禁 `scripts/preview-migrate.mjs`：仅 Cloudflare 的 dev Preview，核对 D1 UUID、名称及独立绑定后执行；UUID 尚未提供时不运行远程 SQL。生产迁移未授权。

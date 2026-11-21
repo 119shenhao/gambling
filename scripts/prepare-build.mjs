@@ -7,6 +7,9 @@ for(const args of [['node_modules/typescript/bin/tsc','--noEmit'],['--test','tes
  const result=spawnSync(process.execPath,args,{stdio:'inherit'});
  if(result.status!==0)throw Error('Source checks failed; refusing build');
 }
+// The optional remote migration script is gated by WORKERS_CI and the exact dev branch.
+const remote=spawnSync(process.execPath,['scripts/preview-migrate.mjs'],{stdio:'inherit'});
+if(remote.status!==0)throw Error('Isolated Preview D1 preparation failed');
 function createVersionedFrontend() {
  // Static JS and CSS are served directly from Cloudflare Assets/CDN (no extra
  // Worker invocations). A unique directory for every content revision avoids
