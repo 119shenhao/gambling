@@ -186,3 +186,12 @@
 - 同时已在生产 Identity Center 登记 `gambling-community-prod`（`web_confidential`）及唯一精确回调 `https://gambling.nbn369.com/api/auth/identity/callback`。**目前 client 仍 disabled，尚无生产 Secret verifier**。这确保还未完成独立生产 OAuth 密钥握手时不能误开启登录。
 - **权限存储状态：生产 D1 管理员角色已完成；生产网页登录还未完成。** 当前 `main` 仍只有 README，`gambling.nbn369.com` 只提供占位内容。后续需要部署生产论坛、配置**独立** `IDENTITY_CLIENT_SECRET` Worker Secret（不同于 Spine 和 DEV）、让认证中心登记对应安全摘要并启用客户端、最后启动 `IDENTITY_LOGIN_ENABLED=true`，用真实 Google 账户完成网页登录和权限验收。不要把这些尚未完成的工作说成已部署成功。
 - 相关受控迁移脚本用后即停，后续部署不能重执行全量 schema 初始化，必须保持 Cloudflare `keep_vars:true`、生产 Worker 已保存的 `TRANSLATOR_KEY` Secret 和其他 Variables、R2/D1 绑定不变；生产翻译开关仍关闭。
+
+## 2026-11-21 生产站首版已由 main 发布；管理员 D1 授权再次确认
+
+- 正式 `main` 提交 [d57cb43bbabc7d2480ee54dc8a985fcf2a8b5cfb](https://github.com/119shenhao/gambling/commit/d57cb43bbabc7d2480ee54dc8a985fcf2a8b5cfb) 已包含论坛应用源码、生产 D1/R2 绑定与固定管理员 SHA-256，Cloudflare Workers Build 和主分支 CI 成功。**该发布保持 `IDENTITY_LOGIN_ENABLED=false`、`TRANSLATION_ENABLED=false`，未擅自开启生产 Google OAuth/翻译**。
+- 生产站运行时只读验证 [Gambling Production launch readiness #44894827005 第二次运行](https://github.com/119shenhao/gambling/actions/runs/44894827005)：`https://gambling.nbn369.com/api/health` HTTP200 JSON `environment=production`、`databaseReady=true`；首页 HTTP200 `text/html`；Identity Center PROD health 正常。此前 first-run 收到 text/plain 的情况已由后续正式部署替代。
+- [生产 D1 首次迁移、Owner 角色授权与客户端注册 #44895241936](https://github.com/119shenhao/identity-center/actions/runs/44895241936) 和 [独立只读二次回查 #44895483517](https://github.com/119shenhao/identity-center/actions/runs/44895483517) 成功：21 项生产 schema 迁移、唯一已验证中心生产 Owner 对应的 forum admin 角色确实存在；不复制 DEV/Spine 内容。
+- 当前 Center PROD 的 `gambling-community-prod` 已注册单一回调，但仍 **disabled，且无有效生产 OAuth client secret verifier**。现有自动化 D1 token 对 Cloudflare Workers Script API 返回403，无权代写生产 Worker Secret。不能声称生产 Google 登录或管理员网页登录已成功。
+- 以后要完成网页登录，只需单独为生产 Worker 设置高熵 `IDENTITY_CLIENT_SECRET`（不能与 DEV 或 Spine 共用）、在 Center PROD 登记 SHA256 base64url verifier、启用此独立 client，然后将对应生产 `IDENTITY_LOGIN_ENABLED` 置 true 并上线验证 `/api/me` 管理员角色。保持 `keep_vars:true`、不覆盖现有 `TRANSLATOR_KEY` 等 Secrets。
+- 过时的首次上线 Draft PR [#3](https://github.com/119shenhao/gambling/pull/3) 已关闭，避免较旧 release 分支覆盖 `main` 已上线的版本。以后新的生产更改应从**最新 main** 定向修改，而非合并旧代码快照。
