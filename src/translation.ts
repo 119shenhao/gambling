@@ -116,9 +116,9 @@ export async function readItems(db:D1Database,items:Item[],locale:string) {
 // so cap this forum to 50,000/month, leaving 50,000 further headroom below
 // the advertised 2m allowance. Local caps are not real-time Azure metering.
 export const AZURE_F0_MONTHLY_CHARS=2000000;
-export const AZURE_SITE_MAX_MONTHLY=50000;
+export const AZURE_SITE_MAX_MONTHLY=25000;
 export const AZURE_DEFAULT_DAILY=5000;
-export const AZURE_DEFAULT_MONTHLY=50000;
+export const AZURE_DEFAULT_MONTHLY=25000;
 export const TRANSLATION_PROVIDER_CATALOG=[
   {id:'azure',name:'Microsoft Azure Translator',implemented:true,freeMonthly:AZURE_F0_MONTHLY_CHARS},
   {id:'aliyun',name:'Alibaba Cloud Machine Translation',implemented:false,freeMonthly:null}
@@ -401,7 +401,80 @@ async function generate(env:Env,entry:Item,row:Row,locale:string,config:Settings
   }
 }
 
+// TEMPORARY DEV-ONLY, one-time Azure credential validation. Remove after success.
+// Fixed harmless test sentences only. D1 one-time claim prevents repeat billing.
+async function devAzureSmoke(req:Request,env:Env){
+ if(env.APP_ENV!=='preview'||req.method!=='POST'||
+    req.headers.get('x-gambling-azure-smoke')!=='2026-11-21-test')fail(404,'not_found');
+ const config=azureConfiguration(env);
+ if(!config)fail(503,'azure_config_not_ready');
+ const selected=await translationProviderSettings(env);
+ if(selected.activeProvider!=='azure'||selected.azure.monthly>10000)fail(409,'invalid_smoke_budget');
+ const key='azure_dev_smoke_20261121';
+ const locked=await one(env.DB,
+   "INSERT INTO settings(key,value) VALUES(?,'running') ON CONFLICT(key) DO NOTHING RETURNING value",key);
+ if(!locked){
+   const saved=await one(env.DB,'SELECT value FROM settings WHERE key=?',key);
+   return json({test:'azure_bilingual_smoke',status:saved?.value||'already_claimed',repeat:false});
+ }
+ const samples=[
+   {source:'en',target:'zh-Hans',text:'I am making positive changes.'},
+   {source:'zh-Hans',target:'en',text:'我正在迈向新的生活。'}
+ ];
+ const characters=samples.reduce((n,s)=>n+s.text.length,0);
+ const day=new Date().toISOString().slice(0,10),month=day.slice(0,7);
+ const sql=[
+ 'UPDATE translation_budget SET day_utc=?,month_utc=?,',
+ 'day_chars=(CASE WHEN day_utc=? THEN day_chars ELSE 0 END)+?,',
+ 'month_chars=(CASE WHEN month_utc=? THEN month_chars ELSE 0 END)+?,reservation_chars=?',
+ 'WHERE id=1 AND cooldown_until<=unixepoch() AND provider_blocked_at<?',
+ 'AND (CASE WHEN day_utc=? THEN day_chars ELSE 0 END)+?<=?',
+ 'AND (CASE WHEN month_utc=? THEN month_chars ELSE 0 END)+?<=? RETURNING id'
+ ].join(' ');
+ const reserve=await one(env.DB,sql,day,month,day,characters,month,characters,characters,
+   config.verifiedAt,day,characters,selected.azure.daily,month,characters,selected.azure.monthly);
+ if(!reserve){
+  await stmt(env.DB,"UPDATE settings SET value='quota_blocked' WHERE key=?",key).run();
+  fail(409,'smoke_quota_blocked');
+ }
+ let metered=0;
+ try{
+   for(const sample of samples){
+     const url=new URL(config.url);
+     url.searchParams.set('from',sample.source);
+     url.searchParams.set('to',sample.target);
+     const res=await fetch(url,{method:'POST',redirect:'manual',headers:config.headers,
+       body:JSON.stringify([{Text:sample.text}]),signal:AbortSignal.timeout(10000)});
+     const usage=Number(res.headers.get('x-metered-usage')||0);
+     if(Number.isSafeInteger(usage)&&usage>0)metered+=usage;
+     if(!res.ok){
+       if(res.status===401||res.status===403)
+         await stmt(env.DB,'UPDATE translation_budget SET provider_blocked_at=unixepoch() WHERE id=1').run();
+       await stmt(env.DB,'UPDATE settings SET value=? WHERE key=?','azure_http_'+res.status,key).run();
+       return json({ok:false,reason:'azure_http_'+res.status},502);
+     }
+     const arr=await res.json() as Array<{translations?:Array<{text?:string}>}>;
+     const translated=arr?.[0]?.translations?.[0]?.text;
+     if(typeof translated!=='string'||!translated.trim()||
+       (sample.target==='zh-Hans'?!/\p{Script=Han}/u.test(translated):!/[A-Za-z]/.test(translated))){
+       await stmt(env.DB,"UPDATE settings SET value='bad_translation' WHERE key=?",key).run();
+       return json({ok:false,reason:'bad_translation'},502);
+     }
+   }
+   if(metered>0)await stmt(env.DB,
+     "UPDATE translation_usage_daily SET metered_characters=metered_characters+? WHERE provider='azure' AND day_utc=?",
+     metered,day).run();
+   await stmt(env.DB,"UPDATE settings SET value='pass' WHERE key=?",key).run();
+   return json({ok:true,test:'azure_bilingual_smoke',bothDirections:true,
+     reservedCharacters:characters,meteredCharacters:metered,secretExposed:false});
+ }catch{
+   await stmt(env.DB,"UPDATE settings SET value='request_failed' WHERE key=?",key).run();
+   return json({ok:false,reason:'request_failed'},502);
+ }
+}
+
 export async function translationRoute(req:Request,env:Env,_user:Row|null,path:string,ctx?:ExecutionContext):Promise<Response|null>{
+  if(path==='/api/dev/azure-smoke')return devAzureSmoke(req,env);
   if(path!=='/api/translate'||req.method!=='POST')return null;
   const input=await body(req),locale=input.locale;
   if(!locales.includes(locale))fail(400,'invalid_translation_request');

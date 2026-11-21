@@ -91,7 +91,7 @@ test('dev-only Google provider hint preserves central OAuth validation, never by
  assert.equal(JSON.parse(read('wrangler.jsonc')).vars.IDENTITY_LOGIN_ENABLED,'false');
 });
 
-test('Azure DEV shared-resource budget is protected by a hard 50k/month cap',()=>{
+test('Azure DEV/PROD shared-key budget is protected by a 25k/month environment cap',()=>{
  const c=JSON.parse(read('wrangler.jsonc'));
  assert.equal(c.vars.TRANSLATION_ENABLED,'false');
  assert.equal(c.previews.vars.TRANSLATION_ENABLED,'true');
@@ -100,11 +100,11 @@ test('Azure DEV shared-resource budget is protected by a hard 50k/month cap',()=
  assert.equal(c.previews.vars.TRANSLATOR_KEY,undefined);
  assert.equal(c.vars.TRANSLATOR_KEY,undefined);
  assert.equal(c.previews.vars.TRANSLATION_DAILY_LIMIT,'5000');
- assert.equal(c.previews.vars.TRANSLATION_MONTHLY_LIMIT,'50000');
+ assert.equal(c.previews.vars.TRANSLATION_MONTHLY_LIMIT,'10000');
  const tr=read('src/translation.ts');
- assert.match(tr,/AZURE_SITE_MAX_MONTHLY=50000/);
+ assert.match(tr,/AZURE_SITE_MAX_MONTHLY=25000/);
  assert.match(tr,/AZURE_DEFAULT_DAILY=5000/);
- assert.match(tr,/AZURE_DEFAULT_MONTHLY=50000/);
+ assert.match(tr,/AZURE_DEFAULT_MONTHLY=25000/);
  assert.match(tr,/Math\.min\(Number\(raw\),max\)/);
  const admin=read('src/admin.ts');
  assert.match(admin,/monthly>AZURE_SITE_MAX_MONTHLY/);
@@ -120,4 +120,18 @@ test('translation provider status exposes database activation state to admin UI'
  const ui=read('public/translation-admin.js');
  assert.match(ui,/azure\.translationEnabled/);
  assert.match(read('src/admin.ts'),/translation_requires_development_verification/);
+});
+
+test('Azure real-world smoke uses only fixed DEV text and a single budgeted execution',()=>{
+ const cfg=JSON.parse(read('wrangler.jsonc'));
+ assert.equal(cfg.vars.TRANSLATION_ENABLED,'false');
+ assert.equal(cfg.vars.TRANSLATOR_REGION,'eastus');
+ assert.equal(cfg.vars.TRANSLATION_MONTHLY_LIMIT,'25000');
+ assert.equal(cfg.previews.vars.TRANSLATION_MONTHLY_LIMIT,'10000');
+ const code=read('src/translation.ts');
+ assert.match(code,/azure_dev_smoke_20261121/);
+ assert.match(code,/env\.APP_ENV!=='preview'/);
+ assert.match(code,/ON CONFLICT\(key\) DO NOTHING/);
+ assert.match(code,/translation_budget SET/);
+ assert.match(code,/我正在迈向新的生活。/);
 });

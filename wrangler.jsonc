@@ -47,7 +47,11 @@
     "TRANSLATION_ENABLED": "false",
     "IDENTITY_ISSUER": "https://idcenter.nbn369.com",
     "IDENTITY_CLIENT_ID": "gambling-community-prod",
-    "IDENTITY_REDIRECT_URI": "https://gambling.nbn369.com/api/auth/identity/callback"
+    "IDENTITY_REDIRECT_URI": "https://gambling.nbn369.com/api/auth/identity/callback",
+    "TRANSLATOR_REGION": "eastus",
+    "TRANSLATOR_F0_VERIFIED_AT": "2026-11-09T06:14:50Z",
+    "TRANSLATION_DAILY_LIMIT": "5000",
+    "TRANSLATION_MONTHLY_LIMIT": "25000"
   },
   "build": {
     "command": "node scripts/prepare-build.mjs"
@@ -78,7 +82,7 @@
       "TRANSLATOR_REGION": "eastus",
       "TRANSLATOR_F0_VERIFIED_AT": "2026-11-09T06:14:50Z",
       "TRANSLATION_DAILY_LIMIT": "5000",
-      "TRANSLATION_MONTHLY_LIMIT": "50000"
+      "TRANSLATION_MONTHLY_LIMIT": "10000"
     },
     "r2_buckets": [
       {

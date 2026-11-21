@@ -119,3 +119,10 @@
 - [线上健康和 SSO 回归 #44888634541 / #44888634514](https://github.com/119shenhao/gambling/actions/runs/44888634541) 通过；[代码 CI #44888634510](https://github.com/119shenhao/gambling/actions/runs/44888634510) 通过。上述通过 **不等于** Azure 实际翻译成功。
 - **尚未完成**：为新论坛 DEV 命名 Preview Worker 注入现有 F0 资源的 `TRANSLATOR_KEY` Secret，检查云端配置状态，确认新论坛管理权限、启用 D1 开关并进行一条测试贴英⇄中翻译、同版本缓存复用和真实 Azure 用量对账。新旧 Worker Secrets 不能通过 GitHub 读取或自动导出，用户不用将任何密钥发给 ChatGPT。
 - R2 公开 JSON 仍禁用，生产 D1、生产 Worker 翻译开关均未更改。
+
+## 2026-11-21 DEV Azure Key 验证与临时联调
+
+- [线上 DEV Worker 密钥存在性检查 #44889584465](https://github.com/119shenhao/gambling/actions/runs/44889584465) 通过：`translationSetup.keyConfigured=true`、地区/旧 F0 核验/翻译结构正常；开发 D1 翻译开关仍关闭。
+- 开发与生产使用同一个 Azure Key，但两套 D1 的预算不共享。因此将戒赌论坛每套环境月度硬上限降低到25,000；开发预设10,000、生产预设25,000；两者管理员最多分别提升到25,000。即使加上 Spine 的最多1.9m，理论上还留50k余量，**不包括 Spine Preview 或其他 Azure 消费者，必须由 Azure 账户真实用量总控**。
+- 增加仅开发有效的一次性真实 Azure 翻译诊断 `POST /api/dev/azure-smoke`，只发送固定的英中两句，不涉及用户内容，在 D1 唯一键上防重并记录预算消耗；成功后删除测试入口。诊断尚未运行成功前不得声称 Key 已经过 Azure 验证。
+- 生产环境只预置 `TRANSLATOR_REGION=eastus`、F0 既有验证日期、预算变量，`TRANSLATION_ENABLED=false` 不变，不更改生产 D1 或发布尚未验收的新站。
