@@ -78,5 +78,5 @@ test('one-time DEV OAuth bootstrap is correctly scoped to Gambling Worker and DE
 });
 
 test('one-time provisioning is no longer invoked from ordinary Cloudflare builds',()=>{
- assert.doesNotMatch(read('scripts/prepare-build.mjs'),/spawnSync\\(process\\.execPath,\\['scripts\\/provision-dev-identity\\.mjs'\\]/);
+ assert.equal(read('scripts/prepare-build.mjs').includes("['scripts/provision-dev-identity.mjs']"),false);
 });
