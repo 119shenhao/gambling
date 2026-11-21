@@ -10,9 +10,7 @@ for(const args of [['node_modules/typescript/bin/tsc','--noEmit'],['--test','tes
 // The optional remote migration script is gated by WORKERS_CI and the exact dev branch.
 const remote=spawnSync(process.execPath,['scripts/preview-migrate.mjs'],{stdio:'inherit'});
 if(remote.status!==0)throw Error('Isolated Preview D1 preparation failed');
-// TEMPORARY one-time DEV-only OAuth Secret bootstrap; remove immediately after verified receipt.
-const credential=spawnSync(process.execPath,['scripts/provision-dev-identity.mjs'],{stdio:'inherit'});
-if(credential.status!==0)throw Error('Gambling DEV Identity Center credential bootstrap was not verified');
+// One-time OAuth Secret setup completed. Do not run it on ordinary builds.
 
 function createVersionedFrontend() {
  // Static JS and CSS are served directly from Cloudflare Assets/CDN (no extra
