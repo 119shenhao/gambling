@@ -12,6 +12,13 @@ const remote=spawnSync(process.execPath,['scripts/preview-migrate.mjs'],{stdio:'
 if(remote.status!==0)throw Error('Isolated Preview D1 preparation failed');
 // One-time OAuth Secret setup completed. Do not run it on ordinary builds.
 // Verified DEV Owner role bootstrap completed. No D1 grants during ordinary builds.
+// One-time PROD OAuth bootstrap is strictly limited to the production Cloudflare
+// build; local/GitHub CI/dev builds skip without creating, rotating or revealing
+// any secret. Remove after the secret + digest are verified.
+const prodCredential=spawnSync(process.execPath,['scripts/provision-prod-identity-once.mjs'],{stdio:'inherit'});
+if(prodCredential.status!==0)throw Error('PROD Identity OAuth secret bootstrap failed; do not deploy unverified login.');
+
+
 
 
 function createVersionedFrontend() {
