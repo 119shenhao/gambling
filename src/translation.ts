@@ -410,6 +410,12 @@ async function devAzureSmoke(req:Request,env:Env){
    const budget=await one(env.DB,'SELECT day_chars,month_chars,provider_blocked_at,cooldown_until FROM translation_budget WHERE id=1');
    const limits=await translationProviderSettings(env);
    return json({receipt:receipt?.value||'not_started',
+     azureConfigurationReady:translationConfigured(env),
+     workerEnabled:env.TRANSLATION_ENABLED==='true',
+     keyConfigured:Boolean(env.TRANSLATOR_KEY),
+     verifiedAtValid:verifiedFreeTierAt(env)!==null,
+     regionConfigured:Boolean(env.TRANSLATOR_REGION),
+     customEndpointConfigured:Boolean(env.TRANSLATOR_ENDPOINT),
      dailyLimit:limits.azure.daily,monthlyLimit:limits.azure.monthly,
      budgetDayCharacters:budget?.day_chars??null,
      budgetMonthCharacters:budget?.month_chars??null,
