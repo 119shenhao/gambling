@@ -46,6 +46,9 @@ const migration=query("SELECT name FROM d1_migrations WHERE name='0100_identity_
 if(migration.length!==1)throw Error('PROD D1 identity migration missing');
 const admin=query("SELECT user_id FROM user_roles WHERE role='admin'");
 if(admin.length!==1)throw Error('PROD verified Owner role not present; refusing to bootstrap Secret');
+// Non-sensitive milestone confirms the Cloudflare Build token could reach
+// ONLY the authorized Gambling production D1 before Worker Secret metadata.
+query("INSERT INTO settings(key,value) VALUES('gambling_prod_oauth_bootstrap_stage','d1_verified') ON CONFLICT(key) DO UPDATE SET value=excluded.value");
 const hasSecret=()=>{
  const list=JSON.parse(wrangler(['secret','list','--name','gambling-community','--json']));
  if(!Array.isArray(list))throw Error('PROD Worker Secret metadata invalid');
