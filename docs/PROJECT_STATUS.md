@@ -176,3 +176,13 @@
 - [Cloudflare Preview 强制回读构建 9b001975](https://github.com/119shenhao/gambling/commit/9b0019750d464ed4aba1c4f0b4c8531720406f9b) **success**；因为临时程序在构建阶段必须完成一次精确 OWNER 管理角色回读，否则构建报错，因此证实 **DEV D1 目标已验证 Owner 的 admin 角色存在**。生产 D1 未访问，其他用户未修改。
 - 完成后**删除**临时授权脚本和构建调用，永久保留正式的签名 JWT + hashed Center Owner 角色匹配逻辑，之后不再运行 D1 强制初始化。Cloudflare Secret/D1/R2 严格隔离和构建后密钥守护继续启用。
 - **生产仅预置代码配置，未完成真实授权**：仓库 `main` 目前只有 README，正式论坛尚未上线、生产 Identity Center 登录开关关闭。待用户单独确认正式发布并实际登录后，生产 Owner 通过相应摘要自动获得 admin，不跨库复制账号、不提前初始化生产管理员，也不得提前报告为已完成。
+
+## 2026-11-21 戒赌论坛生产数据库管理员已实际授权并二次验收
+
+用户要求现在完成戒赌论坛**生产环境的管理员授权**。生产 D1 现在已初始化完成，**不是仅预留代码/配置**。
+
+- [一次性生产 D1 初始化/授权 #44895241936](https://github.com/119shenhao/identity-center/actions/runs/44895241936) PASS：精确校验 `gambling-community-prod` D1 UUID 与资源名后应用 21 项全新 schema 迁移；使用已验收 `identity-center-prod` Google Owner 的中心 User ID 作 SHA-256 精确匹配，仅在本论坛 PROD D1 建立对应 `identity_center` 身份映射和一个本地管理员角色，并回读验证 `user_roles(admin)` 恰好一人。保留 DEV/Spine 所有用户、帖子、Secrets，未跨环境复制数据。
+- [独立只读二次回查 #44895483517](https://github.com/119shenhao/identity-center/actions/runs/44895483517) PASS：重新校验 Center PROD 已认证的 Google Owner、论坛独立 D1 的已关联账号、管理员角色唯一性、21 项迁移历史。
+- 同时已在生产 Identity Center 登记 `gambling-community-prod`（`web_confidential`）及唯一精确回调 `https://gambling.nbn369.com/api/auth/identity/callback`。**目前 client 仍 disabled，尚无生产 Secret verifier**。这确保还未完成独立生产 OAuth 密钥握手时不能误开启登录。
+- **权限存储状态：生产 D1 管理员角色已完成；生产网页登录还未完成。** 当前 `main` 仍只有 README，`gambling.nbn369.com` 只提供占位内容。后续需要部署生产论坛、配置**独立** `IDENTITY_CLIENT_SECRET` Worker Secret（不同于 Spine 和 DEV）、让认证中心登记对应安全摘要并启用客户端、最后启动 `IDENTITY_LOGIN_ENABLED=true`，用真实 Google 账户完成网页登录和权限验收。不要把这些尚未完成的工作说成已部署成功。
+- 相关受控迁移脚本用后即停，后续部署不能重执行全量 schema 初始化，必须保持 Cloudflare `keep_vars:true`、生产 Worker 已保存的 `TRANSLATOR_KEY` Secret 和其他 Variables、R2/D1 绑定不变；生产翻译开关仍关闭。
