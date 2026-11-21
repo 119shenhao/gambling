@@ -176,3 +176,16 @@
 - [Cloudflare Preview 强制回读构建 9b001975](https://github.com/119shenhao/gambling/commit/9b0019750d464ed4aba1c4f0b4c8531720406f9b) **success**；因为临时程序在构建阶段必须完成一次精确 OWNER 管理角色回读，否则构建报错，因此证实 **DEV D1 目标已验证 Owner 的 admin 角色存在**。生产 D1 未访问，其他用户未修改。
 - 完成后**删除**临时授权脚本和构建调用，永久保留正式的签名 JWT + hashed Center Owner 角色匹配逻辑，之后不再运行 D1 强制初始化。Cloudflare Secret/D1/R2 严格隔离和构建后密钥守护继续启用。
 - **生产仅预置代码配置，未完成真实授权**：仓库 `main` 目前只有 README，正式论坛尚未上线、生产 Identity Center 登录开关关闭。待用户单独确认正式发布并实际登录后，生产 Owner 通过相应摘要自动获得 admin，不跨库复制账号、不提前初始化生产管理员，也不得提前报告为已完成。
+
+## 2026-11-21 最终状态：戒赌论坛生产管理员 + 统一 Google 登录正式上线
+
+本节优先于上文“main 只有 README / 生产未部署 / 生产权限仅预置”的历史记录；那些描述是 2026-11-21 较早阶段的快照。
+
+1. **生产 D1 已授权管理员**：使用 [生产初始化 44895241936](https://github.com/119shenhao/identity-center/actions/runs/44895241936) 对真实 `gambling-community-prod` 做 21 项迁移，将已验证的 Identity Center **生产 Owner** 精确绑定为唯一论坛管理员。再由 [44895483517](https://github.com/119shenhao/identity-center/actions/runs/44895483517) 远程只读校验，admin 记录恰好 1 个。未将 DEV 用户或角色复制到生产。
+2. **生产 OAuth Secret 独立初始化并验证**：由只限 `main` Cloudflare Workers Build 的一次性脚本生成 48 字节随机凭证、写入生产 Worker `IDENTITY_CLIENT_SECRET`，论坛生产 D1 留 SHA-256 摘要和第二次验证回执；[回执只读检查 44897349517](https://github.com/119shenhao/identity-center/actions/runs/44897349517) 显示两个回执存在。一次性构建调用已从 `scripts/prepare-build.mjs` 移除，普通构建不得轮换或删除 Cloudflare Secret。
+3. **Identity Center 生产客户端启用**：[激活 44897454960](https://github.com/119shenhao/identity-center/actions/runs/44897454960) 成功：核对两套生产 D1、Owner、forum admin、精确回调、密钥回执完全一致，写入唯一有效密钥摘要并启用 `gambling-community-prod`。独立于 `spine-community-prod`。
+4. **正式站已上线**：认证中心 `main` [09f5d689](https://github.com/119shenhao/identity-center/commit/09f5d689eb7fab46106f19d838db546c4f88361d) 采用 DEV 已验证的 `prompt=select_account`，避免身份中心旧 SSO 会话绕过 Google 账号选择；论坛 `main` [98a7e376](https://github.com/119shenhao/gambling/commit/98a7e37671769913229e6e37de14623025fce1f6) 启用 `IDENTITY_LOGIN_ENABLED=true`，保留 `provider_hint=google`、签名校验、PKCE/Nonce/State 和精确回调。
+5. **生产线上自动验收**：[GitHub Actions 44897628628](https://github.com/119shenhao/gambling/actions/runs/44897628628) 真实 HTTP PASS：正式域名/生产 D1 healthy、匿名 `/api/me` 的 `identityConfigured=true`、论坛 → 中心 → Google 两次 302、Google `prompt=select_account`、保护 Cookie、PKCE、Nonce、State、精确回调、旧直连 Google 410 和无状态回调 401。[完整代码 CI 44897628644](https://github.com/119shenhao/gambling/actions/runs/44897628644) 成功。
+6. **绝对保留密钥与隔离规则**：`wrangler.jsonc.keep_vars=true`；开发/生产 D1、R2、Issuer 和机密客户端单独绑定。已有 `TRANSLATOR_KEY` 没有读取原文或手动修改，初次配置时校验了 Worker 上现存 Azure Secret 名称。**生产 `TRANSLATION_ENABLED=false` 仍保持关闭**，开发译文能力不受影响。内容采集/导入仍禁用。
+
+**验收边界**：已确认公网 OAuth 协议跳转和管理员数据库映射；未持有用户 Google 登录浏览器的实际 Cookie，因此**不能代替本人完成生产 Google 授权回跳、在生产管理员 UI 中实际浏览的最终人工验收**。这不影响上述自动化通过和生产权限已存在的事实。

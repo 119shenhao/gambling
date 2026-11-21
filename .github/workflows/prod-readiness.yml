@@ -7,6 +7,9 @@ on:
       - wrangler.jsonc
       - src/auth.ts
       - src/index.ts
+      - docs/PROJECT_STATUS.md
+      - docs/CLOUDFLARE_SETUP.md
+      - README.md
 permissions:
   contents: read
 concurrency:

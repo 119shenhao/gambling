@@ -158,3 +158,11 @@ Cloudflare 文档：`https://developers.cloudflare.com/workers/previews/configur
 - [Cloudflare Preview 强制回读构建 9b001975](https://github.com/119shenhao/gambling/commit/9b0019750d464ed4aba1c4f0b4c8531720406f9b) **success**；因为临时程序在构建阶段必须完成一次精确 OWNER 管理角色回读，否则构建报错，因此证实 **DEV D1 目标已验证 Owner 的 admin 角色存在**。生产 D1 未访问，其他用户未修改。
 - 完成后**删除**临时授权脚本和构建调用，永久保留正式的签名 JWT + hashed Center Owner 角色匹配逻辑，之后不再运行 D1 强制初始化。Cloudflare Secret/D1/R2 严格隔离和构建后密钥守护继续启用。
 - **生产仅预置代码配置，未完成真实授权**：仓库 `main` 目前只有 README，正式论坛尚未上线、生产 Identity Center 登录开关关闭。待用户单独确认正式发布并实际登录后，生产 Owner 通过相应摘要自动获得 admin，不跨库复制账号、不提前初始化生产管理员，也不得提前报告为已完成。
+
+## 2026-11-21 生产授权与部署的最终有效状态
+
+以 [PROJECT_STATUS 最新结项](PROJECT_STATUS.md#2026-11-21-最终状态戒赌论坛生产管理员--统一-google-登录正式上线) 为准。正式站 `https://gambling.nbn369.com` 已发布，身份服务客户端为 `gambling-community-prod`，生产 D1 `gambling-community-prod` 唯一管理员由正式认证中心 Owner 关联并经真实 D1 只读回读；`IDENTITY_LOGIN_ENABLED=true`。
+
+[生产登录线上 Smoke 44897628628](https://github.com/119shenhao/gambling/actions/runs/44897628628) 验证论坛 → 中心 → Google 选择账号、用户态配置及安全拒绝流程。真实用户浏览器 OAuth 完整回跳仍由本人核验。
+
+**部署不得覆盖** Cloudflare 控制台已有的 `TRANSLATOR_KEY`、`IDENTITY_CLIENT_SECRET` 等 Secrets / Variables；保留 `keep_vars:true`、D1/R2 分环境绑定，禁止将这些密钥以明文复制至仓库、D1、Logs 或跨环境。生产 Azure 翻译服务开关目前仍为 `false`，不能将“密钥保留”误报为“生产翻译已开启”。一次性 Secret bootstrap 已删除构建调用；后续不会自动轮换。
