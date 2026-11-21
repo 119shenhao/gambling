@@ -39,10 +39,8 @@ const qualified=command(`SELECT u.id,ai.provider_subject FROM auth_identities ai
  WHERE ai.provider='identity_center' AND u.status='active' AND u.is_system=0 LIMIT 300`);
 const hash=x=>createHash('sha256').update(x).digest('hex');
 const selected=qualified.filter(row=>typeof row.provider_subject==='string'&&hash(row.provider_subject)===expectedHash);
-if(selected.length===0){
- console.log('Verified Center Owner has not logged into Gambling DEV yet; automatic role grant remains active at next sign-in.');
- process.exit(0);
-}
+if(selected.length===0)
+ throw Error('No matching verified Center Owner account in Gambling DEV D1; refusing to claim completed admin grant.');
 if(selected.length!==1)throw Error('Ambiguous Center Owner identity in DEV D1; no grant.');
 const owner=selected[0];
 const uuid=/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/;
