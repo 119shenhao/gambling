@@ -142,3 +142,12 @@
 ## 2026-11-21 Secret 持久化要求与自动监控
 
 用户再次在 `dev` 命名 Preview 保存 Azure Key；重新运行开发站在线检查已确认 `translationSetup.keyConfigured=true`（[重新检查](https://github.com/119shenhao/gambling/actions/runs/44890627081)）。此轮新增发布后 `dev` Secret 持久化检查，并把不得覆盖 Cloudflare Secret/Variables/D1/R2 写入 `docs/CLOUDFLARE_SETUP.md`；生产仍不开放自动翻译。普通构建禁止对 Secret 执行 put/delete。发布监测会因真实在线键缺失失败，不会尝试恢复/暴露 Key。
+
+## 2026-11-21 Azure 双语验证成功、启用 DEV 数据库翻译、拆除临时接口
+
+- [真实 Azure EN→zh-Hans 与 zh-Hans→EN 成功 #44889928443](https://github.com/119shenhao/gambling/actions/runs/44889928443)：固定安全文本共预留39字符，未记录或暴露密钥。DEV D1 的原子预算更新后，一次性测试收据为 `pass`，provider=Azure，翻译每日5,000/月10,000，`settings.translation_enabled=true`。
+- [数据库收据只读复核 #44890037912](https://github.com/119shenhao/gambling/actions/runs/44890037912)：`receipt=pass`，`budgetDayCharacters=39`、`budgetMonthCharacters=39`、providerBlocked=false。
+- [DEV 线上配置再次复核 #44890627081](https://github.com/119shenhao/gambling/actions/runs/44890627081)：`workerEnabled=true`、`keyConfigured=true`、`translationReady=true`、`databaseEnabled=true`、`translationConfigured=true`，开发 D1 正常。
+- [Cloudflare DEV 最终构建后 Secret 保留验收 #44891525065](https://github.com/119shenhao/gambling/actions/runs/44891525065)：Cloudflare build 完成后，Azure Key、开发 D1、Region、F0 标记及健康检查都正确。每次后续 DEV commit 的构建继续自动做这套 Secret 绑定验证；本次清理后的部署也必须通过。
+- 成功后**永久删除**临时 `/api/dev/azure-smoke` 诊断接口及一次性 GitHub Actions，避免公开测试接口留在部署中；保留既有诊断日志和 D1 计费记录作为审计事实，不能将39字符测试当作真实帖子 UI/译文缓存端到端验收。
+- 生产 `TRANSLATION_ENABLED=false` 仍然不变，且正式站尚未发布新论坛代码；不改动或导出生产密钥。

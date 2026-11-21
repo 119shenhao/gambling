@@ -120,30 +120,6 @@ test('translation provider status exposes database activation state to admin UI'
  assert.match(read('src/admin.ts'),/translation_requires_development_verification/);
 });
 
-test('Azure real-world smoke uses only fixed DEV text and a single budgeted execution',()=>{
- const cfg=JSON.parse(read('wrangler.jsonc'));
- assert.equal(cfg.vars.TRANSLATION_ENABLED,'false');
- assert.equal(cfg.vars.TRANSLATOR_REGION,'eastus');
- assert.equal(cfg.vars.TRANSLATION_MONTHLY_LIMIT,'25000');
- assert.equal(cfg.previews.vars.TRANSLATION_MONTHLY_LIMIT,'10000');
- const code=read('src/translation.ts');
- assert.match(code,/azure_dev_smoke_20261121/);
- assert.match(code,/env\.APP_ENV!=='preview'/);
- assert.match(code,/ON CONFLICT\(key\) DO NOTHING/);
- assert.match(code,/translation_budget SET/);
- assert.match(code,/我正在迈向新的生活。/);
-});
-
-test('DEV translation activates only after successful live Azure bilingual result',()=>{
- const t=read('src/translation.ts');
- const pos=t.indexOf("await env.DB.batch([");
- const sms=t.indexOf("async function devAzureSmoke");
- assert.ok(sms>=0&&pos>sms);
- assert.match(t,/UPDATE settings SET value='true' WHERE key='translation_enabled' AND value='false'/);
- assert.match(t,/translation_azure_monthly_limit','10000'/);
- assert.match(t,/bothDirections:true/);
-});
-
 test('Worker deployment never overwrites Cloudflare-managed secrets or isolates wrong resources',()=>{
  const cfg=JSON.parse(read('wrangler.jsonc'));
  assert.equal(cfg.keep_vars,true);
@@ -159,4 +135,11 @@ test('Worker deployment never overwrites Cloudflare-managed secrets or isolates 
  assert.doesNotMatch(build,/secrets-file/);
  assert.match(read('.github/workflows/dev-secret-persistence.yml'),/Workers Builds: gambling-community/);
  assert.match(read('.github/workflows/dev-secret-persistence.yml'),/keyConfigured/);
+});
+
+test('One-shot Azure validation endpoint is removed from running forum code after successful verification',()=>{
+ const source=read('src/translation.ts');
+ assert.doesNotMatch(source,/api\/dev\/azure-smoke/);
+ assert.doesNotMatch(source,/function devAzureSmoke/);
+ assert.doesNotMatch(source,/azure_dev_smoke_20261121/);
 });
