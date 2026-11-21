@@ -36,3 +36,10 @@
 两套 UUID 均已加入 `dev/wrangler.jsonc` 的对应 Preview 与 Production 分环境绑定。新建 `wrangler.preview-migrations.jsonc` 仅指向开发 D1 的 UUID；`scripts/preview-migrate.mjs` 以两个已确认的 UUID 和环境分支为白名单安全验证。
 
 **注意**：只完成源码配置/提交，并非已连接 Cloudflare API 实际迁移。开发远程迁移将在合规 Cloudflare dev Preview Build 中运行，待查看实际部署日志和数据库状态；生产库始终不执行迁移。
+
+## 2026-11-21 D1 配置提交后验证
+
+- 开发配置提交 [`99fbc46aae68258c05c47feefa533c8ed47487d5`](https://github.com/119shenhao/gambing/commit/99fbc46aae68258c05c47feefa533c8ed47487d5)，将用户截图确认的独立开发/生产 D1 UUID 分别绑定，自动迁移专用配置只指向开发库。
+- [GitHub Actions #44882745486](https://github.com/119shenhao/gambing/actions/runs/44882745486)：**通过**。包含 `npm ci`、`npm run verify`、`npm run db:local` 与 `npm run build`。
+- 该 GitHub Actions 不持有 Cloudflare 远端数据库写入权限，`scripts/preview-migrate.mjs` 在非 Cloudflare dev Preview 构建中安全跳过；CI 通过**不能当成远端 D1 已迁移**。
+- 云端 Worker Preview URL、Cloudflare Build 实际日志、D1 表数量和 `/api/health` 仍未验证。继续开发前应提供该 Worker 的实际 Preview URL 或 Cloudflare Build 截图；之后再判断远程迁移、Worker 与真实身份联调的下一步。
