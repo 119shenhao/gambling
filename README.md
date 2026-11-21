@@ -1,5 +1,7 @@
 # 戒赌社区 / Problem Gambling
 
+GitHub 仓库：`119shenhao/gambling`（https://github.com/119shenhao/gambling）。
+
 目标域名：`gambling.nbn369.com`。以 `119shenhao/spine-community` 为技术底座，独立建设的多语言赌博经历交流社区。
 
 当前主分支仅保留项目入口，开发请查看 `dev` 分支；暂未配置 Cloudflare 生产数据库、生产部署或正式域名路由。**不得复用原脊椎论坛的 D1/R2、OAuth Client 或密钥。**
