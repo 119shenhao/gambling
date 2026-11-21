@@ -34,7 +34,7 @@
     ]
   },
   "vars": {
-    "APP_ENV": "preview",
+    "APP_ENV": "production",
     "PUBLIC_CONTENT_ENABLED": "false",
     "PUBLIC_CONTENT_READS": "false",
     "PUBLIC_CONTENT_FALLBACK": "false",
@@ -48,5 +48,32 @@
   },
   "build": {
     "command": "node scripts/prepare-build.mjs"
+  },
+  "r2_buckets": [
+    {
+      "binding": "PUBLIC_CONTENT_R2",
+      "bucket_name": "gambling-community-public-prod"
+    }
+  ],
+  "previews": {
+    "vars": {
+      "APP_ENV": "preview",
+      "PUBLIC_CONTENT_ENABLED": "false",
+      "PUBLIC_CONTENT_READS": "false",
+      "PUBLIC_CONTENT_FALLBACK": "false",
+      "PUBLIC_CONTENT_ON_DEMAND": "false",
+      "PUBLIC_TRANSLATION_DIRECT": "false",
+      "PUBLIC_TRANSLATION_SEPARATE": "true",
+      "IDENTITY_LOGIN_ENABLED": "false",
+      "IMPORT_ENABLED": "false",
+      "COLLECT_ENABLED": "false",
+      "TRANSLATION_ENABLED": "false"
+    },
+    "r2_buckets": [
+      {
+        "binding": "PUBLIC_CONTENT_R2",
+        "bucket_name": "gambling-community-public-dev"
+      }
+    ]
   }
 }

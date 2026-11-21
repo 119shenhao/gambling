@@ -13,3 +13,13 @@
 - 此结果证明源码可以在 CI 中通过检查与本地迁移，**不证明浏览器端所有业务交互、真实 Google/Identity Center 登录、Cloudflare 预览或生产已经可用**。
 - 不复制原站已验证的 Google 域名证明页面、Cloudflare D1/R2 绑定、远端采集/同步 Actions；原数据没有导入。
 - 技术债：仍存在源项目兼容字段（如 `body_part` / `symptom_duration_days`），其业务 UI 已初步隐藏/简化；应逐步清理并完成真实端到端回归。源项目大规模医疗业务测试不能直接当作新站验收。
+
+## Cloudflare 资源已创建（用户确认；待 UUID 回读）
+
+用户 2026-11-21 表示已经创建 Worker `gambling-community`、开发/生产 D1 `gambling-community-dev` / `gambling-community-prod` 和开发/生产 R2 `gambling-community-public-dev` / `gambling-community-public-prod`。
+
+- dev 的 `wrangler.jsonc` 已新增正确的 Preview / Production R2 绑定和分环境 `APP_ENV`，不包含任何原 Spine 的资源 ID。
+- 暂**没有** Cloudflare 控制台 API 授权，不能独立核实新 D1 UUID、Worker 生产/预览构建状态或 R2 存在情况。资源创建按用户确认记载，不能宣称已经远程绑定或迁移。
+- 新 D1 的 UUID 仍必须取自 Cloudflare D1 详情页面；获得两个真实 UUID 后，单独绑定两套数据库并在开发预览执行版本化迁移。**开发验证前不做生产迁移**。
+- R2 只是绑定到环境；公开 JSON 读取/回填仍关闭，待开发端流程和 CDN 域名验收后才开启。
+- 详细操作及避免手工运行的开发迁移流程见 [CLOUDFLARE_SETUP.md](CLOUDFLARE_SETUP.md)。
