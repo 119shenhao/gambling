@@ -1,38 +1,48 @@
-name: Production launch readiness (read-only)
+name: Gambling production site and Worker Secret readiness (read-only)
 on:
   push:
-    branches: [dev]
+    branches: [main]
     paths:
       - .github/workflows/prod-readiness.yml
-  workflow_dispatch:
+      - wrangler.jsonc
+      - src/auth.ts
+      - src/index.ts
 permissions:
   contents: read
 jobs:
-  check:
+  inspect:
     runs-on: ubuntu-latest
-    timeout-minutes: 4
+    timeout-minutes: 6
     steps:
-      - name: Check PROD site and Identity Center without credentials or writes
+      - name: Inspect live PROD hostname and Worker runtime without mutation
         shell: bash
         run: |
           node --input-type=module <<'NODE'
-          for (const [name,url] of [
-            ['Gambling PROD', 'https://gambling.nbn369.com/api/health'],
-            ['Gambling PROD home', 'https://gambling.nbn369.com/'],
-            ['Identity Center PROD', 'https://idcenter.nbn369.com/health']
-          ]){
+          const urls=['https://gambling.nbn369.com','https://gambling-community.119shenhao.workers.dev'];
+          let checked=false;
+          for(const origin of urls){
             try{
-              const res=await fetch(url,{redirect:'manual',signal:AbortSignal.timeout(12000)});
-              let summary={name,HTTP:res.status,contentType:res.headers.get('content-type')?.slice(0,80)};
-              if(name==='Gambling PROD'&&res.ok&&summary.contentType?.includes('json')){
-                const d=await res.json();
-                summary={...summary,environment:d.environment,databaseReady:d.databaseReady,identityConfigured:d.identityConfigured??null};
+              const res=await fetch(origin+'/api/health',{redirect:'manual',signal:AbortSignal.timeout(13000)});
+              const raw=await res.text();
+              let h;try{h=JSON.parse(raw)}catch{console.log('Origin '+origin+' HTTP '+res.status+' non-JSON; unready');continue;}
+              const s=h.translationSetup||{};
+              console.log('Production host readiness '+JSON.stringify({
+                origin,HTTP:res.status,env:h.environment,status:h.status,
+                databaseConfigured:h.databaseConfigured,databaseReady:h.databaseReady,
+                identityConfigured:h.identityConfigured,workerTranslationEnabled:s.workerEnabled,
+                translatorSecretConfigured:s.keyConfigured,regionConfigured:s.regionConfigured
+              }));
+              if(res.ok&&h.environment==='production'&&h.databaseReady===true&&h.status==='ok'){
+                checked=true;
+                if(origin==='https://gambling.nbn369.com'){
+                  if(h.identityConfigured!==false)throw Error('PROD login unexpectedly enabled before client activation');
+                  if(s.workerEnabled===true)throw Error('PROD translation unexpectedly enabled');
+                  console.log('PASS: exact production forum hostname is ready with D1; identity and translation gated.');
+                  process.exit(0);
+                }
               }
-              if(name==='Identity Center PROD'&&res.ok&&summary.contentType?.includes('json')){
-                const d=await res.json();
-                summary={...summary,environment:d.environment,healthy:d.status||d.ok||null};
-              }
-              console.log(JSON.stringify(summary));
-            }catch(e){console.log(JSON.stringify({name,reachable:false,reason:e?.name||'network_error'}));}
+            }catch(e){console.log('Origin '+origin+' not currently serving required production health');}
           }
+          if(!checked)throw Error('Production Worker or D1 cannot yet be verified from either hostname');
+          throw Error('Production Worker available via workers.dev but custom gambling.nbn369.com hostname not confirmed');
           NODE
