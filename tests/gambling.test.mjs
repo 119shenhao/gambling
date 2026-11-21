@@ -81,14 +81,12 @@ test('one-time provisioning is no longer invoked from ordinary Cloudflare builds
  assert.equal(read('scripts/prepare-build.mjs').includes("['scripts/provision-dev-identity.mjs']"),false);
 });
 
-test('dev-only Google provider hint preserves central OAuth validation, never bypasses center',()=>{
- const auth=read('src/auth.ts');
- assert.match(auth,/params\.set\('provider_hint','google'\)/);
- assert.match(auth,/env\.APP_ENV==='preview'/);
- assert.match(auth,/config\.clientId==='gambling-community-dev'/);
- assert.match(auth,/config\.issuer==='https:\/\/dev-identity-center\.119shenhao\.workers\.dev'/);
- assert.match(auth,/return redirect\(config\.issuer\+'\/oauth\/authorize\?'\+params,flowCookie\(state\)\)/);
- assert.equal(JSON.parse(read('wrangler.jsonc')).vars.IDENTITY_LOGIN_ENABLED,'false');
+test('Google login always requests account chooser through Identity Center, never bypasses center',()=>{
+  const auth=read('src/auth.ts');
+  assert.match(auth,/params\.set\('provider_hint','google'\)/);
+  assert.match(auth,/prompt:'select_account'/);
+  assert.match(auth,/return redirect\(config\.issuer\+'\/oauth\/authorize\?'\+params,flowCookie\(state\)\)/);
+  assert.equal(JSON.parse(read('wrangler.jsonc')).vars.IDENTITY_LOGIN_ENABLED,'false');
 });
 
 test('Azure DEV/PROD shared-key budget is protected by a 25k/month environment cap',()=>{
