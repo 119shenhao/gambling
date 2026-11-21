@@ -126,3 +126,8 @@
 - 开发与生产使用同一个 Azure Key，但两套 D1 的预算不共享。因此将戒赌论坛每套环境月度硬上限降低到25,000；开发预设10,000、生产预设25,000；两者管理员最多分别提升到25,000。即使加上 Spine 的最多1.9m，理论上还留50k余量，**不包括 Spine Preview 或其他 Azure 消费者，必须由 Azure 账户真实用量总控**。
 - 增加仅开发有效的一次性真实 Azure 翻译诊断 `POST /api/dev/azure-smoke`，只发送固定的英中两句，不涉及用户内容，在 D1 唯一键上防重并记录预算消耗；成功后删除测试入口。诊断尚未运行成功前不得声称 Key 已经过 Azure 验证。
 - 生产环境只预置 `TRANSLATOR_REGION=eastus`、F0 既有验证日期、预算变量，`TRANSLATION_ENABLED=false` 不变，不更改生产 D1 或发布尚未验收的新站。
+
+
+## 2026-11-21 · 每次主动 Google 登录都提供账号选择（仅 DEV）
+
+按用户新要求，仅保留“使用 Google 登录”一个按钮；点击后要求 Google 显示可选旧账号或使用其他账号的界面，不能默默复用 Identity Center 中已有的 SSO 身份。DEV 的 `src/auth.ts` 在既有 PKCE/state/nonce 和精确回调上携带 `provider_hint=google&prompt=select_account`；注册/启用的 Google 网站均使用相同方式，正式论坛的 `IDENTITY_LOGIN_ENABLED=false` 保持不变。认证中心 DEV 配合新授权行为：已有 Center Cookie 也直接转 Google（上游 `prompt=select_account`）。不恢复旧的直接 Google OAuth 登录路由，不混用 Spine 用户或数据库，不改帖子/角色。生产须另外批准并验收。
