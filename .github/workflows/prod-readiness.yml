@@ -1,0 +1,38 @@
+name: Production launch readiness (read-only)
+on:
+  push:
+    branches: [dev]
+    paths:
+      - .github/workflows/prod-readiness.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Check PROD site and Identity Center without credentials or writes
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          for (const [name,url] of [
+            ['Gambling PROD', 'https://gambling.nbn369.com/api/health'],
+            ['Gambling PROD home', 'https://gambling.nbn369.com/'],
+            ['Identity Center PROD', 'https://idcenter.nbn369.com/health']
+          ]){
+            try{
+              const res=await fetch(url,{redirect:'manual',signal:AbortSignal.timeout(12000)});
+              let summary={name,HTTP:res.status,contentType:res.headers.get('content-type')?.slice(0,80)};
+              if(name==='Gambling PROD'&&res.ok&&summary.contentType?.includes('json')){
+                const d=await res.json();
+                summary={...summary,environment:d.environment,databaseReady:d.databaseReady,identityConfigured:d.identityConfigured??null};
+              }
+              if(name==='Identity Center PROD'&&res.ok&&summary.contentType?.includes('json')){
+                const d=await res.json();
+                summary={...summary,environment:d.environment,healthy:d.status||d.ok||null};
+              }
+              console.log(JSON.stringify(summary));
+            }catch(e){console.log(JSON.stringify({name,reachable:false,reason:e?.name||'network_error'}));}
+          }
+          NODE
