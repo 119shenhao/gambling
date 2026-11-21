@@ -349,3 +349,68 @@ const gamblingCopy={
   }
 };
 for(const [locale,updates] of Object.entries(gamblingCopy))Object.assign(dictionaries[locale],updates);
+
+// Complete neutral and privacy-focused copy for every non-Chinese locale.
+const neutralPrivacyCopy={
+  "es": {
+    "approach": "Relatos y debate abierto.",
+    "approachBody": "Una comunidad en varios idiomas donde cada persona puede contar hechos y sacar sus propias conclusiones.",
+    "requestNote": "El administrador revisará la solicitud; las respuestas de otras personas podrían permanecer. Utiliza datos ficticios en la vista de desarrollo.",
+    "privacyProduction": "Las publicaciones y respuestas son públicas. Usa un seudónimo y no compartas datos personales, números de cuentas financieras ni contactos. Puedes solicitar la eliminación de datos. La discusión no es asesoramiento profesional.",
+    "privacyText": "Esta versión de desarrollo usa únicamente datos ficticios. Las publicaciones son públicas. No reveles información personal ni financiera. Puedes solicitar la eliminación de datos.",
+    "publicNote": "La publicación será pública. No compartas datos personales, financieros o de terceros.",
+    "stories": "Experiencias personales",
+    "symptom": "Experiencias personales",
+    "treatment": "Experiencias personales",
+    "category": "Categorías"
+  },
+  "pt-BR": {
+    "approach": "Relatos reais e discussão aberta.",
+    "approachBody": "Uma comunidade em vários idiomas onde todos podem relatar fatos e formar suas próprias conclusões.",
+    "requestNote": "O administrador analisará o pedido; respostas de outras pessoas podem permanecer. Use dados fictícios no ambiente de desenvolvimento.",
+    "privacyProduction": "Publicações e respostas são públicas. Use um apelido e evite dados pessoais, contas financeiras ou contatos. Você pode solicitar a exclusão dos dados. As discussões não substituem orientação profissional.",
+    "privacyText": "Esta versão de desenvolvimento usa apenas dados fictícios. As publicações são públicas. Não revele dados pessoais ou financeiros. Você pode solicitar exclusão.",
+    "publicNote": "A publicação será pública. Não divulgue dados pessoais ou financeiros, seus ou de terceiros.",
+    "stories": "Experiências pessoais",
+    "symptom": "Experiências pessoais",
+    "treatment": "Experiências pessoais",
+    "category": "Categorias"
+  },
+  "de": {
+    "approach": "Erfahrungen und offene Diskussion.",
+    "approachBody": "Eine mehrsprachige Community, in der jeder Fakten schildern und eigene Schlussfolgerungen ziehen kann.",
+    "requestNote": "Anfragen werden geprüft; Antworten anderer können erhalten bleiben. In der Entwicklung nur fiktive Testdaten verwenden.",
+    "privacyProduction": "Beiträge und Antworten sind öffentlich. Nutze einen Spitznamen und teile keine persönlichen Daten, Bank- oder Kontonummern oder Kontaktdaten. Du kannst die Löschung beantragen. Diskussionen ersetzen keine professionelle Beratung.",
+    "privacyText": "Diese Entwicklungsvorschau ist nur für fiktive Daten. Beiträge sind öffentlich. Keine persönlichen oder finanziellen Daten veröffentlichen. Löschanträge sind möglich.",
+    "publicNote": "Beiträge sind öffentlich. Teile keine persönlichen oder finanziellen Informationen über dich oder andere.",
+    "stories": "Persönliche Erfahrungen",
+    "symptom": "Persönliche Erfahrungen",
+    "treatment": "Persönliche Erfahrungen",
+    "category": "Kategorien"
+  },
+  "fr": {
+    "approach": "Des témoignages et une discussion ouverte.",
+    "approachBody": "Une communauté multilingue où chacun peut relater des faits et tirer ses propres conclusions.",
+    "requestNote": "Les demandes sont examinées; les réponses d'autres personnes peuvent rester. Utilisez des données fictives dans l'environnement de test.",
+    "privacyProduction": "Les publications et réponses sont publiques. Utilisez un pseudonyme et ne partagez ni données personnelles, ni coordonnées, ni numéros de comptes financiers. Vous pouvez demander la suppression de données. Ces discussions ne constituent pas un conseil professionnel.",
+    "privacyText": "Cette version de développement est réservée aux données fictives. Les messages sont publics. Ne publiez pas de données personnelles ou financières. Vous pouvez demander leur suppression.",
+    "publicNote": "Les messages sont publics. Ne révélez pas d'informations personnelles ou financières sur vous-même ou autrui.",
+    "stories": "Expériences personnelles",
+    "symptom": "Expériences personnelles",
+    "treatment": "Expériences personnelles",
+    "category": "Catégories"
+  },
+  "ja": {
+    "approach": "実際の経験と自由な議論。",
+    "approachBody": "多言語で一つのコミュニティです。それぞれの体験や事実を共有し、結論は本人が判断できます。",
+    "requestNote": "申請は運営者が審査します。他の人の返信は残る場合があります。開発中は架空のテストデータのみ利用してください。",
+    "privacyProduction": "投稿と返信は公開されます。ニックネームを使い、個人情報、連絡先、銀行口座情報を公開しないでください。削除を申請できます。投稿は専門的助言ではありません。",
+    "privacyText": "開発版では架空のテストデータのみ使用してください。投稿は公開されます。個人情報や金融情報を公開せず、必要に応じて削除を申請してください。",
+    "publicNote": "投稿は公開されます。自分や他人の個人情報・金融情報を書かないでください。",
+    "stories": "個人の経験",
+    "symptom": "個人の経験",
+    "treatment": "個人の経験",
+    "category": "カテゴリ"
+  }
+};
+for(const [locale,changes] of Object.entries(neutralPrivacyCopy))Object.assign(dictionaries[locale],changes);
