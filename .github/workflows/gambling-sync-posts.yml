@@ -1,6 +1,9 @@
 name: Gambling preview-to-production content sync
 run-name: Gambling content / ${{ inputs.mode }}
 on:
+  push:
+    branches: [dev]
+    paths: [.github/gambling-sync-authorization.json]
   workflow_dispatch:
     inputs:
       mode:
@@ -28,6 +31,10 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ vars.GAMBLING_CLOUDFLARE_ACCOUNT_ID }}
       GAMBLING_SYNC_PRODUCTION_CONFIRM: 7bba9ada-589f-493b-8fcf-60265fc0efac
     steps:
+      - name: Checkout dev request file without granting write credentials
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
       - name: Require correct mode and independent scoped Cloudflare credentials
         shell: bash
         env:
@@ -35,6 +42,22 @@ jobs:
           CONFIRMATION: ${{ inputs.confirmation }}
         run: |
           set -euo pipefail
+          if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
+            # A push can trigger production publication only through this
+            # dedicated, explicit authorization request; other dev pushes do not.
+            python3 - <<'PY'
+          import json,re
+          data=json.load(open('.github/gambling-sync-authorization.json'))
+          if (data.get('mode')!='sync' or data.get('confirmation')!='gambling-community-prod'
+              or data.get('approval_scope')!='user-authorized-periodic-gambling-content-sync'
+              or data.get('target_d1')!='7bba9ada-589f-493b-8fcf-60265fc0efac'
+              or not re.fullmatch(r'[A-Za-z0-9_-]{8,80}',data.get('request_id',''))):
+              raise SystemExit('Missing narrowly scoped production sync authorization file')
+          print('Approved request file format verified; exact target D1 matches Gambling only.')
+          PY
+            MODE=sync
+            CONFIRMATION=gambling-community-prod
+          fi
           [[ -n "$CLOUDFLARE_API_TOKEN" && -n "$CLOUDFLARE_ACCOUNT_ID" ]] || { echo "::error::Gambling-scoped D1 credentials missing"; exit 1; }
           case "$MODE" in
             inspect) ;;
@@ -58,7 +81,7 @@ jobs:
       - name: Inspect both independent D1 databases without writes
         run: npm run sync:production -- --limit=100
       - name: Capture production Time Travel restore point
-        if: inputs.mode == 'sync'
+        if: github.event_name == 'push' || inputs.mode == 'sync'
         shell: bash
         run: |
           set -euo pipefail
@@ -72,7 +95,7 @@ jobs:
           print("Verified production restore bookmark before any writes")
           PY
       - name: Synchronize only unsynced published topics
-        if: inputs.mode == 'sync'
+        if: github.event_name == 'push' || inputs.mode == 'sync'
         shell: bash
         run: |
           set -euo pipefail
