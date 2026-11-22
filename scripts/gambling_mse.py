@@ -132,8 +132,14 @@ def _original_message(doc):
 
 
 def _page_count(doc, base):
-    # Use only the topic-specific numbered pager (never links in quoted posts).
+    # Include the current page: Vanilla may render it as a non-link, especially
+    # the very last page. Keep the original topic's stable numeric ID.
     max_page = 1
+    canonical = doc.select_one("link[rel='canonical'][href]")
+    if canonical:
+        current = PAGE_RE.fullmatch(urlsplit(canonical["href"]).path)
+        if current and current[1] == source_id(base):
+            max_page = max(max_page, int(current[3]))
     for a in doc.select(".NumberedPager a[href], .Pager a[href]"):
         dest = urlsplit(urljoin(base, a["href"]))
         if dest.netloc != HOST or dest.scheme != "https":
