@@ -11,9 +11,9 @@
 
 ## 采集器的来源状态与未完成事项
 - `scripts/gambling_collect.py` 已准备独立的 GitHub 请求文件协议（`request_id`、`mode`、`sites`、`candidates`、`limit`）及完整 JSON 导出入库。请求文件不会包含论坛用户正文或临时认领令牌。
-- **目前 `scripts/gambling_sources.json` 的来源列表为空**。不能将 Spine 的六个医学来源当成戒赌来源。默认的按时采集任务应报告来源未配置，而不是伪造新增。
-- 从来源建立稳定发现/解析器并在独立开发预览完成真实 HTTP / D1 端到端验收之后，再让定时采集进入 collect 模式。
-- 生产同步 Workflow 必须先安装专用 GitHub `GAMBLING_PROD_D1_API_TOKEN` 机密及账号变量、做新脚本只读预检查、测试恢复点/幂等/生产回读，再获得生产发布审批。**未通过这些验收不得由 ChatGPT 定时任务触发生产写入。**
+- **历史初始状态**：2026-11-22 早些时候 `scripts/gambling_sources.json` 为空；现已登记独立 GamCare 与 Gambling Therapy，**GamCare 根据用户本次确认的完整帖文/回复再发布许可启用，Gambling Therapy 仍关闭**。不迁入 Spine 的医学来源。
+- GamCare 已完成稳定发现、真实帖文 HTML 解析、原子 DEV 入库和 D1 API 读回，默认 `mode=collect`、`sites=["all"]`、`candidates={}`、`limit=2`。其他来源需单独验收后启用。
+- **历史阻碍已通过独立受控路径解决**：戒赌论坛正式内容同步使用已验收的 `119shenhao/identity-center` 专用生产环境工作流和既有受保护凭据（详见下文）；本轮采集开发未触发生产同步。
 - 开发站路由和迁移仅有代码/CI 检查不等于线上 API 已部署；需核实 `GET /api/health` 的 `importEnabled`/`collectEnabled`，以及排除列表和认领释放的真实 HTTP 结果。
 - 定时采集与生产同步不可使用同一数据库或复用 Spine GitHub Actions 作业；定时任务也不得把提交成功当成工作流执行成功。
 
@@ -29,7 +29,7 @@
 - 认证中心仓库 `119shenhao/identity-center/main` 已保存经验证的 D1 访问令牌（之前为戒赌论坛生产 D1 做过初始化，当前仍有效），其 `.github/workflows/gambling-content-sync-protected.yml` 是此论坛专属内容同步执行器。令牌仅在该仓库 **GitHub Actions production** 环境使用，不写入或复制到赌博仓库，不与 Spine 使用相同 Github Repo Secret，D1 UUID 完全隔离。
 - 通过在 `identity-center/main/.github/gambling-content-sync-request.json` 提交唯一 request_id、`mode=sync`，触发经批准固定 SHA 的同步脚本：先核对目标 D1、独立源码 CI/SQL 回归、只读预检查及 Time Travel 恢复点，然后按发布与一次性回执规则执行；已同步主帖永远跳过，绝不补传后续评论；完成再回读 `examined=0`。无 API 写入口或结构迁移。
 - ChatGPT 固定任务「戒赌论坛同步生产帖子」已更新为采用认证中心的受保护工作流，频率仍每12小时。**不要再触发赌博仓库原先缺少 secret 的 `gambling-sync-posts.yml`**；将来要迁移到独立新令牌，需要另行验收。用户不需要通过聊天提供任何密钥。
-- 采集定时任务每6小时仍处于启用状态，但 `scripts/gambling_sources.json` 仍无稳定解析的真实戒赌站点。后续只有配置好的来源才能运行真正定时采集。
+- 采集定时任务每6小时仍处于启用状态；GamCare 来源已实际开启，其他未许可/未验证来源仍会跳过。所有采集只写独立 DEV D1。
 
 ## 2026-11-22 独立外站解析器开发与远程只读核验
 
@@ -37,8 +37,19 @@
 - `scripts/gambling_collect.py` 已接入网站发现、全量 exclusions 分页、6 小时 claim、complete、失败/结果不明时谨慎释放、正文/回复 API 回读与按来源计数；`inspect` 模式只读探测候选帖结构，不会导入。
 - `.github/workflows/gambling-collector-on-demand.yml` 安装独立解析依赖并在调用 Worker 前运行 `tests/test_gambling_collector.py`；仍只监听 gambling/dev 的独立请求文件变化，未新增 GitHub Actions cron，原 ChatGPT 独立任务保持不变。
 - [首次真实 inspect GitHub Actions #44992825630](https://github.com/119shenhao/gambling/actions/runs/44992825630) 执行成功：10 项 Python 离线测试通过，DEV `/api/health` 通过，GamCare 两个论坛列表分别发现 26、22 个候选，合并去重为 **39 个**；Gambling Therapy 列表 HTTP 403，0 个候选。该 inspect 并未 POST claim/complete，**新增主帖/回复 0**。
-- `scripts/gambling_sources.json` 目前列出了两个独立候选适配器，但 `approved=false`、`parser_verified=false`、`reuse_allowed=false`，均没有已验证的转载许可证明；仅有公开网页不等于自动允许复制并匿名发布，因此**当前没有可合法自动导入的已启用来源**。同意开启 `collect` 前必须验证具体来源的使用范围及完整真实网页解析，并保留原站来源记录，不把外部用户内容误标为本站原创。
+- **此条为早期只读检查时的状态，已被下方真实采集验收取代。** 用户确认取得 GamCare 完整主帖/回复的再发布许可；用户陈述已如实登记（未独立核验纸面凭证）。仅 GamCare `approved=true`、`parser_verified=true`、`reuse_allowed=true`；Gambling Therapy 未启用。系统作者固定 Anonymous，采集表保留来源站点和稳定原站 ID。
 - 现有 JS 旧测试曾假设 `sources.length===0`，已按“可登记来源但默认禁止导入”的新规则修订。技术上来源发现打通，不等于当前可以进行未经许可的整篇转载。
 - [真实正文解析只读验收 #44992931664](https://github.com/119shenhao/gambling/actions/runs/44992931664) 已发起；需以最终状态和日志为准，不能把作业触发当成正文解析成功。
 
-**下一步验收门槛：** 确定至少一个具有允许完整内容再发布的来源，单站解析器对该来源的标题/正文/所有回复通过线上探测，完成原文及 parent 关系回读、重复检查，方可将对应来源标记已验证并允许 ChatGPT 每 6 小时的独立任务执行正式 `collect`。对暂时 403 的来源不绕过访问限制。
+**最新状态：** GamCare 已符合上述门槛并完成正式采集；其他来源（尤其仍返回403的 Gambling Therapy）继续严格限制，不绕过反爬或访问控制。
+
+## 2026-11-22 GamCare 正式采集开启与 DEV 回读（最新验收）
+
+- 用户确认已取得 GamCare 论坛完整主帖及回复的再发布许可。本项目仅据用户许可声明登记 `permission_evidence`，没有声称独立审阅许可文件；未授权 Gambling Therapy、Reddit 或 Spine 任何内容。
+- [第一次真实 DEV 入库 #44993497291](https://github.com/119shenhao/gambling/actions/runs/44993497291) PASS：1篇、7回复，完整 API 回读。
+- [自动发现首轮 #44993558005](https://github.com/119shenhao/gambling/actions/runs/44993558005) 原工作流 exit 1，但实际写入4篇：其中2篇即时报为导入成功，另2篇被旧语言回读误判；[历史两篇审计 #44993908744](https://github.com/119shenhao/gambling/actions/runs/44993908744) PASS：分别核实14条和7条回复及原文，未重复入库。
+- [自动发现修复验收 #44993765907](https://github.com/119shenhao/gambling/actions/runs/44993765907) PASS：新增2篇、7回复，5个不完整/含个人信息候选按规则跳过，错误0。
+- [恢复默认运行模式 #44994042299](https://github.com/119shenhao/gambling/actions/runs/44994042299) PASS：`mode=collect`、`sites=["all"]`、`candidates={}`、`limit=2`，GamCare再新增2篇、10回复；未启用的 Gambling Therapy 完全跳过，不再访问其403页面。Python 17项测试通过，[项目CI #44994042376](https://github.com/119shenhao/gambling/actions/runs/44994042376) 通过。
+- **本次实际累计：9篇真实 GamCare 主帖、49条真实回复**，均已当轮回读或历史只读复核，不包含此前3篇 `[QA DIGEST]` 和11条测试回复。本轮只写隔离 DEV D1，未触发生产同步。
+- 技术修复：不完整/隐私风险内容记为 `candidate_rejected`；服务端独立语言识别将短评论标记 `und` 不再导致虚假的正文不一致；仍严格验证主帖及各级评论原文、数量、分页与父子关系；支持只读审计已完成来源，避免重复写入。
+- 保留 ChatGPT 专属每6小时的戒赌采集任务及既有每12小时独立生产同步任务；不新建 GitHub Actions cron、不使用 Spine 调度器、数据库、密钥或内容。此轮没有访问或修改正式生产 D1。
