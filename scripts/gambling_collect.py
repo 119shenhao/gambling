@@ -1,79 +1,238 @@
-"""Gambling community: authorized-export collector coordinator.
-No sites are approved by default. Never copy spine sources or scrape arbitrary URLs.
-A scheduled invocation without approved/implemented sources is a safe no-op.
+"""Gambling Community independent, consent-gated external forum collector.
+
+Every HTTP write is preview-only. Site IDs and parser code are unrelated to the
+spine project. Without affirmative source rights and live parser verification,
+inspect can discover candidates, but collect will not copy forum content.
 """
 import argparse
 import json
 import re
 import sys
+import time
+from collections import Counter
 from pathlib import Path
+from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
-from urllib.error import HTTPError, URLError
+
+from gambling_forums import discover, parse_topic, source_id
 
 PREVIEW = "https://dev-gambling-community.119shenhao.workers.dev"
 SITE_RE = re.compile(r"^[a-z0-9][a-z0-9_-]{1,31}$")
 SOURCE_RE = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
+MAX_BYTES = 150_000
 
 
-def api(path, data=None):
-    payload = json.dumps(data, ensure_ascii=False).encode() if data is not None else None
-    if payload and len(payload) > 150000:
+def emit(event, **fields):
+    print(json.dumps({"event": event, **fields}, ensure_ascii=False), flush=True)
+
+
+def http(url, payload=None):
+    data = None if payload is None else json.dumps(payload, ensure_ascii=False).encode()
+    if data is not None and len(data) > MAX_BYTES:
         raise ValueError("payload_too_large")
-    req = Request(PREVIEW + path, data=payload, headers={
-        "Accept": "application/json",
-        "User-Agent": "GamblingCommunityAuthorizedCollector/1.0",
-        **({"Content-Type": "application/json"} if payload is not None else {}),
-    })
+    headers = {"User-Agent": "GamblingCommunityCollector/2.0 (public pages)",
+               "Accept": "application/json,text/html",
+               **({"Content-Type": "application/json"} if data is not None else {})}
+    req = Request(url, data=data, headers=headers)
     try:
-        with urlopen(req, timeout=20) as res:
-            return json.load(res)
-    except (HTTPError, URLError) as error:
-        raise ValueError("preview_http_unavailable:" + str(getattr(error, "code", "network"))) from None
+        with urlopen(req, timeout=18) as res:
+            body = res.read(4_000_001)
+            if len(body) > 4_000_000:
+                raise ValueError("source_response_too_large")
+            return body
+    except HTTPError as e:
+        raise ValueError("http_" + str(e.code)) from None
+    except (URLError, TimeoutError, OSError):
+        raise ValueError("network_error_or_timeout") from None
 
 
-def exclusions(site):
-    seen = {}
+def api(path, payload=None):
+    return json.loads(http(PREVIEW + path, payload))
+
+
+def excluded_ids(site):
+    found = {}
     cursor = None
     visited = set()
     while True:
-        options = {"site": site, "limit": 200}
+        params = {"site": site, "limit": 200}
         if cursor:
-            options["cursor"] = cursor
-        page = api("/api/collect/exclusions?" + urlencode(options))
+            params["cursor"] = cursor
+        page = api("/api/collect/exclusions?" + urlencode(params))
         if page.get("site") != site:
-            raise ValueError("site_mismatch")
-        seen.update((row["source_id"], row["status"]) for row in page["items"])
+            raise ValueError("exclusions_site_mismatch")
+        for row in page.get("items", []):
+            if row.get("status") in ("completed", "claimed"):
+                found[row["source_id"]] = row["status"]
         cursor = page.get("next_cursor")
         if cursor is None:
-            return seen
-        if not isinstance(cursor, str) or cursor in visited:
-            raise ValueError("invalid_cursor")
+            return found
+        if not isinstance(cursor, str) or not cursor or cursor in visited:
+            raise ValueError("invalid_exclusions_cursor")
         visited.add(cursor)
 
 
-def flatten_comments(comments, depth=1):
-    if depth > 8:
+def flatten(comments, depth=1):
+    if not isinstance(comments, list) or depth > 8:
         raise ValueError("reply_depth_exceeded")
     out = []
     for c in comments:
-        if set(c) - {"body", "source_lang", "replies"} or not isinstance(c.get("body"), str):
-            raise ValueError("invalid_comment")
+        if not isinstance(c, dict) or set(c) - {"body", "source_lang", "replies"}:
+            raise ValueError("invalid_reply")
+        if not isinstance(c.get("body"), str) or not 1 <= len(c["body"].strip()) <= 12000:
+            raise ValueError("invalid_reply_body")
         out.append(c)
-        out.extend(flatten_comments(c.get("replies", []), depth + 1))
+        if c.get("replies"):
+            out.extend(flatten(c["replies"], depth + 1))
     return out
 
 
-def validated_draft(data):
-    if not isinstance(data, dict) or set(data) - {"title", "body", "source_lang", "comments", "terms", "symptom_duration_days"}:
-        raise ValueError("invalid_export")
-    if not (isinstance(data.get("title"), str) and 1 <= len(data["title"].strip()) <= 200 and
-            isinstance(data.get("body"), str) and 1 <= len(data["body"].strip()) <= 30000):
-        raise ValueError("invalid_content")
-    comments = flatten_comments(data.get("comments", []))
-    if len(comments) > 49:
-        raise ValueError("reply_limit_exceeded")
-    return data, len(comments)
+def validate(draft):
+    if not isinstance(draft, dict) or set(draft) - {"title", "body", "source_lang", "comments"}:
+        raise ValueError("invalid_topic_fields")
+    if not all(isinstance(draft.get(k), str) and draft[k].strip()
+               for k in ("title", "body", "source_lang")):
+        raise ValueError("missing_topic_text")
+    if len(draft["title"]) > 200 or len(draft["body"]) > 30_000:
+        raise ValueError("topic_length_exceeded")
+    replies = flatten(draft.get("comments", []))
+    if not 1 <= len(replies) <= 49:
+        raise ValueError("reply_count_invalid")
+    serialized = json.dumps({"site": "placeholder", "source_id": "placeholder",
+                             "lease_token": "x" * 90, "topic": draft},
+                            ensure_ascii=False).encode()
+    if len(serialized) > MAX_BYTES:
+        raise ValueError("payload_too_large")
+    return len(replies)
+
+
+def readback(topic_id, draft, n):
+    if not re.fullmatch(r"[0-9a-f-]{36}", topic_id or ""):
+        raise ValueError("invalid_topic_id")
+    result = api("/api/topics/" + topic_id)
+    saved = result.get("topic", {})
+    if any(saved.get(field) != draft[field] for field in ("title", "body", "source_lang")):
+        raise ValueError("readback_topic_mismatch")
+    records = result.get("comments", [])
+    if result.get("next") is not None or len(records) != n:
+        raise ValueError("readback_count_or_pagination_mismatch")
+    expected = Counter((item["body"], item.get("source_lang", draft["source_lang"]))
+                       for item in flatten(draft["comments"]))
+    received = Counter((row.get("body"), row.get("source_lang")) for row in records)
+    if expected != received:
+        raise ValueError("readback_reply_mismatch")
+    # A flat source must remain flat; nested source reply IDs are not inferred
+    # merely from quoted text or @mentions.
+    if any(row.get("parent_comment_id") is not None for row in records):
+        if not any(c.get("replies") for c in draft["comments"]):
+            raise ValueError("readback_parent_mismatch")
+    return True
+
+
+def available(source):
+    return (source.get("approved") is True and
+            source.get("parser_verified") is True and
+            source.get("reuse_allowed") is True and
+            bool(source.get("permission_evidence")))
+
+
+def discover_source(source, excluded, cap=60):
+    found = {}
+    for listing in source.get("listings", [])[:5]:
+        try:
+            candidates = discover(source["id"], listing, http(listing), excluded, cap)
+            found.update({k: v for k, v in candidates.items() if k not in found})
+            emit("listing_checked", site=source["id"], candidates=len(candidates))
+        except ValueError as error:
+            emit("listing_unavailable", site=source["id"], reason=str(error))
+        if len(found) >= cap:
+            break
+        time.sleep(1)
+    return dict(list(found.items())[:cap])
+
+
+def load_request(file):
+    obj = json.loads(file.read_text(encoding="utf-8"))
+    if (not isinstance(obj, dict) or set(obj) !=
+            {"request_id", "mode", "sites", "candidates", "limit"}):
+        raise ValueError("invalid_request_fields")
+    if not re.fullmatch(r"[A-Za-z0-9_-]{1,80}", obj["request_id"]):
+        raise ValueError("invalid_request_id")
+    if obj["mode"] not in ("inspect", "collect") or type(obj["limit"]) is not int or not 1 <= obj["limit"] <= 10:
+        raise ValueError("invalid_request_mode_or_limit")
+    if not isinstance(obj["sites"], list) or not obj["sites"] or not isinstance(obj["candidates"], dict):
+        raise ValueError("invalid_sites_or_candidates")
+    return obj
+
+
+def load_registry():
+    sources = json.loads(Path("scripts/gambling_sources.json").read_text(encoding="utf-8"))["sources"]
+    known = {}
+    for s in sources:
+        if (not isinstance(s, dict) or not SITE_RE.fullmatch(s.get("id", ""))
+                or s["id"] in known or s.get("adapter") != "gambling_forums"):
+            raise ValueError("invalid_source_registry")
+        known[s["id"]] = s
+    return known
+
+
+def collect_one(site, source, identifier, url, export_dir):
+    lease = api("/api/collect/claim", {
+        "site": site, "source_ids": [identifier],
+        "collector_id": "gambling-independent-collector",
+    })["results"][0]
+    if lease["result"] != "granted":
+        emit("claim_skipped", site=site, source_id=identifier, reason=lease["result"])
+        return 0, 0, 0
+    token = lease["lease_token"]
+    payload = {"site": site, "source_id": identifier, "lease_token": token}
+    completed = False
+    submitted = False
+    try:
+        if export_dir:
+            file = export_dir / site / (identifier + ".json")
+            if not file.is_file() or file.stat().st_size > MAX_BYTES:
+                raise ValueError("export_missing_or_too_large")
+            draft = json.loads(file.read_text(encoding="utf-8"))
+        else:
+            draft = parse_topic(site, identifier, url, http(url))
+        n = validate(draft)
+        submitted = True
+        receipt = api("/api/collect/complete", {**payload, "topic": draft})
+        completed = receipt.get("status") == "completed"
+        if not completed:
+            raise ValueError("complete_not_confirmed")
+        if receipt.get("duplicate"):
+            emit("duplicate", site=site, source_id=identifier, topic_id=receipt.get("topic_id"))
+            return 0, 0, 1
+        if receipt.get("imported") != {"topics": 1, "comments": n}:
+            raise ValueError("imported_count_mismatch")
+        readback(receipt["topic_id"], draft, n)
+        emit("imported", site=site, source_id=identifier, topic_id=receipt["topic_id"],
+             replies=n, source_url=url)
+        return 1, n, 0
+    except ValueError as e:
+        # A timeout from complete may have committed. Check exclusions rather
+        # than issuing a second non-idempotent completion with unknown outcome.
+        if submitted:
+            try:
+                completed = excluded_ids(site).get(identifier) == "completed"
+            except ValueError:
+                pass
+        emit("candidate_failed", site=site, source_id=identifier, reason=str(e),
+             completion_possible=bool(submitted))
+        raise
+    finally:
+        if not completed:
+            try:
+                if not submitted:
+                    api("/api/collect/release", payload)
+                else:
+                    emit("release_deferred", site=site, source_id=identifier,
+                         reason="completion_outcome_uncertain")
+            except ValueError:
+                emit("release_failed", site=site, source_id=identifier)
 
 
 def main():
@@ -81,82 +240,82 @@ def main():
     parser.add_argument("request", type=Path)
     parser.add_argument("--export-dir", type=Path)
     args = parser.parse_args()
-    req = json.loads(args.request.read_text())
-    if set(req) != {"request_id", "mode", "sites", "candidates", "limit"} or not re.fullmatch(r"[A-Za-z0-9_-]{1,80}", req["request_id"]):
-        raise ValueError("invalid_request")
-    if req["mode"] not in ("inspect", "collect") or not 1 <= req["limit"] <= 10:
-        raise ValueError("invalid_mode_or_limit")
-    registry = json.loads(Path("scripts/gambling_sources.json").read_text())["sources"]
-    registered = {s["id"]: s for s in registry if s.get("approved") is True and s.get("parser_verified") is True}
-    if any(not SITE_RE.fullmatch(s) for s in registered):
-        raise ValueError("invalid_site_registry")
-    sites = list(registered) if req["sites"] == ["all"] else req["sites"]
-    if any(s not in registered for s in sites) or any(s not in sites for s in req["candidates"]):
-        raise ValueError("unapproved_source")
+    req = load_request(args.request)
+    sources = load_registry()
+    sites = list(sources) if req["sites"] == ["all"] else req["sites"]
+    if len(set(sites)) != len(sites) or any(s not in sources for s in sites):
+        raise ValueError("unsupported_site")
+    if set(req["candidates"]) - set(sites):
+        raise ValueError("candidate_site_not_selected")
     health = api("/api/health")
-    if health.get("environment") != "preview" or not health.get("importEnabled") or not health.get("collectEnabled"):
-        raise ValueError("preview_collection_disabled")
-    print(json.dumps({"event": "readiness", "preview": True, "registered_sources": len(registered)}), flush=True)
-    if not sites:
-        print(json.dumps({"event": "no_approved_sources", "new_topics": 0, "reason": "no gambling-specific approved verified source parsers"}), flush=True)
-        return 0
-    total = 0
+    if (health.get("environment") != "preview" or
+            health.get("importEnabled") is not True or
+            health.get("collectEnabled") is not True):
+        raise ValueError("preview_not_ready")
+    emit("readiness", preview=True, configured_sources=len(sources),
+         importable_sources=sum(available(v) for v in sources.values()))
+    total_topics = total_comments = total_duplicates = errors = 0
     for site in sites:
-        excluded = exclusions(site)
-        candidates = req["candidates"].get(site, [])
-        if not isinstance(candidates, list):
-            raise ValueError("invalid_candidates")
-        imported = duplicates = 0
-        for source_id in candidates:
-            if imported >= req["limit"]:
-                break
-            if not isinstance(source_id, str) or not SOURCE_RE.fullmatch(source_id):
-                raise ValueError("invalid_source_id")
-            if source_id in excluded:
+        source = sources[site]
+        try:
+            excluded = excluded_ids(site)
+            explicit = req["candidates"].get(site, [])
+            if not isinstance(explicit, list):
+                raise ValueError("invalid_candidate_list")
+            if explicit:
+                candidates = {}
+                for value in explicit:
+                    if not isinstance(value, str):
+                        raise ValueError("invalid_candidate")
+                    if value.startswith("https://"):
+                        identifier = source_id(site, value)
+                        candidates[identifier] = value
+                    elif SOURCE_RE.fullmatch(value) and args.export_dir:
+                        candidates[value] = ""
+                    else:
+                        raise ValueError("candidate_requires_url_or_export")
+            else:
+                candidates = discover_source(source, excluded)
+            eligible = {identifier: url for identifier, url in candidates.items() if identifier not in excluded}
+            emit("plan", site=site, candidates=len(candidates), excluded=len(candidates)-len(eligible),
+                 eligible=len(eligible), import_allowed=available(source))
+            if req["mode"] == "inspect":
                 continue
-            # No outbound scraping from runner: privately supplied, authorized exports only.
-            if not args.export_dir:
-                print(json.dumps({"event": "source_requires_authorized_export", "site": site}), flush=True)
-                break
-            file = args.export_dir / site / (source_id + ".json")
-            if not file.is_file() or file.stat().st_size > 150000:
-                raise ValueError("missing_or_oversized_authorized_export")
-            draft, count = validated_draft(json.loads(file.read_text()))
-            claim = api("/api/collect/claim", {"site": site, "source_ids": [source_id], "collector_id": "gambling-authorized-export"})
-            result, = claim["results"]
-            if result["result"] != "granted":
+            if not available(source):
+                emit("source_not_enabled", site=site, reason="reuse_or_parser_verification_required")
                 continue
-            token = result["lease_token"]
-            committed = False
-            try:
-                receipt = api("/api/collect/complete", {"site": site, "source_id": source_id, "lease_token": token, "topic": draft})
-                committed = receipt.get("status") == "completed"
-                if not committed:
-                    raise ValueError("completion_unconfirmed")
-                if receipt.get("duplicate"):
-                    duplicates += 1
-                    continue
-                record = api("/api/topics/" + receipt["topic_id"])
-                if (record["topic"]["title"] != draft["title"] or
-                        record["topic"]["body"] != draft["body"] or
-                        len(record["comments"]) != count):
-                    raise ValueError("readback_mismatch")
-                imported += 1
-                print(json.dumps({"event": "imported", "site": site, "source_id": source_id,
-                                  "topic_id": receipt["topic_id"], "replies": count}), flush=True)
-            finally:
-                if not committed:
-                    api("/api/collect/release", {"site": site, "source_id": source_id, "lease_token": token})
-        total += imported
-        print(json.dumps({"event": "site_summary", "site": site, "new_topics": imported,
-                          "duplicates": duplicates, "target": req["limit"]}), flush=True)
-    print(json.dumps({"event": "run_summary", "new_topics": total}), flush=True)
+            imported = comments = duplicates = 0
+            for identifier, url in eligible.items():
+                if imported >= req["limit"]:
+                    break
+                try:
+                    n_topics, n_comments, n_dupes = collect_one(site, source, identifier, url, args.export_dir)
+                    imported += n_topics
+                    comments += n_comments
+                    duplicates += n_dupes
+                except ValueError:
+                    errors += 1
+            total_topics += imported
+            total_comments += comments
+            total_duplicates += duplicates
+            emit("site_summary", site=site, new_topics=imported,
+                 new_comments=comments, duplicates=duplicates, target=req["limit"])
+        except (ValueError, KeyError, TypeError) as error:
+            errors += 1
+            emit("site_error", site=site, reason=str(error))
+    emit("run_summary", new_topics=total_topics, new_comments=total_comments,
+         duplicates=total_duplicates, errors=errors,
+         ready_for_unattended_collect=bool(sum(available(s) for s in sources.values())))
+    if errors:
+        return 1
+    if req["mode"] == "collect" and not any(available(sources[s]) for s in sites):
+        return 2  # A safe, visible failure, NEVER a green zero-post success.
     return 0
 
 
 if __name__ == "__main__":
     try:
-        sys.exit(main())
-    except (ValueError, KeyError, TypeError, OSError) as error:
-        print(json.dumps({"event": "collector_error", "reason": str(error)}), flush=True)
-        sys.exit(1)
+        raise SystemExit(main())
+    except (ValueError, TypeError, KeyError, OSError) as error:
+        emit("collector_error", reason=str(error))
+        raise SystemExit(1) from None
