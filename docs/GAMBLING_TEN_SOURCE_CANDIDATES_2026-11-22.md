@@ -68,3 +68,6 @@
 - 已通过独立 `.github/gambling-source-probe-request.json` 提交 `probe-20261122-v2ex-pii-redaction-v05`，要求 GitHub Runner 再次读取真实原文与全部251条回复；GitHub Actions 实际日志和 `docs/GAMBLING_CHINESE_PROBE_LATEST.json` 必须证明 `parser_ok` 才能继续 DEV D1 导入及回读验收。**不要把触发成功当成实际通过。**
 - 本阶段优先处理 V2EX 隐私与解析；豆瓣后置，既有每6小时采集任务频率和生产数据库不变。
 
+## 2026-11-22 已授权英文真实故事来源的后续验收
+
+本轮依据用户确认的七站授权，逐站在正常采集运行器验证。已启用站点以 [来源配置](../scripts/gambling_sources.json) 为准，正式验收、各站访问结果与文章来源说明见 [采集与内容同步](COLLECTION_AND_SYNC.md#2026-11-22-七个授权英文来源的运行器验收)。
