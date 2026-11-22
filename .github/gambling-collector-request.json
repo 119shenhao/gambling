@@ -1,8 +1,11 @@
 {
-  "request_id": "gambling_20261122_collect_harm_and_family_boards",
-  "mode": "collect",
+  "request_id": "gambling_20261122_inspect_authorized_standalone_stories",
+  "mode": "inspect",
   "sites": [
-    "all"
+    "tacklinggamblingstigma",
+    "agr",
+    "gamblingwithlives",
+    "australiadss"
   ],
   "candidates": {},
   "limit": 2
