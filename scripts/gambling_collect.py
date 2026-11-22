@@ -23,6 +23,11 @@ SOURCE_RE = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
 MAX_BYTES = 150_000
 
 
+class RejectedCandidate(ValueError):
+    """Source post is ineligible (missing replies, private data, etc.)."""
+    pass
+
+
 def emit(event, **fields):
     print(json.dumps({"event": event, **fields}, ensure_ascii=False), flush=True)
 
@@ -118,8 +123,12 @@ def readback(topic_id, draft, n):
         path = "/api/topics/" + topic_id + (("?before=" + str(cursor)) if cursor is not None else "")
         result = api(path)
         saved = result.get("topic", {})
-        if any(saved.get(field) != draft[field] for field in ("title", "body", "source_lang")):
+        if any(saved.get(field) != draft[field] for field in ("title", "body")):
             raise ValueError("readback_topic_mismatch")
+        # The Worker independently detects original language; source_lang in
+        # the imported payload is only a hint. Short replies may become 'und'.
+        if not isinstance(saved.get("source_lang"), str) or not saved["source_lang"]:
+            raise ValueError("readback_missing_topic_language")
         page = result.get("comments", [])
         if not isinstance(page, list):
             raise ValueError("readback_invalid_page")
@@ -138,11 +147,19 @@ def readback(topic_id, draft, n):
         raise ValueError("readback_pagination_unfinished")
     if len(rows) != n or len({row.get("id") for row in rows}) != n:
         raise ValueError("readback_count_mismatch")
-    expected = Counter((item["body"], item.get("source_lang", draft["source_lang"]))
-                       for item in flatten(draft["comments"]))
-    received = Counter((row.get("body"), row.get("source_lang")) for row in rows)
+    # The Worker detects language rather than blindly accepting a hint.
+    # Require every byte of every reply body and correct multiplicity.
+    expected = Counter(item["body"] for item in flatten(draft["comments"]))
+    received = Counter(row.get("body") for row in rows)
     if expected != received:
-        raise ValueError("readback_reply_mismatch")
+        raise ValueError("readback_reply_body_mismatch")
+    if any(not isinstance(row.get("source_lang"), str) or
+           not row["source_lang"] for row in rows):
+        raise ValueError("readback_missing_reply_language")
+    detected = Counter(row["source_lang"] for row in rows)
+    if detected != Counter({draft["source_lang"]: n}):
+        emit("readback_language_detection", topic_id=topic_id,
+             source_hint=draft["source_lang"], detected_languages=dict(detected))
     # Current GamCare/Gambling Therapy HTML adapters yield flat replies.
     # Never infer nesting from quotes or @mentions.
     if any(row.get("parent_comment_id") is not None for row in rows):
@@ -216,8 +233,15 @@ def collect_one(site, source, identifier, url, export_dir):
                 raise ValueError("export_missing_or_too_large")
             draft = json.loads(file.read_text(encoding="utf-8"))
         else:
-            draft = parse_topic(site, identifier, url, http(url))
-        n = validate(draft)
+            source_html = http(url)
+            try:
+                draft = parse_topic(site, identifier, url, source_html)
+            except ValueError as error:
+                raise RejectedCandidate(str(error)) from None
+        try:
+            n = validate(draft)
+        except ValueError as error:
+            raise RejectedCandidate(str(error)) from None
         submitted = True
         receipt = api("/api/collect/complete", {**payload, "topic": draft})
         completed = receipt.get("status") == "completed"
@@ -274,7 +298,7 @@ def main():
         raise ValueError("preview_not_ready")
     emit("readiness", preview=True, configured_sources=len(sources),
          importable_sources=sum(available(v) for v in sources.values()))
-    total_topics = total_comments = total_duplicates = errors = 0
+    total_topics = total_comments = total_duplicates = errors = rejected = 0
     for site in sites:
         source = sources[site]
         try:
@@ -323,6 +347,8 @@ def main():
                     imported += n_topics
                     comments += n_comments
                     duplicates += n_dupes
+                except RejectedCandidate:
+                    rejected += 1
                 except ValueError:
                     errors += 1
             total_topics += imported
@@ -334,7 +360,7 @@ def main():
             errors += 1
             emit("site_error", site=site, reason=str(error))
     emit("run_summary", new_topics=total_topics, new_comments=total_comments,
-         duplicates=total_duplicates, errors=errors,
+         duplicates=total_duplicates, rejected=rejected, errors=errors,
          ready_for_unattended_collect=bool(sum(available(s) for s in sources.values())))
     if errors:
         return 1
