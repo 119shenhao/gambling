@@ -439,3 +439,8 @@
 - [历史语言元数据修复 #45024860737](https://github.com/119shenhao/identity-center/actions/runs/45024860737)：6篇主帖+857回复修复并回读。
 - [最终只读核验 #45026992693](https://github.com/119shenhao/identity-center/actions/runs/45026992693)：剩余142条评论在 DEV 和 PROD 都是 `und`，`dev_source_missing=0`、`dev_source_nonund_unverified=0`，并非同步丢失原文语言。按准确性原则保留原始未知标记，不得批量猜测；人工确认属于可选内容治理工作，不再视为此同步故障遗留。
 - 结论：本次用户要求的生产发布、未来同步用新实现、历史错误修复与远端验收均已完成；后续新增来源仍须经过相同严格语言证据检查。不得触碰 `spine-community`。
+
+## 2026-11-22 「发帖」按钮复用阅读设置金色 CTA（开发环境）
+
+- 根据用户确认的截图效果，`dev/public/styles.css` 中发帖入口去除覆盖主题色的深绿色规则，改用 `.button.primary` 已使用的金色渐变、深色文字及高光；不改四列导航、图标及 `data-action="compose"` 业务代码。
+- 同步更新 `tests/gambling.test.mjs`，校验金色主题变量、手机导航及按钮行为绑定。仅提交开发分支；本次未请求生产部署，也不修改生产数据库和其他论坛。CI / 线上预览结果以实际运行回执为准。

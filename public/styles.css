@@ -434,8 +434,7 @@ dialog .dialog-close:hover {
   border-color:#96764d;
   background:#4a0c1a;
 }
-:root:not([data-reading-theme="warm"]) .sidebar .primary-nav .nav-link.active,
-:root:not([data-reading-theme="warm"]) .sidebar .primary-nav .nav-compose {
+:root:not([data-reading-theme="warm"]) .sidebar .primary-nav .nav-link.active {
   background:linear-gradient(160deg,#1c563b,#103d2a);
   border:1px solid #c4a35e;
   color:#f7edcd;
@@ -447,9 +446,6 @@ dialog .dialog-close:hover {
 :root:not([data-reading-theme="warm"]) .sidebar .primary-nav .nav-link:not(.active):not(.nav-compose):hover {
   color:#fff1cb;
   background:#531624;
-}
-:root:not([data-reading-theme="warm"]) .sidebar .primary-nav .nav-compose:hover {
-  background:linear-gradient(160deg,#246b4b,#145038);
 }
 
 /* The 390px reference screenshot is a mobile composition, not a desktop
@@ -652,23 +648,24 @@ dialog .dialog-close:hover {
 :root[data-reading-theme="warm"] .panel {background:var(--paper);}
 
 
-/* Final approved 2026-11-22: understated compose button only.
-   A deeper felt-green button, bolder label and slightly firmer gold outline.
-   No marquee, bright glow, decorative badge or changes to other navigation. */
+/* Approved 2026-11-22: compose matches the Reading settings gold CTA.
+   Reuse .button.primary's gradient, ink, border and inset highlight in both
+   reading themes, without changing the four navigation positions or action. */
+.sidebar .primary-nav .nav-compose {
+  background:var(--gold-fill);
+  border:1px solid var(--frame);
+  border-radius:12px;
+  color:var(--on-accent);
+  font-weight:750;
+  box-shadow:inset 0 1px #fff5d391;
+  text-shadow:none;
+}
+.sidebar .primary-nav .nav-compose:hover,
+.sidebar .primary-nav .nav-compose:active {
+  background:var(--accent-hover);
+  color:var(--on-accent);
+}
 @media (max-width:700px) {
-  :root:not([data-reading-theme="warm"]) .sidebar .primary-nav .nav-compose {
-    background:linear-gradient(160deg,#12392b 0%,#082b20 100%);
-    border:2px solid #d3b06b;
-    border-radius:12px;
-    color:#f7eed5;
-    font-weight:750;
-    box-shadow:inset 0 1px 0 #f4dfa52e,0 2px 5px #0b090622;
-    text-shadow:none;
-  }
-  :root:not([data-reading-theme="warm"]) .sidebar .primary-nav .nav-compose:hover,
-  :root:not([data-reading-theme="warm"]) .sidebar .primary-nav .nav-compose:active {
-    background:linear-gradient(160deg,#164233 0%,#0a3226 100%);
-  }
   .sidebar .primary-nav .nav-compose::before {display:none;}
 }
 

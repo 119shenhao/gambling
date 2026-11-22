@@ -280,13 +280,13 @@ test('approved mobile casino-felt theme keeps reading preferences and four prima
  assert.match(app,/function readingSettingsCard\(/);
 });
 
-test('compose action is visually distinct without affecting the other mobile tabs',()=>{
+test('compose matches reading-settings gold style without affecting other mobile tabs',()=>{
  const css=read('public/styles.css'),js=read('public/app.js');
- assert.match(css,/Final approved 2026-11-22: understated compose button only/);
- assert.match(css,/\.sidebar \.primary-nav \.nav-compose \{/);
- assert.match(css,/background:linear-gradient\(160deg,#12392b 0%,#082b20 100%\)/);
- assert.match(css,/border:2px solid #d3b06b/);
- assert.match(css,/font-weight:750/);
+ assert.match(css,/Approved 2026-11-22: compose matches the Reading settings gold CTA/);
+ assert.match(css,/\.button\.primary,\.sidebar \.nav-compose\{background:var\(--gold-fill\);color:var\(--on-accent\);border:1px solid var\(--frame\);box-shadow:inset 0 1px #fff5d391\}/);
+ assert.match(css,/\.sidebar \.primary-nav \.nav-compose \{\s*background:var\(--gold-fill\);\s*border:1px solid var\(--frame\);\s*border-radius:12px;\s*color:var\(--on-accent\);\s*font-weight:750;\s*box-shadow:inset 0 1px #fff5d391/);
+ assert.match(css,/\.sidebar \.primary-nav \.nav-compose:hover,[\s\S]*?background:var\(--accent-hover\)/);
+ assert.doesNotMatch(css,/\.primary-nav \.nav-compose \{\s*background:linear-gradient\(160deg,#12392b/);
  assert.match(css,/\.sidebar \.primary-nav \.nav-compose::before \{display:none;\}/);
  assert.match(js,/data-action="compose"/);
 });
