@@ -15,7 +15,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-from gambling_forums import discover, parse_topic, source_id
+from gambling_forums import discover, parse_topic, parse_topic_pages, source_id
 
 PREVIEW = "https://dev-gambling-community.119shenhao.workers.dev"
 SITE_RE = re.compile(r"^[a-z0-9][a-z0-9_-]{1,31}$")
@@ -102,13 +102,13 @@ def validate(draft):
     if len(draft["title"]) > 200 or len(draft["body"]) > 30_000:
         raise ValueError("topic_length_exceeded")
     replies = flatten(draft.get("comments", []))
-    if not 1 <= len(replies) <= 49:
+    if not 1 <= len(replies) <= 500:
         raise ValueError("reply_count_invalid")
     serialized = json.dumps({"site": "placeholder", "source_id": "placeholder",
                              "lease_token": "x" * 90, "topic": draft},
                             ensure_ascii=False).encode()
-    if len(serialized) > MAX_BYTES:
-        raise ValueError("payload_too_large")
+    # 49-or-fewer comments may use the single atomic endpoint. Long topics
+    # are sent as independent bounded pages, never as one giant request.
     return len(replies)
 
 
@@ -119,7 +119,7 @@ def readback(topic_id, draft, n):
     rows = []
     cursor = None
     visited = set()
-    for _ in range(5):
+    for _ in range(32):
         path = "/api/topics/" + topic_id + (("?before=" + str(cursor)) if cursor is not None else "")
         result = api(path)
         saved = result.get("topic", {})
@@ -133,7 +133,7 @@ def readback(topic_id, draft, n):
         if not isinstance(page, list):
             raise ValueError("readback_invalid_page")
         rows.extend(page)
-        if len(rows) > 49:
+        if len(rows) > 500:
             raise ValueError("readback_reply_overflow")
         nxt = result.get("next")
         if nxt is None:
@@ -245,6 +245,73 @@ def load_registry():
     return known
 
 
+def staged_replies(draft):
+    """Flatten original comment preorder, preserving absolute parent indices."""
+    output = []
+    def visit(items, parent=None, depth=1):
+        if depth > 8:
+            raise ValueError("reply_depth_exceeded")
+        for node in items:
+            index = len(output)
+            output.append({"body": node["body"],
+                           "source_lang": node.get("source_lang", draft["source_lang"]),
+                           "parent_index": parent})
+            visit(node.get("replies", []), index, depth + 1)
+    visit(draft["comments"])
+    return output
+
+
+def complete_staged(site, identifier, token, draft, source_total, n):
+    """Stage up to 500 comments in bounded requests, then publish atomically."""
+    stage = {"site": site, "source_id": identifier, "lease_token": token}
+    started = False
+    try:
+        response = api("/api/collect/long/start", {
+            **stage, "title": draft["title"], "body": draft["body"],
+            "source_lang": draft["source_lang"], "source_total": source_total,
+            "target_count": n})
+        if response.get("status") == "completed" and response.get("duplicate"):
+            return response
+        if response.get("status") != "staging":
+            raise ValueError("long_start_not_staging")
+        started = True
+        replies = staged_replies(draft)
+        if len(replies) != n or n != min(source_total, 500):
+            raise ValueError("long_count_mismatch")
+        received = response["received"]
+        if type(received) is not int or not 0 <= received <= n:
+            raise ValueError("long_bad_resume_offset")
+        for offset in range(received, n, 10):
+            batch = replies[offset:offset + 10]
+            answer = api("/api/collect/long/append", {
+                **stage, "offset": offset, "comments": batch})
+            if answer.get("received") != offset + len(batch):
+                raise ValueError("long_append_not_confirmed")
+        response = api("/api/collect/long/finish", stage)
+        if response.get("status") != "completed":
+            raise ValueError("long_finish_not_confirmed")
+        if response.get("stored_comments") != n:
+            raise ValueError("long_finish_count_mismatch")
+        if response.get("capped") is not (source_total > 500):
+            raise ValueError("long_cap_mismatch")
+        return response
+    except ValueError:
+        # A timed-out finish could have succeeded. Do not abort until
+        # the collector source exclusion proves the outcome is not completed.
+        if started:
+            status = None
+            try:
+                status = excluded_ids(site).get(identifier)
+            except ValueError:
+                pass
+            if status == "claimed":
+                try:
+                    api("/api/collect/long/abort", stage)
+                except ValueError:
+                    emit("long_abort_failed", site=site, source_id=identifier)
+        raise
+
+
 def collect_one(site, source, identifier, url, export_dir):
     lease = api("/api/collect/claim", {
         "site": site, "source_ids": [identifier],
@@ -266,15 +333,30 @@ def collect_one(site, source, identifier, url, export_dir):
         else:
             source_html = http(url)
             try:
-                draft = parse_topic(site, identifier, url, source_html)
+                if site == "gamcare":
+                    draft, metadata = parse_topic_pages(site, identifier, url, source_html, http)
+                else:
+                    draft = parse_topic(site, identifier, url, source_html)
+                    metadata = {"source_total": len(flatten(draft.get("comments", []))),
+                                "capped": False, "pages": 1}
             except ValueError as error:
                 raise RejectedCandidate(str(error)) from None
+        if export_dir:
+            metadata = {"source_total": len(flatten(draft.get("comments", []))),
+                        "capped": False, "pages": 1}
         try:
             n = validate(draft)
         except ValueError as error:
             raise RejectedCandidate(str(error)) from None
         submitted = True
-        receipt = api("/api/collect/complete", {**payload, "topic": draft})
+        whole_bytes = len(json.dumps({**payload, "topic": draft},
+                        ensure_ascii=False).encode())
+        long_mode = n > 49 or whole_bytes > MAX_BYTES or metadata["pages"] > 1
+        if long_mode:
+            receipt = complete_staged(site, identifier, token, draft,
+                                      metadata["source_total"], n)
+        else:
+            receipt = api("/api/collect/complete", {**payload, "topic": draft})
         completed = receipt.get("status") == "completed"
         if not completed:
             raise ValueError("complete_not_confirmed")
@@ -283,6 +365,9 @@ def collect_one(site, source, identifier, url, export_dir):
             return 0, 0, 1
         if receipt.get("imported") != {"topics": 1, "comments": n}:
             raise ValueError("imported_count_mismatch")
+        if metadata.get("capped"):
+            emit("source_reply_cap", site=site, source_id=identifier,
+                 captured=n, source_total=metadata["source_total"], limit=500)
         readback(receipt["topic_id"], draft, n)
         emit("imported", site=site, source_id=identifier, topic_id=receipt["topic_id"],
              replies=n, source_url=url)
@@ -365,8 +450,16 @@ def main():
                 inspection = candidates if explicit else eligible
                 for identifier, url in list(inspection.items())[:10]:
                     try:
-                        draft = parse_topic(site, identifier, url, http(url))
+                        if site == "gamcare":
+                            draft, meta = parse_topic_pages(site, identifier, url, http(url), http)
+                        else:
+                            draft = parse_topic(site, identifier, url, http(url))
+                            meta = {"source_total": len(flatten(draft.get("comments", []))),
+                                    "capped": False, "pages": 1}
                         count = validate(draft)
+                        emit("parser_probe_pagination", site=site, source_id=identifier,
+                             pages=meta["pages"], source_total=meta["source_total"],
+                             captured=count, capped=meta["capped"])
                         emit("parser_probe_ok", site=site, source_id=identifier,
                              replies=count, source_url=url)
                         if excluded.get(identifier) == "completed":
