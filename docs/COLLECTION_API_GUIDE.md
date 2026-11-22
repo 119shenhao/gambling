@@ -172,7 +172,7 @@ curl -sS -X POST 'https://dev-gambling-community.119shenhao.workers.dev/api/coll
 - `.github/workflows/gambling-collector-on-demand.yml`：按需采集工作流
 - `docs/COLLECTION_AND_SYNC.md`：开发/生产内容同步与验收记录
 
-目前 `scripts/gambling_sources.json` 已登记 GamCare 与 Gambling Therapy 两个候选来源（默认均未启用）。`scripts/gambling_forums.py` 已提供独立来源发现及严格 HTML 正文/回复解析器，`gambling_collect.py` 支持 `inspect` 只读探测候选与正文。真实 GitHub Runner 首次只读发现 GamCare 39 个去重候选、Gambling Therapy HTTP 403。**登记来源、发现候选、通过离线测试，不等于具备完整转载许可或能立即自动入库。** 仅当 `approved`、`parser_verified`、`reuse_allowed` 均为 true，且 `permission_evidence` 是真实核验凭证时，才能从 `collect` 模式自动导入；无已启用来源的 `collect` 将以非零状态结束而不是冒充新增成功。
+目前 `scripts/gambling_sources.json` 已登记 GamCare 与 Gambling Therapy 两个来源，其中 **GamCare 在用户明确确认取得完整主帖和评论再发布许可后已启用**（用户声明如实登记；没有独立核验许可文件），Gambling Therapy 仍未启用且列表 HTTP 403。`scripts/gambling_forums.py` 实现独立发现及严格 HTML 正文/回复解析；`scripts/gambling_collect.py` 的 `inspect` 可以只读检查及核实已完成帖子，`collect` 会检查 `approved`、`parser_verified`、`reuse_allowed` 和 `permission_evidence` 后执行 `exclusions → claim → complete → 多页回读`。GamCare **已实测自动新增真实 9 篇主帖、49 条回复**（见下文记录），但这不是其它来源可用的证明。未启用的来源在正式采集模式中直接跳过。
 
 GitHub 请求文件 `.github/gambling-collector-request.json` 的格式为：
 
@@ -191,3 +191,12 @@ GitHub 请求文件 `.github/gambling-collector-request.json` 的格式为：
 - [GitHub Actions 真实只读来源发现 #44992825630](https://github.com/119shenhao/gambling/actions/runs/44992825630)：GitHub Runner 访问开发 Worker 成功、10 项离线解析测试通过、GamCare 候选 39 篇；没有导入。
 - 正文解析探测：`mode=inspect` 会对每个来源前两篇候选验证完整正文和评论数，只记录验证数量或失败原因，不记录原文内容；待检查实际新运行结果。
 - 所有外部采集仅可写 gambling DEV；`src/collect.ts` 的租约、去重、原子完整评论导入仍是最终门禁。
+
+### 2026-11-22 GamCare 已验收执行记录（截至本轮）
+
+- [首篇真导入](https://github.com/119shenhao/gambling/actions/runs/44993497291)：1 主帖、7 回复。
+- [自动采集及误判记录](https://github.com/119shenhao/gambling/actions/runs/44993558005)：有 2 篇因服务端对短评论独立识别为 `und`，旧代码误报 `readback_reply_mismatch`；[只读再核验](https://github.com/119shenhao/gambling/actions/runs/44993908744) 已确认14条和7条真实评论全文完整。
+- [首次自动验收成功](https://github.com/119shenhao/gambling/actions/runs/44993765907)：2 篇、7 回复、错误0。
+- [最新恢复自动采集默认命令](https://github.com/119shenhao/gambling/actions/runs/44994042299)：2 篇、10 回复、错误0、17项解析器测试通过、Actions 成功。
+- 原站正文及评论内容保留，服务端原文语言为自动检测结果；评论提示 `en` 不应强制覆盖服务端 `und`。每篇仍按原站稳定 source_id 去重并由系统账户显示 Anonymous；不会因检测语言不一致重复提交。
+- 当前 GitHub 请求默认保持 `mode=collect`、`sites=["all"]`、`candidates={}`、`limit=2`，仅向戒赌独立 DEV D1 写入。开发→生产独立同步不属于本接口指南中的采集动作。
