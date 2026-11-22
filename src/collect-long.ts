@@ -142,6 +142,18 @@ export async function collectLongRoute(req:Request,env:Env,path:string):Promise<
    existing.topic_id,UNKNOWN_USER_ID,existing.title,existing.body,existing.source_lang,existing.source_lang_mode,existing.topic_status,existing.content_hash),
   stmt(db,'INSERT INTO comments(id,topic_id,author_id,parent_comment_id,kind,body,source_lang,source_lang_mode,status) SELECT c.id,?, ?,p.id,?,c.body,c.source_lang,c.source_lang_mode,c.reply_status FROM collector_long_replies c LEFT JOIN collector_long_replies p ON p.site=c.site AND p.source_id=c.source_id AND p.ordinal=c.parent_ordinal WHERE c.site=? AND c.source_id=? ORDER BY c.ordinal',
    existing.topic_id,UNKNOWN_USER_ID,'regular',site,sourceId),
+  // Record the same independent language evidence used by the short-topic
+  // import path. Without these current-version rows, the protected DEV-to-PROD
+  // sync deliberately downgrades otherwise recognized original languages to
+  // "und" (especially visible on V2EX long threads).
+  stmt(db,`INSERT OR IGNORE INTO content_language_verifications
+   (content_type,content_id,content_version,language,method,score)
+   SELECT 'topic',id,content_version,source_lang,'tinyld-heavy',NULL FROM topics
+   WHERE id=? AND status='published' AND source_lang_mode='auto' AND source_lang<>'und'`,existing.topic_id),
+  stmt(db,`INSERT OR IGNORE INTO content_language_verifications
+   (content_type,content_id,content_version,language,method,score)
+   SELECT 'comment',id,content_version,source_lang,'tinyld-heavy',NULL FROM comments
+   WHERE topic_id=? AND status='published' AND source_lang_mode='auto' AND source_lang<>'und'`,existing.topic_id),
   stmt(db,'UPDATE collect_sources SET state=?,lease_token_hash=NULL,lease_expires_at=NULL,completion_token_hash=?,topic_id=?,content_hash=?,completed_duplicate=0,completed_at=?,updated_at=? WHERE site=? AND source_id=? AND state=? AND lease_token_hash=?',
    'completed',tokenHash,existing.topic_id,existing.content_hash,now(),now(),site,sourceId,'claimed',tokenHash),
   stmt(db,'UPDATE collector_long_stages SET status=? WHERE site=? AND source_id=? AND lease_hash=?','completed',site,sourceId,tokenHash),
