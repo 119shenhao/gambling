@@ -166,5 +166,39 @@ class ParserTests(unittest.TestCase):
             self.assertTrue(mock.call_args_list[1].args[0].endswith("?before=200"))
 
 
+    def test_readback_allows_server_detected_language_not_import_hint(self):
+        draft = {"title": "Online gambling recovery", "body": "I am starting to quit",
+                 "source_lang": "en", "comments": [
+                     {"body": "Wish you well", "source_lang": "en"},
+                     {"body": "Keep going", "source_lang": "en"}]}
+        result = {"topic": {"title": draft["title"], "body": draft["body"],
+                            "source_lang": "und"},
+                  "comments": [
+                      {"id": "c1", "body": "Wish you well", "source_lang": "und",
+                       "parent_comment_id": None},
+                      {"id": "c2", "body": "Keep going", "source_lang": "en",
+                       "parent_comment_id": None}],
+                  "next": None}
+        with patch.object(collect, "api", return_value=result):
+            self.assertTrue(collect.readback(
+                "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee", draft, 2))
+
+    def test_incomplete_source_raises_rejected_candidate_and_releases(self):
+        calls = []
+        def fake_api(path, body=None):
+            calls.append(path)
+            if path.endswith("/claim"):
+                return {"results": [{"result": "granted",
+                                     "lease_token": "x" * 64}]}
+            if path.endswith("/release"):
+                return {"status": "released"}
+            raise AssertionError("unexpected API path " + path)
+        with patch.object(collect, "api", side_effect=fake_api), \
+                patch.object(collect, "http", return_value=b"<html></html>"):
+            with self.assertRaises(collect.RejectedCandidate):
+                collect.collect_one(self.site, {}, "trying-to-stop", self.url, None)
+        self.assertEqual(calls, ["/api/collect/claim", "/api/collect/release"])
+
+
 if __name__ == "__main__":
     unittest.main()
