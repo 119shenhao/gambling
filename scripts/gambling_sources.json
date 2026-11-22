@@ -37,12 +37,12 @@
         "https://forums.moneysavingexpert.com/categories/debt-free-diaries"
       ],
       "adapter": "gambling_forums",
-      "approved": false,
+      "approved": true,
       "parser_verified": false,
-      "reuse_allowed": false,
-      "permission_evidence": "",
+      "reuse_allowed": true,
+      "permission_evidence": "User-confirmed 2026-11-22 in project chat: permission obtained for MoneySavingExpert gambling-related complete topics and replies to be republished; no written agreement independently inspected.",
       "parser_sample": "https://forums.moneysavingexpert.com/discussion/6512900/redemption-the-journey-of-a-recovering-gambling-addict",
-      "note": "Read-only structural/parser verification in progress. No independent full-post republication permission; NEVER collect or publish until explicitly authorized."
+      "note": "User confirmed full-text/reply republication permission. Technical parser remains disabled until live page and reply-integrity verification succeeds; collect gate is parser_verified=false."
     }
   ]
 }
