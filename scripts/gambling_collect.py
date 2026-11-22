@@ -112,7 +112,7 @@ def validate(draft):
     return len(replies)
 
 
-def readback(topic_id, draft, n):
+def readback(topic_id, draft, n, site=None, identifier=None):
     """Read all DEV detail pages, not just the first 20 comments."""
     if not re.fullmatch(r"[0-9a-f-]{36}", topic_id or ""):
         raise ValueError("invalid_topic_id")
@@ -145,14 +145,44 @@ def readback(topic_id, draft, n):
         cursor = nxt
     else:
         raise ValueError("readback_pagination_unfinished")
-    if len(rows) != n or len({row.get("id") for row in rows}) != n:
+    if len(rows) > n or len({row.get("id") for row in rows}) != len(rows):
         raise ValueError("readback_count_mismatch")
-    # The Worker detects language rather than blindly accepting a hint.
-    # Require every byte of every reply body and correct multiplicity.
+    # The Worker independently detects language. Exact public-body matching
+    # must always pass, even if some private moderation records are withheld.
     expected = Counter(item["body"] for item in flatten(draft["comments"]))
     received = Counter(row.get("body") for row in rows)
-    if expected != received:
+    if received - expected:
         raise ValueError("readback_reply_body_mismatch")
+    if len(rows) == n:
+        if expected != received:
+            raise ValueError("readback_reply_body_mismatch")
+    else:
+        # Moderated replies belong in the DEV database but are deliberately
+        # omitted from the public detail API. Count them as *stored* only after
+        # a fresh preview-only, DB-backed verification of the completed source.
+        # Do NOT silently accept missing/deleted/blocked/unaccounted replies.
+        if not site or not identifier:
+            raise ValueError("readback_count_mismatch")
+        proof = api("/api/collect/verification?" + urlencode({
+            "site": site, "source_id": identifier}))
+        counts = proof.get("status_counts", {})
+        if (proof.get("site") != site or proof.get("source_id") != identifier
+                or proof.get("topic_id") != topic_id
+                or proof.get("status") != "completed"
+                or proof.get("duplicate") is not False
+                or type(proof.get("total")) is not int or proof["total"] != n
+                or not isinstance(counts, dict)
+                or any(type(v) is not int or v < 0 for v in counts.values())
+                or sum(counts.values()) != n
+                or counts.get("published", 0) != len(rows)
+                or counts.get("pending_review", 0) != n - len(rows)
+                or any(v for k, v in counts.items()
+                       if k not in ("published", "pending_review"))):
+            raise ValueError("readback_moderation_count_unverified")
+        emit("readback_pending_review_verified", site=site,
+             source_id=identifier, topic_id=topic_id,
+             stored=n, public=len(rows),
+             pending_review=counts["pending_review"])
     if any(not isinstance(row.get("source_lang"), str) or
            not row["source_lang"] for row in rows):
         raise ValueError("readback_missing_reply_language")
@@ -194,7 +224,7 @@ def audit_completed(site, identifier, url, draft, n):
     topic_id = lookup_published_topic_id(draft)
     if not topic_id:
         raise ValueError("completed_topic_not_visible_in_dev_feed")
-    readback(topic_id, draft, n)
+    readback(topic_id, draft, n, site, identifier)
     emit("completed_audit_ok", site=site, source_id=identifier,
          topic_id=topic_id, replies=n, source_url=url)
 
@@ -381,7 +411,7 @@ def collect_one(site, source, identifier, url, export_dir):
         if metadata.get("capped"):
             emit("source_reply_cap", site=site, source_id=identifier,
                  captured=n, source_total=metadata["source_total"], limit=500)
-        readback(receipt["topic_id"], draft, n)
+        readback(receipt["topic_id"], draft, n, site, identifier)
         emit("imported", site=site, source_id=identifier, topic_id=receipt["topic_id"],
              replies=n, source_url=url)
         return 1, n, 0
