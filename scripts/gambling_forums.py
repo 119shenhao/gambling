@@ -165,3 +165,112 @@ def parse_topic(site, expected_id, page_url, html):
         "source_lang": "en",
         "comments": [{"body": content, "source_lang": "en"} for content in bodies[1:]],
     }
+
+
+MAX_CAPTURED_REPLIES = 500
+MAX_FORUM_PAGES = 40
+
+
+def _post_nodes(page):
+    nodes = page.select(POST_SELECTOR)
+    return [node for node in nodes if not node.find_parent(lambda parent: parent in nodes)]
+
+
+def _page_label(page):
+    """wpForo displays 'Page N / M' for long threads, including page 2."""
+    text = page.get_text(" ", strip=True)
+    found = re.search(r"\bPage\s+(\d{1,4})\s*/\s*(\d{1,4})\b", text, re.I)
+    return (int(found[1]), int(found[2])) if found else None
+
+
+def _declared_post_count(page):
+    """The topic-wide 'NN Posts' stat, not a user's individual post count."""
+    stat = page.select_one(".wpforo-topic-stat, .wpf-topic-stat, .wpf-topic-posts")
+    text = stat.get_text(" ", strip=True) if stat is not None else ""
+    match = re.search(r"\b(\d{1,7})\s+posts?\b", text, re.I)
+    if not match:
+        # Some wpForo themes render the count in a standalone element.
+        whole = page.get_text(" ", strip=True)
+        match = re.search(r"\b(\d{1,7})\s+Posts\b", whole)
+    return int(match[1]) if match else None
+
+
+def parse_topic_pages(site, expected_id, page_url, first_html, fetch):
+    """Walk stable GamCare forum pagination and return the first <=500 replies.
+
+    The published response reports the original reply total and capped status
+    separately. A missing/unavailable page before the 500th reply always fails.
+    """
+    if source_id(site, page_url) != expected_id:
+        raise ValueError("source_id_mismatch")
+    if site != "gamcare":
+        raise ValueError("long_pagination_adapter_unavailable")
+    base = page_url.rstrip("/") + "/"
+    total_posts = None
+    page_count = None
+    replies = []
+    seen_ids = set()
+    title = first_body = None
+    page_number = 1
+    while page_number <= MAX_FORUM_PAGES:
+        url = base if page_number == 1 else base + "paged/" + str(page_number) + "/"
+        raw = first_html if page_number == 1 else fetch(url)
+        page = BeautifulSoup(raw, "html.parser")
+        label = _page_label(page)
+        if label:
+            if label[0] != page_number or label[1] < page_number:
+                raise ValueError("pagination_number_mismatch")
+            if page_count is not None and page_count != label[1]:
+                raise ValueError("pagination_total_changed")
+            page_count = label[1]
+        elif page_number > 1:
+            raise ValueError("pagination_label_missing")
+        declared = _declared_post_count(page)
+        if declared is None or declared < 2:
+            raise ValueError("forum_total_posts_unavailable")
+        if total_posts is None:
+            total_posts = declared
+        elif total_posts != declared:
+            raise ValueError("source_reply_total_changed")
+        nodes = _post_nodes(page)
+        if not nodes:
+            raise ValueError("empty_forum_page")
+        if page_number == 1:
+            title_node = page.select_one("h1.wpforo-topic-title, h1.wpf-topic-title, h1.entry-title, h1")
+            if title_node is None:
+                raise ValueError("title_missing")
+            title = _required(title_node, "title_invalid")
+            if len(title) > 200:
+                raise ValueError("title_too_long")
+            content = nodes[0].select_one(CONTENT_SELECTOR)
+            first_body = _required(content, "post_body_invalid")
+            if len(first_body) > 30000 or not GAMBLING.search(title + " " + first_body):
+                raise ValueError("invalid_gambling_topic")
+            nodes = nodes[1:]
+        for node in nodes:
+            content = node.select_one(CONTENT_SELECTOR)
+            body = _required(content, "post_body_invalid")
+            if len(body) > 12000:
+                raise ValueError("reply_too_long")
+            native_id = node.get("id") or ""
+            if native_id:
+                if native_id in seen_ids:
+                    raise ValueError("duplicate_native_reply_id")
+                seen_ids.add(native_id)
+            if len(replies) < MAX_CAPTURED_REPLIES:
+                replies.append({"body": body, "source_lang": "en"})
+            if len(replies) >= MAX_CAPTURED_REPLIES:
+                break
+        wanted = min(total_posts - 1, MAX_CAPTURED_REPLIES)
+        if len(replies) == wanted:
+            return ({"title": title, "body": first_body, "source_lang": "en",
+                     "comments": replies},
+                    {"source_total": total_posts - 1, "captured": len(replies),
+                     "capped": total_posts - 1 > MAX_CAPTURED_REPLIES,
+                     "pages": page_number})
+        if page_count is not None and page_number >= page_count:
+            raise ValueError("forum_reply_count_mismatch")
+        if page_count is None:
+            raise ValueError("pagination_required_but_unavailable")
+        page_number += 1
+    raise ValueError("forum_page_limit_exceeded")
