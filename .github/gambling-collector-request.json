@@ -1,12 +1,12 @@
 {
-  "request_id": "collect-142-replies-10pages-20261122-1551",
-  "mode": "collect",
+  "request_id": "inspect-real-more-than-500-gamcare-20261122-1600",
+  "mode": "inspect",
   "sites": [
     "gamcare"
   ],
   "candidates": {
     "gamcare": [
-      "https://community.gamcare.org.uk/forum/recovery-diaries/i-have-a-problem-2/"
+      "https://community.gamcare.org.uk/forum/recovery-diaries/charlys-life/"
     ]
   },
   "limit": 1
