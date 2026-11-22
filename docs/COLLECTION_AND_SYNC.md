@@ -82,3 +82,22 @@
 - [首次复验 #45031599497](https://github.com/119shenhao/gambling/actions/runs/45031599497) 的运行日志记录 `listing_unavailable` 和网络超时。旧脚本随后以零候选、零错误退出，GitHub 的绿色状态不能作为来源连通证据。
 - 修复后，PsychForums 公共网页的网络超时只重试一次，HTTP 403 不重试。若所有配置的列表均不可用，运行记录明确返回来源错误，同时在脱敏报告中保留列表检查结果。此重试不应用于开发 Worker API 写请求。
 - [修复后复验 #45031861301](https://github.com/119shenhao/gambling/actions/runs/45031861301) 的 50 项离线测试全通过。在线检查在列表阶段仍无法连接，报告明确记录 1 个来源错误、新增 0 篇、0 条回复。本次未达到接入标准，PsychForums 保持关闭，常规采集请求已恢复，原定时任务继续按现有配置执行。
+
+## 2026-11-22 赌博债务、家庭破裂与生活变故来源扩充
+
+- 选题以当事人或家属可追溯的公开经历为依据。纳入赌博债务、破产、失业、住房损失、家庭冲突、分居离婚和失去亲人等影响；故事可仍在发展，康复可作为后续。论坛内容保留原始语境与回帖，来源资料作者的自述不视为独立查证。
+- 已有许可覆盖 GamCare 论坛的主帖和回复。本次新增 [Family & Friends](https://community.gamcare.org.uk/forum/family-friends/) 和 [Overcoming Gambling Harms](https://community.gamcare.org.uk/forum/overcoming-problem-gambling/) 两个发现入口。四个板块的候选交错合并，新增板块优先；每站的采集额度、去重和回复校验仍由原采集代码负责。
+- [现有工作流只读探测 #45033174072](https://github.com/119shenhao/gambling/actions/runs/45033174072) 在相同运行器完成两个新板块的 3 篇样本，读到 3、9、9 条回复，错误 0、入库 0。自动发现和开发入库以常规采集作业回执为准。
+
+### 待验收的英文外站
+
+| 来源 | 已读样本 | 接入状态 |
+| --- | --- | --- |
+| [Mumsnet](https://www.mumsnet.com/talk/substance_addiction_/5534704-partner-has-admitted-to-gambling-70k-worth-of-debt?page=1) | 家属讲述伴侣因赌博欠下 7 万英镑，主帖及分页可读，原站显示 224 条回复。 | [条款](https://www.mumsnet.com/i/terms-of-use) 要求采集和转载许可；未完成 Actions 验证。 |
+| [Tackling Gambling Stigma](https://tacklinggamblingstigma.com/contributors/) | 有当事人和家属的公开访谈正文，涉及破产、失业、伴侣分开与失去亲人。 | 独立访谈文章无原站回复；待确认转载范围。 |
+| [Alliance for Gambling Reform](https://www.agr.org.au/stories/sunenna) | 当事人讲述伴侣为赌博盗用其钱财及随后的家庭变故；公开文字故事。 | 独立文章，待确认转载范围。 |
+| [Gambling with Lives](https://www.gamblingwithlives.org/newsletter/inquests-gareth-and-stephen/) | 公开记录赌博相关死亡的家庭经历及验尸官结论。 | 独立文章，待确认转载范围。 |
+| [myFICO Bankruptcy](https://ficoforums.myfico.com/t5/Bankruptcy/Income-Increase-During-Chapter-13/td-p/4832222) | 当事人自述为赌博借约 5 万美元无抵押债务并申请破产，可读主帖和回复。样本为历史帖。 | 待确认全文及回复的再发布许可和运行器访问。 |
+| [英国 Gambling Commission](https://www.gamblingcommission.gov.uk/report/lived-experiences-of-affected-others-qualitative-research/consequences) | 研究中的匿名访谈案例，涉及瞒债、家庭储蓄损失及婚姻变故。 | 独立报告内的案例，[全文复用条款](https://www.gamblingcommission.gov.uk/about-us/page/terms-of-use) 要求权利人批准。 |
+
+独立案例文章目前只登记来源与链接。现有定时采集协议要求每个论坛主题至少有一条真实回复。
