@@ -222,6 +222,9 @@ function run(){
   if(typeof topic.title!=='string'||typeof topic.body!=='string')throw Error('Unexpected missing source text');
   const hash=fingerprint(topic.title,topic.body);
   if(topic.content_hash&&topic.content_hash!==hash)throw Error('Source hash mismatch: '+topic.id);
+  // Validate the source proof even if a matching production topic already
+  // exists. Do not create a completion receipt for an inconsistent DEV row.
+  resolveSyncLanguage(topic);
   const existing=verifyTopic(topic,hash);
   if(existing&&existing.id!==topic.id){
    console.log('SKIP already exists: '+topic.id+' -> '+existing.id);
