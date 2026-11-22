@@ -229,5 +229,84 @@ class ParserTests(unittest.TestCase):
                 collect.audit_completed(self.site, "trying-to-stop", self.url, topic, 2)
 
 
+    def test_multi_page_gamcare_keeps_all_replies(self):
+        from gambling_forums import parse_topic_pages
+        def generate(page, total=26, pages=2):
+            start = 0 if page == 1 else 20
+            stop = min(20 * page, total)
+            entries = []
+            for index in range(start, stop):
+                body = ("I lost money gambling and want to quit." if index == 0
+                        else "Reply no. " + str(index))
+                entries.append(
+                    '<article class="wpforo-post" id="post-' + str(index) +
+                    '"><div class="wpforo-post-content"><p>' + body +
+                    '</p></div></article>')
+            return ('<html><body><h1>Gambling recovery diary</h1>'
+                    '<div class="wpf-topic-stat">' + str(total) + ' Posts</div>'
+                    '<div>Page ' + str(page) + ' / ' + str(pages) + '</div>' +
+                    ''.join(entries) + '</body></html>')
+        first = generate(1)
+        urls = []
+        def fetch(url):
+            urls.append(url)
+            return generate(2)
+        draft, meta = parse_topic_pages(
+            self.site, "trying-to-stop", self.url, first, fetch)
+        self.assertEqual(meta, {"source_total": 25, "captured": 25,
+                                "capped": False, "pages": 2})
+        self.assertEqual(len(draft["comments"]), 25)
+        self.assertEqual(len(urls), 1)
+        self.assertTrue(urls[0].endswith("/paged/2/"))
+
+    def test_501_reply_thread_keeps_exactly_first_500(self):
+        from gambling_forums import parse_topic_pages
+        total = 502  # One original topic plus 501 actual replies.
+        pages = 26
+        def page(number):
+            start = (number - 1) * 20
+            stop = min(number * 20, total)
+            entries = []
+            for idx in range(start, stop):
+                message = "Gambling support and recovery." if idx == 0 else (
+                    "Original reply " + str(idx) + ".")
+                entries.append('<article class="wpforo-post" id="post-' +
+                               str(idx) + '"><div class="wpforo-post-content"><p>' +
+                               message + '</p></div></article>')
+            return ('<html><body><h1>My gambling recovery journey</h1>'
+                    '<div class="wpf-topic-stat">502 Posts</div>'
+                    '<div>Page ' + str(number) + ' / 26</div>' +
+                    ''.join(entries) + '</body></html>')
+        fetched = []
+        def fetch(url):
+            n = int(url.rstrip("/").rsplit("/", 1)[-1])
+            fetched.append(n)
+            return page(n)
+        draft, meta = parse_topic_pages(
+            self.site, "trying-to-stop", self.url, page(1), fetch)
+        self.assertEqual(meta["source_total"], 501)
+        self.assertEqual(meta["captured"], 500)
+        self.assertTrue(meta["capped"])
+        self.assertEqual(len(draft["comments"]), 500)
+        self.assertEqual(draft["comments"][0]["body"], "Original reply 1.")
+        self.assertEqual(draft["comments"][-1]["body"], "Original reply 500.")
+        self.assertNotIn("Original reply 501.",
+                         [c["body"] for c in draft["comments"]])
+        self.assertEqual(fetched[-1], 26)
+        self.assertEqual(collect.validate(draft), 500)
+
+    def test_gamcare_missing_page_is_rejected_not_partial(self):
+        from gambling_forums import parse_topic_pages
+        initial = ('<html><h1>Gambling quit attempt</h1>'
+                   '<div class="wpf-topic-stat">30 Posts</div>'
+                   '<div>Page 1 / 2</div>'
+                   '<article class="wpforo-post" id="p1">'
+                   '<div class="wpforo-post-content">I want to quit gambling.</div>'
+                   '</article></html>')
+        with self.assertRaisesRegex(ValueError, "pagination_number_mismatch"):
+            parse_topic_pages(self.site, "trying-to-stop", self.url, initial,
+                              lambda url: initial)
+
+
 if __name__ == "__main__":
     unittest.main()
