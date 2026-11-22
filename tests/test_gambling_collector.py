@@ -308,5 +308,43 @@ class ParserTests(unittest.TestCase):
                               lambda url: initial)
 
 
+    def test_preview_staging_schema_caps_500_and_keeps_source_total(self):
+        import sqlite3
+        database = sqlite3.connect(":memory:")
+        database.execute("PRAGMA foreign_keys=ON")
+        script = (Path(__file__).resolve().parents[1] /
+                  "migrations/preview-only/0002_collector_long.sql").read_text(
+                      encoding="utf-8")
+        database.executescript(script)
+        database.execute(
+            "INSERT INTO collector_long_stages "
+            "(site,source_id,topic_id,lease_hash,title,body,source_lang,"
+            "source_lang_mode,topic_status,content_hash,source_total,"
+            "target_count,capped) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            ("gamcare", "example", "test-topic", "hash", "test", "body", "en",
+             "auto", "published", "f"*64, 501, 500, 1))
+        row = database.execute(
+            "SELECT source_total,target_count,capped FROM collector_long_stages"
+        ).fetchone()
+        self.assertEqual(row, (501, 500, 1))
+        with self.assertRaises(sqlite3.IntegrityError):
+            database.execute(
+                "INSERT INTO collector_long_replies "
+                "(site,source_id,ordinal,id,body,source_lang,"
+                "source_lang_mode,reply_status) VALUES(?,?,?,?,?,?,?,?)",
+                ("gamcare", "example", 500, "reply-501", "text", "en",
+                 "auto", "published"))
+        for index in range(500):
+            database.execute(
+                "INSERT INTO collector_long_replies "
+                "(site,source_id,ordinal,id,body,source_lang,"
+                "source_lang_mode,reply_status) VALUES(?,?,?,?,?,?,?,?)",
+                ("gamcare", "example", index, "reply-" + str(index), "text",
+                 "en", "auto", "published"))
+        self.assertEqual(database.execute(
+            "SELECT COUNT(*) FROM collector_long_replies").fetchone()[0], 500)
+        database.close()
+
+
 if __name__ == "__main__":
     unittest.main()
