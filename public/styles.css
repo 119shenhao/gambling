@@ -134,6 +134,10 @@ dialog #modal-content {
   dialog #modal-content { padding:0 22px 27px; }
 }
 
+/* The dialog itself receives initial focus, rather than auto-highlighting the X button.
+   Keyboard tabbing still uses the normal :focus-visible ring on the close button. */
+dialog:focus {outline:none;}
+
 /* Keep the programmatically focusable main region free of Safari's blue outline when a modal closes. */
 #main:focus{outline:none}
 
