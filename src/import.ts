@@ -79,7 +79,7 @@ export async function importRoute(req:Request,env:Env,path:string):Promise<Respo
   const text=textField(r.body,1,12000),commentId=id(),status=risk('',text),language=importedSourceLanguage(r.source_lang,text);
   push({path,type:'comment',id:commentId,topic_id:topicId,parent_comment_id:parent,status});
   writes.push(stmt(db,"INSERT INTO comments(id,topic_id,author_id,parent_comment_id,kind,body,source_lang,source_lang_mode,status) VALUES(?,?,?,?,'regular',?,?,?,?)",commentId,topicId,UNKNOWN_USER_ID,parent,text,language.label,language.mode,status));
-  if(language.mode==='auto'&&status==='published')writes.push(verificationWrite(db,'comment',commentId,1,language.label,'tinyld-heavy',language.score));
+  if(language.mode==='auto')writes.push(verificationWrite(db,'comment',commentId,1,language.label,'tinyld-heavy',language.score));
   const children=array(r.replies);
   for(let i=0;i<children.length;i++)await addReply(children[i],topicId,commentId,`${path}.replies[${i}]`,depth+1);
  };
@@ -100,7 +100,7 @@ export async function importRoute(req:Request,env:Env,path:string):Promise<Respo
   seenTopics.set(contentHash,{id:topicId,status});
   push({path:`topics[${i}]`,type:'topic',id:topicId,topic_id:topicId,status});
   writes.push(stmt(db,'INSERT INTO topics(id,author_id,title,body,source_lang,source_lang_mode,status,symptom_duration_days,content_hash) VALUES(?,?,?,?,?,?,?,?,?)',topicId,UNKNOWN_USER_ID,title,text,language.label,language.mode,status,duration,contentHash));
-  if(language.mode==='auto'&&status==='published')writes.push(verificationWrite(db,'topic',topicId,1,language.label,'tinyld-heavy',language.score));
+  if(language.mode==='auto')writes.push(verificationWrite(db,'topic',topicId,1,language.label,'tinyld-heavy',language.score));
   for(const tag of tags)writes.push(stmt(db,'INSERT INTO topic_terms(topic_id,term_id) VALUES(?,?)',topicId,tag));
   const replies=array(t.comments);
   for(let j=0;j<replies.length;j++)await addReply(replies[j],topicId,null,`topics[${i}].comments[${j}]`,1);
