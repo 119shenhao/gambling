@@ -1,5 +1,5 @@
 {
-  "request_id": "probe-20261122-v2ex-strict-selfreport-v04",
+  "request_id": "probe-20261122-v2ex-pii-redaction-v05",
   "mode": "read_only_probe",
   "database_writes": false,
   "schedule_changes": false
