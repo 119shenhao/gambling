@@ -28,6 +28,21 @@
       "parser_verified": false,
       "reuse_allowed": false,
       "permission_evidence": ""
+    },
+    {
+      "id": "moneysavingexpert",
+      "name": "MoneySavingExpert Forum — Debt Free Diaries",
+      "host": "forums.moneysavingexpert.com",
+      "listings": [
+        "https://forums.moneysavingexpert.com/categories/debt-free-diaries"
+      ],
+      "adapter": "gambling_forums",
+      "approved": false,
+      "parser_verified": false,
+      "reuse_allowed": false,
+      "permission_evidence": "",
+      "parser_sample": "https://forums.moneysavingexpert.com/discussion/6512900/redemption-the-journey-of-a-recovering-gambling-addict",
+      "note": "Read-only structural/parser verification in progress. No independent full-post republication permission; NEVER collect or publish until explicitly authorized."
     }
   ]
 }
