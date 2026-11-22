@@ -140,7 +140,7 @@ class ParserTests(unittest.TestCase):
             raise AssertionError("unexpected API path: " + path)
         with patch.object(collect, "api", side_effect=fake_api), \
                 patch.object(collect, "http", return_value=b"<html>incomplete</html>"):
-            with self.assertRaisesRegex(ValueError, "title_missing"):
+            with self.assertRaisesRegex(ValueError, "forum_total_posts_unavailable"):
                 collect.collect_one(self.site, {}, "trying-to-stop", self.url, None)
         self.assertEqual(calls, ["/api/collect/claim", "/api/collect/release"])
 
