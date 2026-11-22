@@ -244,3 +244,20 @@ test('sync candidate rows preserve language proof and idempotent Anonymous autho
  assert.match(sql,/INSERT OR IGNORE INTO topics/);
  assert.doesNotMatch(sql,/spine-topic-v1|spine-community/);
 });
+
+
+test('approved mobile casino-felt theme keeps reading preferences and four primary actions',()=>{
+ const css=read('public/styles.css');
+ const html=read('public/index.html');
+ const app=read('public/app.js');
+ assert.match(css,/Mobile visual baseline approved 2026-11-22/);
+ assert.match(css,/--paper:\s*#103927/);
+ assert.match(css,/--bg:\s*#350714/);
+ assert.match(css,/--frame:\s*#b69a5c/);
+ assert.match(css,/grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
+ assert.match(css,/\[data-reading-theme="warm"\] \.topic-card/);
+ assert.match(html,/M16 3C12 9 5 12/); // approved spade, not previous chat bubble
+ assert.match(app,/class="primary-nav"/);
+ assert.match(app,/class="nav-link nav-compose"/);
+ assert.match(app,/function readingSettingsCard\(/);
+});
