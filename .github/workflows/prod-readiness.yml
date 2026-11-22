@@ -14,7 +14,7 @@ on:
       - docs/CLOUDFLARE_SETUP.md
       - README.md
 permissions:
-  contents: read
+  contents: write
 concurrency:
   group: gambling-prod-oauth-readiness
   cancel-in-progress: true
@@ -24,6 +24,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Verify live production Google account chooser and D1 without credentials
+        id: live
         shell: bash
         run: |
           node --input-type=module <<'NODE'
@@ -81,4 +82,42 @@ jobs:
             if(attempt<24)await new Promise(resolve=>setTimeout(resolve,12000));
           }
           if(!passed)throw Error('Gambling PROD OAuth flow not fully available after retries. Do not report user login as verified.');
+          NODE
+
+      - name: Record sanitized production language deployment evidence
+        if: always()
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LIVE_RESULT: ${{ steps.live.outcome }}
+          LIVE_RUN_ID: ${{ github.run_id }}
+          LIVE_COMMIT_SHA: ${{ github.sha }}
+        run: |
+          node --input-type=module <<'NODE'
+          const repo='119shenhao/gambling',dest='docs/GAMBLING_PROD_LANGUAGE_LIVE_LATEST.json';
+          const run=process.env.LIVE_RUN_ID||'';
+          const status=process.env.LIVE_RESULT||'unknown';
+          if(!/^[0-9]+$/.test(run)||!['success','failure','cancelled','skipped'].includes(status))
+            throw Error('invalid_production_readiness_report');
+          const report={
+            run_id:Number(run),run_url:'https://github.com/'+repo+'/actions/runs/'+run,
+            deployment_check:status,expected_worker_version:'0.5.1-language-proof-atomic.20261122',
+            production_v2ex_original_language_expected:'zh-CN',
+            source_commit:process.env.LIVE_COMMIT_SHA,
+            checked_at:new Date().toISOString(),
+            verified:status==='success'
+          };
+          const token=process.env.GITHUB_TOKEN;
+          if(!token)throw Error('missing_ephemeral_github_token');
+          const url='https://api.github.com/repos/'+repo+'/contents/'+dest;
+          const headers={'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json',
+            'Content-Type':'application/json','X-GitHub-Api-Version':'2022-11-28'};
+          const old=await fetch(url+'?ref=main',{headers});
+          if(old.status!==404&&!old.ok)throw Error('unable_to_read_existing_production_status');
+          const payload={branch:'main',message:'ops(report): persist live production original-language release validation',
+            content:Buffer.from(JSON.stringify(report,null,2)+'\n').toString('base64')};
+          if(old.ok)payload.sha=(await old.json()).sha;
+          const res=await fetch(url,{method:'PUT',headers,body:JSON.stringify(payload)});
+          if(!res.ok)throw Error('unable_to_publish_live_release_evidence_http_'+res.status);
+          console.log('Live production validation recorded:',status,'run',run);
           NODE
