@@ -31,6 +31,7 @@ jobs:
               if(u.origin!=='https://idcenter.nbn369.com')throw Error('unexpected issuer origin');
               const second=await get(link);
               safe('center-handoff-'+i,second);
+              if(second.status!==302){const ct=second.headers.get('content-type')||'';if(ct.includes('json')){try{const body=await second.json();console.log(JSON.stringify({name:'center-error-'+i,keys:Object.keys(body).slice(0,8),error:String(body.error||'').slice(0,90),code:String(body.code||'').slice(0,90)}));}catch{}}}
             }catch(e){console.log(JSON.stringify({attempt:i,error:e.name||'request_failed'}));}
           }
           const health=await get('https://idcenter.nbn369.com/health');safe('center-health',health);
