@@ -336,3 +336,13 @@
 - [正常采集 #45000258945](https://github.com/119shenhao/gambling/actions/runs/45000258945) **Success**：恢复 `mode=collect,sites=["all"],candidates={},limit=2` 后本轮独立 DEV 新增 **4篇主帖、26条回复**，`errors=0`、`duplicates=0`，8个不合格候选安全跳过；其中 GamCare 新增2篇7回复，MoneySavingExpert 新增2篇19回复。工作流的 unittest 中 `imported` 事件仅为模拟，真实入库计数只以运行末尾 `site_summary/run_summary` 为准。
 - 真实 MoneySavingExpert 本轮新增：源帖 `6655256` 7回复、`6035505` 12回复，正常回读通过。此前 `6200242` 已经是完成回执且已核对DB总数67（65公开+2待审核），未重入库、没有重复计数。新验收规则不改变管理审核状态，也不会把待审核评论显示给访客。
 - 自动采集任务原有**每6小时**频率与各启用来源每轮最多2篇保持不变，正式生产环境不动。MoneySavingExpert 网站搜索返回403；当前主要依赖种子和栏目列表，已知种子经采集后可能耗尽，不能据此宣称长期稳定发现新帖；后续需要继续拓展可靠的公开发现途径。
+
+
+## 2026-11-22 V2EX 中文来源真实采集与251条回复回读验收（DEV）
+
+- 已完成V2EX公开主题 `https://www.v2ex.com/t/1121755` 的严格三页解析，原站显示251条回复，分页100+100+51，共251；新解析器对联系邮箱/电话等文字作适度脱敏，保留其余正文与原始回复顺序，45项Python单元测试成功。只读解析 GitHub Actions [#45003064070](https://github.com/119shenhao/gambling/actions/runs/45003064070) 报告 `parser_ok, source_total=251, captured=251, pages=3, capped=false`。
+- 用户已确认V2EX完整主帖和回复有权复用，用户声明记录在 `scripts/gambling_sources.json`；该来源的 `approved`、`reuse_allowed`、`parser_verified` 已全部为 `true`，仅开发环境采集。
+- **实际开发D1入库并成功只读回读**：使用原有 `gambling-collector-on-demand.yml` 对V2EX `1121755` 发起首次真实导入，随后 [完整回读验收 #45003490694](https://github.com/119shenhao/gambling/actions/runs/45003490694) 显示 `completed_audit_ok`、`replies=251`、`topic_id=5aae46c6-56d8-468d-8d24-76bc689f09d2`，`errors=0`，并验证原文、所有回复数量、顺序及公开正文；同一源已在DEV exclusions中记录完成，后续不会重复导入。**这次审计本身新增0篇0条，251条是此前实际写入的旧记录**；不要把审计再次计为新增。
+- 由于GitHub连接器查询push-triggered Actions存在局限，已在同一采集工作流增加脱敏结果写回 `docs/GAMBLING_COLLECTOR_LATEST.json`；仅记录运行ID、来源ID、聚合数和topic_id，不复制用户正文、邮件、电话号码和lease_token。可据此直接回读后续采集运行；不会另建GitHub Actions定时器。
+- **已恢复常规 `.github/gambling-collector-request.json`**：`mode=collect`、`sites=["all"]`、`candidates={}`、`limit=2`，请求提交SHA `2d0533f1e2b54e5b5f22f9e4fab11a6e09b36f01`。既有ChatGPT每6小时独立采集任务自动包括3个已启用站（GamCare/MoneySavingExpert/V2EX），其余来源保持禁用。恢复后的第一轮全来源实际运行结果须单独回读报告，不可预先宣称通过。
+- 严守开发/生产隔离：本轮开发、采集和验收都只针对 `119shenhao/gambling/dev` 和其专有DEV D1；未触发正式发布或生产数据写入，未修改每12小时生产同步任务。豆瓣仍待后续单独开发。
