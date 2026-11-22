@@ -1,4 +1,5 @@
 import {importedSourceLanguage} from './source-language';
+import {collectLongRoute} from './collect-long';
 import {verificationWrite} from './language-state';
 import {Env,Row,all,body,fail,hash,id,json,lang,now,one,rate,risk,stmt,textField,topicFingerprint} from './core';
 import {terms} from './content';
@@ -97,7 +98,7 @@ function finished(row:Row,fp:string,leaseHash:string){
 export async function collectRoute(req:Request,env:Env,path:string):Promise<Response>{
  // Preview-only environment gating happens BEFORE touching either database.
  allowPreviewRequest(req,env);
- if(path.startsWith('/api/collect/long/'))fail(404,'long_collection_not_configured');
+ if(path.startsWith('/api/collect/long/'))return collectLongRoute(req,env,path);
  if(!['/api/collect/exclusions','/api/collect/claim','/api/collect/complete','/api/collect/release','/api/collect/queue'].includes(path))fail(404,'not_found');
  const db=env.IMPORT_DB!;
  if(path==='/api/collect/queue'){
