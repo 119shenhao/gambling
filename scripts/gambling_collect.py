@@ -167,6 +167,37 @@ def readback(topic_id, draft, n):
             raise ValueError("readback_parent_mismatch")
     return True
 
+
+def lookup_published_topic_id(draft):
+    """Find an existing DEV-published topic using exact title and full body."""
+    for offset in range(0, 100, 20):
+        feed = api("/api/topics?sort=latest&offset=" + str(offset))
+        topics = feed.get("topics", [])
+        if not isinstance(topics, list):
+            raise ValueError("audit_invalid_feed")
+        for topic in topics:
+            if topic.get("title") != draft["title"]:
+                continue
+            topic_id = topic.get("id")
+            if not isinstance(topic_id, str) or not re.fullmatch(r"[0-9a-f-]{36}", topic_id):
+                continue
+            detail = api("/api/topics/" + topic_id)
+            if detail.get("topic", {}).get("body") == draft["body"]:
+                return topic_id
+        if feed.get("next") is None:
+            break
+    return None
+
+
+def audit_completed(site, identifier, url, draft, n):
+    """Read-only audit of old completed imports, never claim or re-import."""
+    topic_id = lookup_published_topic_id(draft)
+    if not topic_id:
+        raise ValueError("completed_topic_not_visible_in_dev_feed")
+    readback(topic_id, draft, n)
+    emit("completed_audit_ok", site=site, source_id=identifier,
+         topic_id=topic_id, replies=n, source_url=url)
+
 def available(source):
     return (source.get("approved") is True and
             source.get("parser_verified") is True and
@@ -325,15 +356,21 @@ def main():
             emit("plan", site=site, candidates=len(candidates), excluded=len(candidates)-len(eligible),
                  eligible=len(eligible), import_allowed=available(source))
             if req["mode"] == "inspect":
-                for identifier, url in list(eligible.items())[:2]:
+                # Explicit inspection can verify sources already marked completed.
+                # Automatic inspect still only probes newly discovered candidates.
+                inspection = candidates if explicit else eligible
+                for identifier, url in list(inspection.items())[:10]:
                     try:
                         draft = parse_topic(site, identifier, url, http(url))
                         count = validate(draft)
                         emit("parser_probe_ok", site=site, source_id=identifier,
                              replies=count, source_url=url)
+                        if excluded.get(identifier) == "completed":
+                            audit_completed(site, identifier, url, draft, count)
                     except ValueError as error:
                         emit("parser_probe_failed", site=site, source_id=identifier,
                              reason=str(error), source_url=url)
+                        errors += 1
                     time.sleep(1)
                 continue
             if not available(source):
