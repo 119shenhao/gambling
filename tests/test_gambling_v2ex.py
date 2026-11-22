@@ -76,15 +76,30 @@ class V2EXParserTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"http_403"):
             v2.parse_topic_pages("12345",BASE,page(),fetch)
 
-    def test_reply_missing_or_private_must_fail_closed(self):
-        broken=page(pages=1,tail=1).replace(
-            "加油，别再赌了 1/0", "欢迎联系 me@example.com")
-        with self.assertRaisesRegex(ValueError,"v2ex_private_identifier"):
-            v2.parse_topic_pages("12345",BASE,broken,lambda _:None)
-        empty=page(pages=1,tail=1).replace(
-            "加油，别再赌了 1/0", "")
+    def test_private_reply_redacted_preserves_reply_count(self):
+        # Source content may include real-looking PII; never publish it.
+        # This synthetic example must keep the rest of the reply intact.
+        original="加油，别再赌了 1/0"
+        risky="继续戒赌，联系 me@example.com 或 13800138000，但我已坚持恢复"
+        html=page(pages=1,tail=1).replace(original,risky)
+        draft,meta=v2.parse_topic_pages("12345",BASE,html,lambda _:None)
+        self.assertEqual(meta["captured"],1)
+        text=draft["comments"][0]["body"]
+        self.assertIn("继续戒赌",text)
+        self.assertIn("[联系方式已隐藏]",text)
+        self.assertNotIn("me@example.com",text)
+        self.assertNotIn("13800138000",text)
+
+    def test_private_only_reply_rejected_without_publishing(self):
+        html=page(pages=1,tail=1).replace(
+            "加油，别再赌了 1/0", "me@example.com")
+        with self.assertRaisesRegex(ValueError,"v2ex_only_private_identifier"):
+            v2.parse_topic_pages("12345",BASE,html,lambda _:None)
+
+    def test_empty_reply_rejected(self):
+        html=page(pages=1,tail=1).replace("加油，别再赌了 1/0","")
         with self.assertRaisesRegex(ValueError,"v2ex_empty_text"):
-            v2.parse_topic_pages("12345",BASE,empty,lambda _:None)
+            v2.parse_topic_pages("12345",BASE,html,lambda _:None)
 
     def test_page_loss_detected(self):
         with self.assertRaisesRegex(ValueError,"v2ex_reply_body_missing"):
