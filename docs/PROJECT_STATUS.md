@@ -387,3 +387,13 @@
 按用户明确同意，使用 `119shenhao/crime-life-simulator-docs/main` 的**真实源码**：`source-mirror/project_inner_game/casino_life_simulator/assets/diamond-tile.svg`、`styles.css` 的 `.background-light`。已在戒赌社区 `dev` 添加**字节内容一致**的 `public/casino-diamond-tile.svg`；更新 `public/styles.css` 深色主题下的 body 和 topbar，使用 91×103 方片的比例缩放及原赌场中心柔光/左右黑红暗角/纵向阴影叠层，取消旧的 CSS 交叉线纹理。该背景静态平铺以免影响持续阅读。暖色阅读主题、3号骰子品牌素材、导航按钮、深绿帖子卡片及全部业务逻辑保留。测试 `tests/gambling.test.mjs` 增加原 SVG、配色、比例、渐变和暖色主题的回归断言。
 
 本轮**仅提交 `119shenhao/gambling/dev`**；`main`、生产 Cloudflare Worker/D1、帖子采集/同步和 Identity Center 不变。GitHub Actions 与 Cloudflare 预览部署需另行检查运行回执；如果无法读取真实开发站，不把源码提交或本地静态预览表述为线上验收。
+
+
+## 2026-11-22 · V2EX 语言标记 DEV zh-CN / PROD und 根因核对
+
+- 用户截图确认：同一原帖 V2EX `1121755`（DEV topic_id `5aae46c6-56d8-468d-8d24-76bc689f09d2`，251 回复）在 DEV 首页显示 `zh-CN`，而已同步到 PROD 的版本显示 `und`。
+- 已核对 `main` 与 `dev` 的 `src/source-language.ts` **blob SHA 一致**（`9c92f6901ed443d16bd37e459d3830f625302bc1`），两边均使用 `tinyld/heavy` 加中文字符判断，**不是不同语言模型**。
+- 根因在数据链：旧版 `src/collect-long.ts` 的长帖分页 `finish` 向 `topics/comments` 写入 `source_lang=zh-CN,source_lang_mode=auto` 后，未向 `content_language_verifications` 写入对应内容版本的识别凭据；而已审核的 `scripts/sync-preview-to-production.mjs::resolveSyncLanguage` 只接受版本匹配的 `tinyld-heavy/azure-auto/admin-manual` 验证记录或手动语言，缺少时将发布语言回退为 `und`。截图与这一代码路径一致，但数据库中是否真的缺失凭据仍需 D1 只读验证后最终落锤。
+- 在 DEV 源码提交 `0335bbc35ddc389478393849e0e557c6bbdcec72` 中，长帖 `finish` 现将已识别出的主帖及已发布回复的当前版本 `tinyld-heavy` 语言凭据与原文写入同一个 D1 batch；回归断言提交 `1a94b1d6d3b981b5a569cd665334439c0dcd7bbe`。**尚未取得本次修改的线上 CI/部署验收，不能把源码修复说成生产已修复**。
+- **历史数据需要单独、准确的元数据修复**：先只读核对 DEV 原帖和 PROD 副本的 `source_lang/source_lang_mode/content_version`、对应语言验证记录、源 ID 和回复计数；仅对核实为中文原文且 PROD 为 `und` 的记录（回复逐条独立判断）修复原文语言标记和凭据。保持标题、正文、251 条回复、parent ID、作者、时间、状态、同步回执全部不变。因为该贴已同步且已有 receipt，原有一生一次同步工作流不会自动重新写入此篇，不可通过重复触发发布任务期待自动修正。
+- 生产 D1 元数据写入需要单独确认授权，并通过受保护通道先核实 Time Travel 恢复点、执行定向更新及读回验证；不能用前端临时隐藏 `und` 代替真实数据修复。
