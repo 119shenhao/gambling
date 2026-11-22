@@ -44,14 +44,14 @@
     "IDENTITY_LOGIN_ENABLED": "true",
     "IMPORT_ENABLED": "false",
     "COLLECT_ENABLED": "false",
-    "TRANSLATION_ENABLED": "false",
+    "TRANSLATION_ENABLED": "true",
     "IDENTITY_ISSUER": "https://idcenter.nbn369.com",
     "IDENTITY_CLIENT_ID": "gambling-community-prod",
     "IDENTITY_REDIRECT_URI": "https://gambling.nbn369.com/api/auth/identity/callback",
     "TRANSLATOR_REGION": "eastus",
     "TRANSLATOR_F0_VERIFIED_AT": "2026-11-09T06:14:50Z",
-    "TRANSLATION_DAILY_LIMIT": "5000",
-    "TRANSLATION_MONTHLY_LIMIT": "25000",
+    "TRANSLATION_DAILY_LIMIT": "200000",
+    "TRANSLATION_MONTHLY_LIMIT": "1800000",
     "ADMIN_CENTER_OWNER_SHA256": "eb367b5a659205efbacd7dfa4964e0c2a9852c072237b668d3d885e334105ba4"
   },
   "build": {
