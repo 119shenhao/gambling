@@ -97,8 +97,8 @@ class ParserTests(unittest.TestCase):
         draft = parse_topic(self.site, "trying-to-stop", self.url, fixture())
         details = {"topic": {"title": draft["title"], "body": draft["body"], "source_lang": "en"},
                    "comments": [
-                       {"body": x["body"], "source_lang": "en", "parent_comment_id": None}
-                       for x in reversed(draft["comments"])
+                       {"id": "comment-" + str(i), "body": x["body"], "source_lang": "en", "parent_comment_id": None}
+                       for i, x in enumerate(reversed(draft["comments"]))
                    ], "next": None}
         with patch.object(collect, "api", return_value=details):
             self.assertTrue(collect.readback("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee", draft, 2))
@@ -143,6 +143,27 @@ class ParserTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "title_missing"):
                 collect.collect_one(self.site, {}, "trying-to-stop", self.url, None)
         self.assertEqual(calls, ["/api/collect/claim", "/api/collect/release"])
+
+
+    def test_readback_fetches_all_comment_pages(self):
+        draft = {"title": "Gambling recovery update",
+                 "body": "I am trying to quit online gambling.",
+                 "source_lang": "en",
+                 "comments": [{"body": "Response " + str(i), "source_lang": "en"}
+                              for i in range(21)]}
+        saved = {k: draft[k] for k in ("title", "body", "source_lang")}
+        rows = [{"id": "cid-" + str(i), "body": "Response " + str(i),
+                 "source_lang": "en", "parent_comment_id": None}
+                for i in range(21)]
+        pages = iter([
+            {"topic": saved, "comments": rows[:20], "next": 200},
+            {"topic": saved, "comments": rows[20:], "next": None},
+        ])
+        with patch.object(collect, "api", side_effect=lambda *_: next(pages)) as mock:
+            self.assertTrue(collect.readback(
+                "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee", draft, 21))
+            self.assertEqual(mock.call_count, 2)
+            self.assertTrue(mock.call_args_list[1].args[0].endswith("?before=200"))
 
 
 if __name__ == "__main__":
