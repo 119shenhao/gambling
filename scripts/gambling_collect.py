@@ -264,7 +264,8 @@ def collect_one(site, source, identifier, url, export_dir):
                 completed = excluded_ids(site).get(identifier) == "completed"
             except ValueError:
                 pass
-        emit("candidate_failed", site=site, source_id=identifier, reason=str(e),
+        emit("candidate_rejected" if isinstance(e, RejectedCandidate) else "candidate_failed",
+             site=site, source_id=identifier, reason=str(e),
              completion_possible=bool(submitted))
         raise
     finally:
