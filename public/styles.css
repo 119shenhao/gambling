@@ -366,14 +366,32 @@ dialog .dialog-close:hover {
   --nav-active: #1e5139;
   --nav-border: #907147;
   --radius: 16px;
-  --diamond-pattern: repeating-linear-gradient(55deg,#d19e8706 0 1px,transparent 1px 54px),
-                     repeating-linear-gradient(-55deg,#d19e8706 0 1px,transparent 1px 54px);
+  /* Original Casino Life Simulator lobby tile: 91 × 103 at the 941px design width.
+     Scale both axes together to preserve the tall playing-card diamond proportions. */
+  --diamond-pattern: url("/casino-diamond-tile.svg");
+  --casino-diamond-w: min(9.67vw, 91px);
+  --casino-diamond-h: min(10.95vw, 103px);
 }
+/* Casino lobby's original light overlay, side vignette and vertical shadow on the
+   exact original solid-color tile. Keep it static for long-form forum reading. */
 :root:not([data-reading-theme="warm"]) body {
-  background: radial-gradient(ellipse 105% 400px at 50% 7%,#591022 0%,transparent 90%),var(--diamond-pattern),var(--bg);
+  background-color: #50010d;
+  background-image:
+    radial-gradient(ellipse 56% 27% at 51% 31%, #c71a2a55, transparent 80%),
+    linear-gradient(90deg, #1d000bc4, transparent 20%, transparent 80%, #1d000bc4),
+    linear-gradient(180deg, #22000b44, transparent 36%, #2400079c 77%, #17000be8),
+    var(--diamond-pattern);
+  background-size: 100% 100%, 100% 100%, 100% 100%, var(--casino-diamond-w) var(--casino-diamond-h);
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat;
 }
 :root:not([data-reading-theme="warm"]) .topbar {
-  background: linear-gradient(180deg,#5a0d20,#440817);
+  background-color: #50010d;
+  background-image:
+    linear-gradient(180deg, #22000b44, #2400079c),
+    linear-gradient(90deg, #1d000bc4, transparent 20%, transparent 80%, #1d000bc4),
+    var(--diamond-pattern);
+  background-size: 100% 100%, 100% 100%, var(--casino-diamond-w) var(--casino-diamond-h);
+  background-repeat: no-repeat, no-repeat, repeat;
   border-bottom: 1px solid var(--frame);
   box-shadow: none;
 }
