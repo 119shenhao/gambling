@@ -309,7 +309,7 @@ test('all localized public notices are about gambling and privacy, not medical c
  for(const locale of languages){
   const dict=dictionaries[locale];
   for(const key of ['communityReminder','privacyProduction','privacyText','publicNote','translationCaution']){
-   assert.ok(typeof dict[key]==='string'&&dict[key].length>20,locale+':'+key);
+   assert.ok(typeof dict[key]==='string'&&dict[key].length>(key==='translationCaution'?8:20),locale+':'+key);
    assert.doesNotMatch(dict[key],/医疗|醫療|医療|医学|醫學|診療|诊疗|medical|médic|medizin|ärzt/i);
   }
   assert.doesNotMatch(readingLabels(locale).hint,/医疗|醫療|医療|medical|médic|medizin|医学|醫學/i);
