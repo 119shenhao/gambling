@@ -28,6 +28,23 @@ class ParserTests(unittest.TestCase):
         self.site = "gamcare"
         self.url = "https://community.gamcare.org.uk/forum/recovery-diaries/trying-to-stop/"
 
+    def test_gamcare_discovers_every_board_when_one_board_fills_the_cap(self):
+        base = "https://community.gamcare.org.uk/forum/"
+        listings = [base + name + "/" for name in (
+            "family-friends", "overcoming-problem-gambling", "recovery-diaries")]
+        relative_links = (
+            '<a href="/forum/family-friends/family-one/">Family one</a>'
+            '<a href="/forum/family-friends/family-two/">Family two</a>'
+            '<a href="/forum/family-friends/family-three/">Family three</a>'
+            '<a href="/forum/overcoming-problem-gambling/debt/">Debt</a>'
+            '<a href="/forum/recovery-diaries/diary/">Diary</a>'
+        )
+        with patch.object(collect, "fetch_source", return_value=relative_links) as request, \
+                patch.object(collect.time, "sleep"):
+            discovered = collect.discover_source({"id": self.site, "listings": listings}, {}, cap=3)
+        self.assertEqual(request.call_count, 3)
+        self.assertEqual(list(discovered), ["family-one", "debt", "diary"])
+
     def test_psychforums_discovery_retries_one_timeout(self):
         listing = "https://www.psychforums.com/gambling-addiction-forum-f204/"
         source = {"id": "psychforums", "listings": [listing]}
