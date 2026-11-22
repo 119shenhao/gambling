@@ -75,3 +75,10 @@
 - [GitHub Actions 只读验证 #45030785249](https://github.com/119shenhao/gambling/actions/runs/45030785249) 的 48 个本地结构及契约测试通过。首次运行及重试中，托管运行器读取两个样本均超时。来源配置保留适配器和许可记录，自动采集保持关闭。常规请求恢复为 `mode=collect, sites=["all"], candidates={}, limit=2`。
 - Netmums 的样本在脚本直连和浏览器中均返回 HTTP 403。未核实完整主题与回复，采集量为零，未加入定时采集。
 - 本轮数据库写入限定为戒赌论坛 DEV。
+
+### 2026-11-22 定时采集运行器复验
+
+- 现有定时任务通过更新 `dev/.github/gambling-collector-request.json` 触发同一 GitHub Actions 工作流。本次在相同运行器只读检查 PsychForums 的板块列表，未在定时任务配置中启用该来源。
+- [首次复验 #45031599497](https://github.com/119shenhao/gambling/actions/runs/45031599497) 的运行日志记录 `listing_unavailable` 和网络超时。旧脚本随后以零候选、零错误退出，GitHub 的绿色状态不能作为来源连通证据。
+- 修复后，PsychForums 公共网页的网络超时只重试一次，HTTP 403 不重试。若所有配置的列表均不可用，运行记录明确返回来源错误，同时在脱敏报告中保留列表检查结果。此重试不应用于开发 Worker API 写请求。
+- [修复后复验 #45031861301](https://github.com/119shenhao/gambling/actions/runs/45031861301) 的 50 项离线测试全通过。在线检查在列表阶段仍无法连接，报告明确记录 1 个来源错误、新增 0 篇、0 条回复。本次未达到接入标准，PsychForums 保持关闭，常规采集请求已恢复，原定时任务继续按现有配置执行。
