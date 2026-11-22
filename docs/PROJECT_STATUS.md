@@ -238,3 +238,9 @@
 - 原独立 ChatGPT 每 6 小时采集任务和每 12 小时生产同步任务继续保持项目隔离；本轮没有修改 Spine 定时任务或生产同步作业、密钥、数据库内容。
 
 **当前结论：** “自动发现、解析、API 编排”已经开发并经过局部真实/模拟验证；**外站全文自动发布未启用、DEV 新增 0**。只有经验证可合法再发布的来源满足上线门槛后才能声明自动采集正常运行。
+
+### 2026-11-22 最终补测：分页回读
+- 后续修复 `scripts/gambling_collect.py::readback`：详情 API 使用 `?before=<cursor>` 分页，每页通常20条评论；现在可完整回读并校验最多49条，避免导入21–49条回复时误把第一页当全部。
+- [最终独立采集检查 #44993261146](https://github.com/119shenhao/gambling/actions/runs/44993261146) PASS：**13/13** Python 测试通过，含多页回读模拟；再次从 GamCare 真实网页只读解析 **7 条回复**，`new_topics=0,new_comments=0`。此次日志中的模拟导入提示属于 unittest，不是 D1 写入。
+- [Gambling Community CI #44993261210](https://github.com/119shenhao/gambling/actions/runs/44993261210) PASS：项目综合检查完成。
+- **尚未开启自动全文复制**：两站 `approved=false`、`reuse_allowed=false`；下一步需有允许完整再发布的确切来源，确认每站的许可及真实论坛文章结构，之后才能运行 `mode=collect` 验证开发 D1 新增记录。当前不要报告“已能自动导入2篇”。
