@@ -69,8 +69,8 @@ function candidates(table,type){
      AND v.content_version=${alias}.content_version
    WHERE ${alias}.status='published' AND ${alias}.source_lang_mode='auto'
     AND ${alias}.source_lang<>'und'
-    AND (v.content_id IS NULL OR v.language<>${alias}.source_lang OR
-     v.method NOT IN ('tinyld-heavy','azure-auto','admin-manual'))
+    AND (v.content_id IS NULL OR v.language IS NULL OR v.language<>${alias}.source_lang
+     OR v.method IS NULL OR v.method NOT IN ('tinyld-heavy','azure-auto','admin-manual'))
    ORDER BY ${alias}.id LIMIT ${limit}`);
 }
 function plannedStatement(row){
