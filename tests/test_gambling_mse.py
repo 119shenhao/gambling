@@ -98,6 +98,27 @@ class MSEParserTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"personal_identifier"):
             mse.parse_topic_pages("6512900",BASE,bad,Mock())
 
+    def test_live_style_emoji_and_embedded_image_links_preserved(self):
+        # Icons are actual inline images, CDN screenshots appear in replies.
+        html=sample(total_pages=1,last_count=1).replace(
+            "Recovery reply 1-0 with real progress.",
+            'Progress <img class="emoji" alt="🙂" src="/emoji.png"> '
+            '<img class="embedImage-img importedEmbed-img" '
+            'src="https://us-noi.v-cdn.net/1234/example.png"> still going.')
+        draft, meta=mse.parse_topic_pages("6512900",BASE,html,Mock())
+        body=draft["comments"][0]["body"]
+        self.assertIn("🙂",body)
+        self.assertIn("[Image: https://us-noi.v-cdn.net/1234/example.png]",body)
+        self.assertEqual(meta["captured"],1)
+
+    def test_unsafe_media_not_accepted(self):
+        html=sample(total_pages=1,last_count=1).replace(
+            "Recovery reply 1-0 with real progress.",
+            '<img src="javascript:alert(1)">')
+        # urljoin against our origin produces a non-https scheme.
+        with self.assertRaisesRegex(ValueError,"unsupported_media_url"):
+            mse.parse_topic_pages("6512900",BASE,html,Mock())
+
     def test_unapproved_source_never_collectible(self):
         obj={"approved":False, "parser_verified":True,"reuse_allowed":True,
              "permission_evidence":"not granted"}
