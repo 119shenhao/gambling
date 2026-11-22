@@ -444,3 +444,10 @@
 
 - 根据用户确认的截图效果，`dev/public/styles.css` 中发帖入口去除覆盖主题色的深绿色规则，改用 `.button.primary` 已使用的金色渐变、深色文字及高光；不改四列导航、图标及 `data-action="compose"` 业务代码。
 - 同步更新 `tests/gambling.test.mjs`，校验金色主题变量、手机导航及按钮行为绑定。仅提交开发分支；本次未请求生产部署，也不修改生产数据库和其他论坛。CI / 线上预览结果以实际运行回执为准。
+
+## 2026-11-22 首页黑桃去黑底及旧医疗文案清理（仅 DEV）
+
+- 实机截图中的金色黑桃下方深色矩形为 `public/styles.css` 的 `.feed-heading::after { background:var(--bg) }`，不是图像透明通道问题。现设置 `background:transparent`，分隔线 `::before` 在中心留出透明间隔，保留黑桃大小与原始赌场纹理。
+- `public/app.js` 的页脚、侧栏、隐私页统一使用新 `communityReminder` 键，移除从旧脊椎论坛遗留的 `medical` 提示；页脚隐私与社区规则链接仍在，修复尾随年份粘连的问题。
+- `public/i18n.js` 将戒赌论坛专用隐私、公开发帖、禁博彩推广文案应用于八种站内语言；繁体字典 `public/i18n-zh-tw.js` 清理旧医疗文字。原文语言及 Azure 翻译用途说明不改。个人中心 `public/reading-preferences.js` 阅读设置说明清除医疗护眼套话。
+- `tests/gambling.test.mjs` 增加 CSS 透明黑桃/分隔线与全语言新文案的自动回归测试。本节仅记录开发分支代码修改，线上部署和浏览器渲染待查看实际运行回执；本次不修改生产数据库、内容同步任务或其他论坛。
