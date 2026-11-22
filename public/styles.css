@@ -654,6 +654,7 @@ dialog .dialog-close:hover {
   .sidebar .primary-nav .nav-compose::before {display:none;}
 }
 
-/* Exact approved #3 icon includes its own gold frame: do not double-frame it. */
-.brand-icon {border:0; background:transparent; box-shadow:none;}
+/* Exact approved #3 tile carries its own frame: override both color schemes, including the stronger dark-theme rule. */
+:root:not([data-reading-theme="warm"]) .brand-icon,
+:root[data-reading-theme="warm"] .brand-icon {border:0; background:transparent; box-shadow:none;}
 .brand-icon img {display:block; width:100%; height:100%; object-fit:contain; border-radius:inherit;}
