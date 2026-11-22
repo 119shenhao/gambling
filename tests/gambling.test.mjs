@@ -186,3 +186,19 @@ test('collector HTTP surfaces remain isolated to Gambling Preview and preserve p
  assert.match(read('scripts/preview-migrate.mjs'),/migrations\/preview-only\/0001_collector_queue[.]sql/);
  assert.match(read('migrations/preview-only/0001_collector_queue.sql'),/CREATE TABLE IF NOT EXISTS collector_candidates/);
 });
+
+test('safe production sync is offline by default and uses only gambling D1',()=>{
+ const prod=JSON.parse(read('wrangler.production-sync.jsonc'));
+ assert.equal(prod.d1_databases[0].database_id,'7bba9ada-589f-493b-8fcf-60265fc0efac');
+ const src=read('scripts/sync-preview-to-production.mjs');
+ assert.match(src,/GAMBLING_SYNC_PRODUCTION_CONFIRM/);
+ assert.match(src,/gambling-topic-v1/);
+ assert.match(src,/topic_sync_receipts/);
+ assert.match(src,/verifyComments/);
+ assert.match(src,/verifyWrittenLanguageEvidence/);
+ assert.doesNotMatch(src,/spine-topic-v1|SPINE_SYNC_PRODUCTION_CONFIRM/);
+ assert.equal(JSON.parse(read('scripts/gambling_sources.json')).sources.length,0);
+ assert.equal(JSON.parse(read('.github/gambling-collector-request.json')).mode,'inspect');
+ const py=spawnSync('python3',['-m','py_compile','scripts/gambling_collect.py'],{encoding:'utf8'});
+ assert.equal(py.status,0,py.stderr);
+});

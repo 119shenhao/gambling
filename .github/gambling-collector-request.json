@@ -1,0 +1,9 @@
+{
+  "request_id": "setup-inspect-template-20261122",
+  "mode": "inspect",
+  "sites": [
+    "all"
+  ],
+  "candidates": {},
+  "limit": 2
+}
