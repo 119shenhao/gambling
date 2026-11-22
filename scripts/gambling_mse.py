@@ -180,7 +180,7 @@ def parse_topic_pages(expected_id, base, first_html, fetch):
     if len(title) > 200:
         raise ValueError("title_too_long")
     original = _text(_original_message(first))
-    if len(original) > 30000 or not GAMBLING.search(title + " " + original):
+    if len(original) > 30000 or not GAMBLING_TITLE.search(title + " " + original):
         raise ValueError("not_problem_gambling")
     total_pages = _page_count(first, base)
     if total_pages > 1000:
