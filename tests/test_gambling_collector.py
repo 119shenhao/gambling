@@ -104,6 +104,52 @@ class ParserTests(unittest.TestCase):
             self.assertTrue(collect.readback("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee", draft, 2))
 
 
+    def test_pending_review_rows_are_verified_in_dev_database_and_counted(self):
+        draft={"title":"Gambling recovery","body":"Recovery in progress",
+               "source_lang":"en","comments":[
+                   {"body":"Public encouragement","source_lang":"en"},
+                   {"body":"Shared three source links","source_lang":"en"},
+                   {"body":"Another public reply","source_lang":"en"}]}
+        topic_id="aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+        detail={"topic":{"title":draft["title"],"body":draft["body"],"source_lang":"en"},
+                "comments":[
+                    {"id":"a","body":"Public encouragement","source_lang":"en","parent_comment_id":None},
+                    {"id":"c","body":"Another public reply","source_lang":"und","parent_comment_id":None}
+                ],"next":None}
+        proof={"site":"moneysavingexpert","source_id":"6200242","topic_id":topic_id,
+               "status":"completed","duplicate":False,"total":3,
+               "status_counts":{"published":2,"pending_review":1}}
+        def fake_api(path):
+            return proof if path.startswith("/api/collect/verification?") else detail
+        with patch.object(collect,"api",side_effect=fake_api) as mock:
+            self.assertTrue(collect.readback(topic_id,draft,3,"moneysavingexpert","6200242"))
+            self.assertEqual(mock.call_count,2)
+
+    def test_missing_replies_not_excused_without_db_pending_review_proof(self):
+        draft={"title":"Gambling recovery","body":"Recovery in progress",
+               "source_lang":"en","comments":[
+                   {"body":"Published A","source_lang":"en"},
+                   {"body":"Missing B","source_lang":"en"}]}
+        topic_id="aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+        detail={"topic":{"title":draft["title"],"body":draft["body"],"source_lang":"en"},
+                "comments":[
+                    {"id":"a","body":"Published A","source_lang":"en","parent_comment_id":None}
+                ],"next":None}
+        for counts in ({"published":1},{"published":1,"blocked":1},
+                       {"published":1,"pending_review":1}):
+            proof={"site":"moneysavingexpert","source_id":"6200242","topic_id":topic_id,
+                   "status":"completed","duplicate":False,
+                   "total":2 if sum(counts.values())==2 else 1,
+                   "status_counts":counts}
+            # The last test case verifies that a pending-review record alone
+            # is NOT sufficient when its source receipt does not match.
+            if "pending_review" in counts:
+                proof["status"]="claimed"
+            with patch.object(collect,"api",side_effect=lambda path: (
+                proof if path.startswith("/api/collect/verification?") else detail)):
+                with self.assertRaisesRegex(ValueError,"readback_moderation_count_unverified"):
+                    collect.readback(topic_id,draft,2,"moneysavingexpert","6200242")
+
     def test_atomic_claim_complete_with_mock_preview_and_readback(self):
         lease = "a" * 64
         calls = []
