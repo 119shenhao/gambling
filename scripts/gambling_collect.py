@@ -116,7 +116,10 @@ def validate(draft, *, allow_no_replies=False):
         raise ValueError("missing_topic_text")
     if len(draft["title"]) > 200 or len(draft["body"]) > 30_000:
         raise ValueError("topic_length_exceeded")
-    replies = flatten(draft.get("comments", []))
+    comments = draft.get("comments")
+    if not isinstance(comments, list):
+        raise ValueError("invalid_comment_list")
+    replies = flatten(comments)
     if len(replies) > 500 or (not replies and not allow_no_replies):
         raise ValueError("reply_count_invalid")
     serialized = json.dumps({"site": "placeholder", "source_id": "placeholder",
