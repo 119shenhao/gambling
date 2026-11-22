@@ -74,7 +74,7 @@ class V2EXParserTests(unittest.TestCase):
             v2.parse_topic_pages("12345",BASE,empty,lambda _:None)
 
     def test_page_loss_detected(self):
-        with self.assertRaisesRegex(ValueError,"v2ex_reply_page_incomplete"):
+        with self.assertRaisesRegex(ValueError,"v2ex_reply_body_missing"):
             v2.parse_topic_pages("12345",BASE,page(),
                 lambda url:page(int(url.split("=")[-1])).replace('class="reply_content"','class="ignored"') if url.endswith("p=2") else page(3))
 
