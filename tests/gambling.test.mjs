@@ -256,8 +256,8 @@ test('approved mobile casino-felt theme keeps reading preferences and four prima
  assert.match(css,/--frame:\s*#c7a765/);
  assert.match(css,/grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
  assert.match(css,/\[data-reading-theme="warm"\] \.topic-card/);
- assert.match(html,/<img src="\/dynamic-dice\.svg" alt="" width="31" height="31"/);
- const dice=read('public/dynamic-dice.svg');
+ assert.match(html,/<img src="\/dynamic-dice-option3\.svg" alt="" width="31" height="31"/);
+ const dice=read('public/dynamic-dice-option3.svg');
  assert.match(dice,/viewBox="0 0 80 80"/);
  assert.match(dice,/Exact artwork cut from the user's approved 3rd dice-icon concept/);
  const embedded=dice.match(/data:image\/png;base64,([^"]+)/)?.[1];
@@ -290,12 +290,12 @@ test('compose action is visually distinct without affecting the other mobile tab
 
 test('approved dynamic die logo preserves a compact brand frame and all navigation',()=>{
  const css=read('public/styles.css'),html=read('public/index.html');
- const svg=read('public/dynamic-dice.svg');
+ const svg=read('public/dynamic-dice-option3.svg');
  assert.match(css,/\.brand-icon \{border:0; background:transparent; box-shadow:none;\}/);
  assert.match(css,/:root:not\(\[data-reading-theme="warm"\]\) \.brand-icon,/);
  assert.match(css,/:root\[data-reading-theme="warm"\] \.brand-icon \{border:0;/);
  assert.match(css,/\.brand-icon img \{display:block; width:100%; height:100%; object-fit:contain;/);
- assert.match(html,/<span class="brand-icon" aria-hidden="true"><img src="\/dynamic-dice\.svg"/);
+ assert.match(html,/<span class="brand-icon" aria-hidden="true"><img src="\/dynamic-dice-option3\.svg"/);
  assert.match(svg,/data:image\/png;base64,/);
  assert.doesNotMatch(svg,/<ellipse|<animate|<script/);
 });
