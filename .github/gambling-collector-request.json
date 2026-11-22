@@ -1,9 +1,13 @@
 {
-  "request_id": "gambling_20261122_mse_pending_verified_resume_all_v1",
+  "request_id": "gambling_20261122_v2ex_251_live_import_v1",
   "mode": "collect",
   "sites": [
-    "all"
+    "v2ex"
   ],
-  "candidates": {},
-  "limit": 2
+  "candidates": {
+    "v2ex": [
+      "https://www.v2ex.com/t/1121755"
+    ]
+  },
+  "limit": 1
 }
