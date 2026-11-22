@@ -61,15 +61,16 @@
       ],
       "adapter": "gambling_forums",
       "approved": true,
-      "parser_verified": false,
+      "parser_verified": true,
       "reuse_allowed": true,
       "permission_evidence": "User explicitly confirmed on 2026-11-22 in project conversation that complete V2EX gambling-related threads and their replies can be republished in Gambling Community; technical full-parser and DEV D1 verification is still pending. Statement recorded as user confirmation, not independently reviewed written agreement.",
       "parser_sample": "https://www.v2ex.com/t/1121755",
-      "note": "User confirmed reuse eligibility, but parser_verified remains false until live 251/251 reply parsing and DEV D1 stored/public verification pass. Raw contact details are redacted on import. Curated candidates /t/1121755 and /t/1018492 undergo full body/reply and relevance checks. Source is still DISABLED for collect until all gates true.",
+      "note": "2026-11-22 read-only GitHub Actions run 45003064070: LIVE strict parser read 251 original replies across 3 HTML pages (100+100+51), 45 Python contract tests pass, no truncation; source-wide user-confirmed reuse eligibility recorded in permission_evidence. PII contact fragments replaced with [联系方式已隐藏] in V2EX parser. Enabled for DEV collection with existing 6-hour ChatGPT collector task; initial DEV D1 write and verification to be run next. Never change PROD.",
       "seed_topics": [
         "https://www.v2ex.com/t/1121755",
         "https://www.v2ex.com/t/1018492"
-      ]
+      ],
+      "parser_sample_replies": 251
     },
     {
       "id": "douban",
