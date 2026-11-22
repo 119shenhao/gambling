@@ -42,9 +42,10 @@ if(!previewBuild){
  remote(['migrations','apply',...opts]);
  // Separate preview-only coordination queue. Never migrate it into production.
  remote(['execute',...opts,'--file','migrations/preview-only/0001_collector_queue.sql']);
+ remote(['execute',...opts,'--file','migrations/preview-only/0002_collector_long.sql']);
  const queues=JSON.parse(remote(['execute',...opts,'--command',
-   "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('collector_candidates','collector_source_state')",'--json']));
- if(new Set(queues.flatMap(x=>x.results||[]).map(x=>x.name)).size!==2)throw Error('Preview collector coordination queue unavailable');
+   "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('collector_candidates','collector_source_state','collector_long_stages','collector_long_replies')",'--json']));
+ if(new Set(queues.flatMap(x=>x.results||[]).map(x=>x.name)).size!==4)throw Error('Preview collector long-reply staging unavailable');
  const after=JSON.parse(remote(['execute',...opts,'--command',"SELECT value FROM settings WHERE key='schema_version'",'--json']));
  if(!after.some(r=>(r.results||[]).some(x=>x.value==='1')))throw Error('Preview schema version check failed after migration.');
  console.log('Verified migrations on gambling-community-dev only. Production D1 not accessed.');
