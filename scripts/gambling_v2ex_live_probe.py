@@ -4,6 +4,7 @@ No content, authors, comments, or PII are output or persisted.
 This is not permission to republish, nor a successful DEV import.
 """
 import json
+import sys
 from gambling_chinese_source_probe import fetch
 from gambling_v2ex import source_id, parse_topic_pages
 
@@ -26,6 +27,10 @@ def main():
     except (ValueError, TypeError, KeyError, IndexError) as exc:
         record.update({"status":"parser_rejected","reason":str(exc)[:150]})
     print(json.dumps(record,sort_keys=True,ensure_ascii=False),flush=True)
+    # Action success must prove actual multi-page parser success, not just
+    # successful execution of the diagnostic script.
+    if record.get("status") != "parser_ok":
+        sys.exit(1)
 
 if __name__=="__main__":
     main()
