@@ -28,6 +28,28 @@ class ParserTests(unittest.TestCase):
         self.site = "gamcare"
         self.url = "https://community.gamcare.org.uk/forum/recovery-diaries/trying-to-stop/"
 
+    def test_psychforums_discovery_retries_one_timeout(self):
+        listing = "https://www.psychforums.com/gambling-addiction-forum-f204/"
+        source = {"id": "psychforums", "listings": [listing]}
+        candidate = {"224726": "https://www.psychforums.com/sample/topic224726.html"}
+        with patch.object(collect, "http", side_effect=[
+                ValueError("network_error_or_timeout"), b"listing"]) as request, \
+                patch.object(collect, "discover", return_value=candidate), \
+                patch.object(collect.time, "sleep"):
+            self.assertEqual(collect.discover_source(source, {}), candidate)
+        self.assertEqual(request.call_count, 2)
+
+    def test_psychforums_failed_listing_is_not_an_empty_success(self):
+        listing = "https://www.psychforums.com/gambling-addiction-forum-f204/"
+        source = {"id": "psychforums", "listings": [listing]}
+        for reason, attempts in [("network_error_or_timeout", 2), ("http_403", 1)]:
+            with self.subTest(reason=reason), \
+                    patch.object(collect, "http", side_effect=ValueError(reason)) as request, \
+                    patch.object(collect.time, "sleep"):
+                with self.assertRaisesRegex(ValueError, reason):
+                    collect.discover_source(source, {})
+                self.assertEqual(request.call_count, attempts)
+
     def test_stable_original_slug(self):
         self.assertEqual(source_id(self.site, self.url), "trying-to-stop")
         with self.assertRaises(ValueError):
