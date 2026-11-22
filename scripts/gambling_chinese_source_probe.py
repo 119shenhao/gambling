@@ -79,7 +79,7 @@ def probe(site, url):
             }
         if site == "v2ex":
             all_text = doc.get_text(" ", strip=True)
-            total = re.search(r"(?<!\\d)(\\d{1,6})\\s+replies\\b",all_text,re.I)
+            total = re.search(r"(?<!\d)(\d{1,6})\s+replies\b",all_text,re.I)
             record["declared_replies"] = int(total.group(1)) if total else None
             # Only aggregate the number of distinct reply containers.
             ids = [n.get("id") for n in doc.select("[id^='r_']")]
@@ -89,7 +89,7 @@ def probe(site, url):
             links = set()
             for a in doc.select("a[href*='/group/topic/']"):
                 dest=urlsplit(urljoin(url,a.get("href","")))
-                if dest.scheme=="https" and dest.hostname in HOSTS[site] and re.fullmatch(r"/group/topic/\\d+/?",dest.path):
+                if dest.scheme=="https" and dest.hostname in HOSTS[site] and re.fullmatch(r"/group/topic/\d+/?",dest.path):
                     links.add(dest.path)
             record["public_topic_links"]=len(links)
     except ValueError as exc:
