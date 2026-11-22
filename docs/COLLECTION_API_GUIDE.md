@@ -172,7 +172,7 @@ curl -sS -X POST 'https://dev-gambling-community.119shenhao.workers.dev/api/coll
 - `.github/workflows/gambling-collector-on-demand.yml`：按需采集工作流
 - `docs/COLLECTION_AND_SYNC.md`：开发/生产内容同步与验收记录
 
-目前 `scripts/gambling_sources.json` 中 `sources` 为空。**接口已经有实现，不等于外站自动发现与解析已配置好。** 外部 AI 可以自行获取完整数据并按本指南调用接口；若要让仓库现有采集器自动运行，需另行配置来源和解析器。
+目前 `scripts/gambling_sources.json` 已登记 GamCare 与 Gambling Therapy 两个候选来源（默认均未启用）。`scripts/gambling_forums.py` 已提供独立来源发现及严格 HTML 正文/回复解析器，`gambling_collect.py` 支持 `inspect` 只读探测候选与正文。真实 GitHub Runner 首次只读发现 GamCare 39 个去重候选、Gambling Therapy HTTP 403。**登记来源、发现候选、通过离线测试，不等于具备完整转载许可或能立即自动入库。** 仅当 `approved`、`parser_verified`、`reuse_allowed` 均为 true，且 `permission_evidence` 是真实核验凭证时，才能从 `collect` 模式自动导入；无已启用来源的 `collect` 将以非零状态结束而不是冒充新增成功。
 
 GitHub 请求文件 `.github/gambling-collector-request.json` 的格式为：
 
@@ -185,3 +185,9 @@ GitHub 请求文件 `.github/gambling-collector-request.json` 的格式为：
 ## 6. 给第三方 AI 的最终执行指令
 
 先阅读本指南，再核对 `dev` 分支 `src/collect.ts`、`src/import.ts`。先检查线上 health；按 **exclusions → claim → 完整解析 → complete → 回读验证** 的顺序操作；失败则 release。只写开发环境，不直接写生产。使用真实来源 ID、完整评论树和服务器签发的租约令牌。每次提交后报告真实新增与重复数量，不能猜测成功。
+
+### 2026-11-22 新解析器和独立采集工作流核验
+
+- [GitHub Actions 真实只读来源发现 #44992825630](https://github.com/119shenhao/gambling/actions/runs/44992825630)：GitHub Runner 访问开发 Worker 成功、10 项离线解析测试通过、GamCare 候选 39 篇；没有导入。
+- 正文解析探测：`mode=inspect` 会对每个来源前两篇候选验证完整正文和评论数，只记录验证数量或失败原因，不记录原文内容；待检查实际新运行结果。
+- 所有外部采集仅可写 gambling DEV；`src/collect.ts` 的租约、去重、原子完整评论导入仍是最终门禁。
