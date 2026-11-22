@@ -244,3 +244,15 @@
 - [最终独立采集检查 #44993261146](https://github.com/119shenhao/gambling/actions/runs/44993261146) PASS：**13/13** Python 测试通过，含多页回读模拟；再次从 GamCare 真实网页只读解析 **7 条回复**，`new_topics=0,new_comments=0`。此次日志中的模拟导入提示属于 unittest，不是 D1 写入。
 - [Gambling Community CI #44993261210](https://github.com/119shenhao/gambling/actions/runs/44993261210) PASS：项目综合检查完成。
 - **尚未开启自动全文复制**：两站 `approved=false`、`reuse_allowed=false`；下一步需有允许完整再发布的确切来源，确认每站的许可及真实论坛文章结构，之后才能运行 `mode=collect` 验证开发 D1 新增记录。当前不要报告“已能自动导入2篇”。
+
+## 2026-11-22 GamCare 用户确认许可后的真实 DEV 首次入库（最新）
+
+- 用户在本对话确认已取得完整帖子和回复再发布许可。仅据此在 gambling/dev 的来源注册表对 **GamCare** 设 `approved=true`、`reuse_allowed=true`；原始凭证目前为用户确认陈述，尚未独立核验许可文件。Gambling Therapy 因 HTTP 403 和未核对复用范围仍关闭。
+- [首次真实完整主帖导入 #44993497291](https://github.com/119shenhao/gambling/actions/runs/44993497291) PASS：GamCare “I need to stop before I loose everything”，DEV 新增 1 篇、7 回复，topic_id `11823542-8666-48ae-87e4-3e91cfe90a17`，接口回读通过。
+- [自动发现首轮 #44993558005](https://github.com/119shenhao/gambling/actions/runs/44993558005) workflow 标记 failure：尽管 “Payday 2, 61 Days Gamble Free” 及 “Can't go on like this 3” **分别真实新增 1 篇、2 回复**（共 2 篇、4 回复），另外两篇已写入的长帖因服务端独立语言识别 `und` 与导入提示 `en` 不同而触发旧回读的误报。原文内容不应因语言检测标签不同被判错；待复核。
+- 修复 `readback`：保留严格原文标题/正文、每条评论正文与条数、层级及多页回读验证；语言提示与服务端重新检测的差异单独记录 `readback_language_detection` 而非误判内容缺失；候选正文缺失、隐私风险等记录为 rejected，不影响成功采集的 Actions 退出码。
+- [自动发现验证成功 #44993765907](https://github.com/119shenhao/gambling/actions/runs/44993765907)：15 项 Python 测试通过，GamCare 自动发现，新增真实 2 主帖、7 回复（“Hi I'm Karolina” 3 条、“10 Years On, 5 Days Off” 4 条），排除 5 个不合格候选，`errors=0`，工作流 Success。
+- [历史两篇异常内容只读回查 #44993908744](https://github.com/119shenhao/gambling/actions/runs/44993908744) PASS：GamCare “New Start for 50”（topic_id `a01e9483-79b9-45e7-9725-7157087dcf23`）原文及 **14 回复**全部回读一致；“Stuart – Well Done on a Year GF”（topic_id `f20ca546-8f1a-4b87-823a-af953bebbdea`）原文及 **7 回复**全部回读一致。仅 `source_lang` 服务端自动识别不同，保留检测结果。该验收未重复导入。
+- 已确认合计 **7 篇主帖、39 条回复**真正导入 DEV 并回读核验（1+2+2+2 篇；7+4+7+21 回复），不包含历史 [QA DIGEST] 摘要测试数据。没有写生产库。
+- 旧 JS CI 在 GamCare 开启后仍假设所有来源 `approved=false`，导致 [#44993908750](https://github.com/119shenhao/gambling/actions/runs/44993908750) 失败；已修改为只允许已确认的 GamCare 标志为 true，其余来源必须继续 false。后续检查最新 CI 结果确认修复完成。
+- 独立 ChatGPT 每6小时采集任务与每12小时生产同步任务保持隔离；本轮没有触发生产同步，新的真实 DEV 帖子尚不能声称已发布正式站。
