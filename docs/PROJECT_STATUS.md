@@ -415,3 +415,15 @@
 - 后续代码检查发现：旧版只有 `status='published'` 才附上语言验证记录。待审核或被阻止的内容即使已在 DEV 独立识别，管理员以后点击发布仍可能缺凭据。现在在 DEV 把“识别及凭据存储”与“公开状态”分离：`src/language-state.ts` 的版本/非删除守卫、`src/collect.ts`、`src/import.ts`、`src/content.ts`、`src/collect-long.ts` 在单一 D1 batch 内保存识别出的语言与对应凭据；不会因此提前公开待审核/屏蔽内容。
 - 最新相关提交：`f55569c9`、`e097f0a6`、`78cc09da`、`7ffca580`、`c10235f0`、`1e9c3ef1`。回归静态断言：`tests/gambling.test.mjs` 的 `58ea894a`。
 - 所有改动仍仅在戒赌论坛 `dev`；实际 GitHub Actions `ci.yml` 的最新结果未获取，不能提前宣称验收通过。既有 Identity Center 受保护生产同步执行器固定旧 SHA，尚未改动，生产 D1 已存在的 `und` 也未修改。
+
+
+## 2026-11-22 戒赌论坛原文语言修复：生产验收完成（优先于前述旧待验收记录）
+
+用户明确授权只处理戒赌论坛，开发→生产同步继续每12小时自动执行，不修改 Spine、OAuth、D1结构、密钥或帖子原文。
+
+- 原因：V2EX 大帖入库保存了 DEV `zh-CN`，旧版长帖流程没有同步保存当前版本语言凭据；旧同步器因此将已识别语言静默改为 `und`。已在 DEV 修复所有导入路径（普通/长帖/待审核）语言与验证记录的同 D1 batch 保存。新的同步代码固定在 `09df153ce9fdc57b435adf92b2aceeea393f3678`，只核对语言标记、对应版本和方法，缺失或冲突报错，不执行语言识别模型，不降级已识别语言。
+- 一次性历史修复 [Identity Center Actions #45024860737](https://github.com/119shenhao/identity-center/actions/runs/45024860737) **success**：DEV 补齐并读回863条证据；PROD 修改并验证6篇原帖、857条回复的错误 `und`；包括 V2EX 主题 `5aae46c6-56d8-468d-8d24-76bc689f09d2` 的 `zh-CN`。源文、回复树、作者、时间及同步回执未重导、未改变。
+- 用户手动采集 [#45025631325](https://github.com/119shenhao/gambling/actions/runs/45025631325) **success**：新增2篇/5回复、errors=0；随后手动触发新的受保护同步 [#45026829285](https://github.com/119shenhao/identity-center/actions/runs/45026829285) **success**，日志 dry-run `examined=2,new=2,comments=5`；apply `new=2,comments=5,marked=2`；下一轮 `examined=0`，最终 `examined=0`。新版生产复制与源回执实际验收通过。
+- 正式站在线检查 [#45027269679](https://github.com/119shenhao/gambling/actions/runs/45027269679) **success**：正式 Worker `GET /api/health` 返回版本 `0.5.1-language-proof-atomic.20261122`、数据库 ready，正式 `GET /api/topics/5aae46c6-56d8-468d-8d24-76bc689f09d2` 返回原文 `zh-CN`；SSO 和 Azure 设置检查正常。相应可复查报告 `docs/GAMBLING_PROD_LANGUAGE_LIVE_LATEST.json`。
+- 剩余142条历史 `und` 已通过受保护只读检查 [#45026992693](https://github.com/119shenhao/identity-center/actions/runs/45026992693) 全量确认：DEV 原始 `source_lang` 也是 `und` 的回复142条，**不是同步把已识别的语言降级**；DEV 来源缺失、DEV已识别而验证缺失、生产内容不一致、生产验证冲突均为0。长度分布：≤8字符19、9–30字符58、>30字符65。由于没有经过可靠语言判定，严格保留这142条 `und`；不可一键设为中文或英文。若以后独立改善原文识别器，应在DEV逐条确认证据后走明确批准的历史元数据更新，不能在同步时猜测。
+- 受保护执行器 [`identity-center`](https://github.com/119shenhao/identity-center/blob/main/docs/GAMBLING_CONTENT_SYNC_EXECUTOR.md) 和 ChatGPT 每12小时自动同步任务均使用固定 SHA `09df153ce9fdc57b435adf92b2aceeea393f3678`，不新建 GitHub cron、不重复同步已有回执的帖子。
