@@ -30,6 +30,9 @@ CONTENT_SELECTOR = (
 
 def source_id(site, url):
     """Use the forum's canonical topic slug, never a generated random ID."""
+    if site == "moneysavingexpert":
+        from gambling_mse import source_id as mse_source_id
+        return mse_source_id(url)
     if site not in ORIGINS or not isinstance(url, str):
         raise ValueError("unsupported_source")
     parsed = urlsplit(url)
@@ -49,6 +52,9 @@ def source_id(site, url):
 
 def discover(site, listing_url, html, excluded=(), maximum=60):
     """Return stable ID->canonical URL pairs without loading full thread bodies."""
+    if site == "moneysavingexpert":
+        from gambling_mse import discover as mse_discover
+        return mse_discover(listing_url, html, excluded, maximum)
     if site not in ORIGINS:
         raise ValueError("unsupported_source")
     root = urlsplit(listing_url)
@@ -203,6 +209,9 @@ def parse_topic_pages(site, expected_id, page_url, first_html, fetch):
     """
     if source_id(site, page_url) != expected_id:
         raise ValueError("source_id_mismatch")
+    if site == "moneysavingexpert":
+        from gambling_mse import parse_topic_pages as mse_pages
+        return mse_pages(expected_id, page_url, first_html, fetch)
     if site != "gamcare":
         raise ValueError("long_pagination_adapter_unavailable")
     base = page_url.rstrip("/") + "/"
