@@ -33,3 +33,12 @@
 - `npm run verify` 通过；中文、英文、日文和其他语言分别测试准确复制与缺证据拒绝。
 - 对历史 V2EX #1121755 / DEV topic `5aae46c6-56d8-468d-8d24-76bc689f09d2`，先只读核对 `topics/comments` 与 `content_language_verifications` 的原始字段；这篇已同步数据需要单独的生产语言元数据修正和后续缓存/SEO 检验。
 - 戒赌论坛当前正式同步通道位于 `119shenhao/identity-center`，使用 **固定审核提交** `94dded5100fd3d3ecc1758f9fba13d82be04c694`。本次仅修改 `gambling/dev`，**固定生产执行器不会自动使用新 DEV 代码**；不可把 GitHub 提交等同于生产生效，发布前还需做原有测试、审批、固定提交升级和真实读回验收。
+
+
+
+## 2026-11-22 真实生产验收结论
+
+- 自动同步执行器固定版本 `09df153ce9fdc57b435adf92b2aceeea393f3678`；[正式同步 #45026829285](https://github.com/119shenhao/identity-center/actions/runs/45026829285)：开发库新采2帖5回复 → 生产新增2帖5回复2回执，终检无待同步。
+- [生产 Worker 在线版本及 V2EX 中文原文 #45027269679](https://github.com/119shenhao/gambling/actions/runs/45027269679)：检查正式 `/api/health` 版本 `0.5.1-language-proof-atomic.20261122` 且实际 `/api/topics/5aae46c6-56d8-468d-8d24-76bc689f09d2` 原文语言 `zh-CN`，通过。
+- [历史语言修复 #45024860737](https://github.com/119shenhao/identity-center/actions/runs/45024860737)：6篇原帖+857条回复由可信 DEV 原文识别记录校正；[剩余原始 und 审计 #45026992693](https://github.com/119shenhao/identity-center/actions/runs/45026992693) 查实142条均在DEV也为 `und`，不是同步降级；原文语言不确定时继续保留 `und`。
+- 以上仅针对戒赌论坛。不得更改颈椎腰椎论坛及其调度；日后继续每12小时沿用固定受保护工作流，不重新识别原文，不对已有回执补传楼中楼。
