@@ -73,13 +73,16 @@ def discover(site, listing_url, html, excluded=(), maximum=60):
     host, _ = ORIGINS[site]
     if root.scheme != "https" or root.netloc != host:
         raise ValueError("invalid_listing_host")
+    board = root.path.strip("/").split("/")[:2] if site == "gamcare" else []
     page = BeautifulSoup(html, "html.parser")
     found = {}
     selectors = (
         ".wpforo-topic-title a[href], .wpf-topic-title a[href], "
         ".bbp-topic-title[href], a[href*='/forum/topic/'], "
         "a[href*='/forum/new-members-intros-forum/'], "
-        "a[href*='/forum/recovery-diaries/']"
+        "a[href*='/forum/recovery-diaries/'], "
+        "a[href*='/forum/family-friends/'], "
+        "a[href*='/forum/overcoming-problem-gambling/']"
     )
     for a in page.select(selectors):
         if a.find_parent("nav") or a.find_parent("footer"):
@@ -88,6 +91,8 @@ def discover(site, listing_url, html, excluded=(), maximum=60):
         try:
             key = source_id(site, url)
         except ValueError:
+            continue
+        if board and urlsplit(url).path.strip("/").split("/")[:len(board)] != board:
             continue
         if key in excluded or key in found:
             continue
