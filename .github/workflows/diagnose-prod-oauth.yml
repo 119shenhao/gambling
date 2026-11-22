@@ -1,0 +1,37 @@
+name: Diagnose production OAuth redirect (read-only)
+on:
+  push:
+    branches: [release/20261122-community-parity]
+    paths:
+      - .github/workflows/diagnose-prod-oauth.yml
+permissions:
+  contents: read
+jobs:
+  redirect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Inspect sanitized HTTP status and redirect hosts only
+        run: |
+          node --input-type=module <<'NODE'
+          const get = u=>fetch(u,{redirect:'manual',signal:AbortSignal.timeout(10000)});
+          const safe = (name,r) => {
+            const loc=r.headers.get('location');
+            let target=null;
+            if(loc){try{const u=new URL(loc);target=u.origin+u.pathname;}catch{target='invalid-location';}}
+            console.log(JSON.stringify({name,status:r.status,content_type:r.headers.get('content-type'),redirect_target:target,has_set_cookie:!!r.headers.get('set-cookie')}));
+          };
+          for(let i=1;i<=3;i++){
+            try{
+              const first=await get('https://gambling.nbn369.com/api/auth/identity?return_to=%2F');
+              safe('forum-authorize-'+i,first);
+              const link=first.headers.get('location');
+              if(first.status!==302||!link)continue;
+              const u=new URL(link);
+              if(u.origin!=='https://idcenter.nbn369.com')throw Error('unexpected issuer origin');
+              const second=await get(link);
+              safe('center-handoff-'+i,second);
+            }catch(e){console.log(JSON.stringify({attempt:i,error:e.name||'request_failed'}));}
+          }
+          const health=await get('https://idcenter.nbn369.com/health');safe('center-health',health);
+          NODE
