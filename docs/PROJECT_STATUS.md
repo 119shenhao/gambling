@@ -224,3 +224,17 @@
 - 通过在 `identity-center/main/.github/gambling-content-sync-request.json` 提交唯一 request_id、`mode=sync`，触发经批准固定 SHA 的同步脚本：先核对目标 D1、独立源码 CI/SQL 回归、只读预检查及 Time Travel 恢复点，然后按发布与一次性回执规则执行；已同步主帖永远跳过，绝不补传后续评论；完成再回读 `examined=0`。无 API 写入口或结构迁移。
 - ChatGPT 固定任务「戒赌论坛同步生产帖子」已更新为采用认证中心的受保护工作流，频率仍每12小时。**不要再触发赌博仓库原先缺少 secret 的 `gambling-sync-posts.yml`**；将来要迁移到独立新令牌，需要另行验收。用户不需要通过聊天提供任何密钥。
 - 采集定时任务每6小时仍处于启用状态，但 `scripts/gambling_sources.json` 仍无稳定解析的真实戒赌站点。后续只有配置好的来源才能运行真正定时采集。
+
+## 2026-11-22 戒赌论坛独立采集器真实改造（GamCare 全文解析核验）
+
+用户要求真正修复原定时采集源数为 0 的问题，且采集任务必须独立于 Spine。开发工作仅针对 `119shenhao/gambling/dev`：
+- 新增 `scripts/gambling_forums.py` 与 `tests/test_gambling_collector.py`；改造 `scripts/gambling_collect.py`；更新本仓库独立采集 Actions。实现候选列表发现、真实 URL 稳定 slug、严格原文/回复解析、exclusions/claim/complete/release、回读验证、每站限制与错误计数。对可能缺失回复/分页/隐私泄露的帖子拒绝导入。
+- `scripts/gambling_sources.json` 登记 `gamcare` 与 `gamblingtherapy` 两个独立来源。GamCare 的 `parser_verified=true` 仅表示一篇真实样本完成解析，不意味着所有帖子可成功。Gambling Therapy 列表 HTTP 403，暂未验收解析。
+- [#44992825630](https://github.com/119shenhao/gambling/actions/runs/44992825630)：真实 Runner 访问开发 `/api/health` 成功、GamCare 两个板块合并 39 个去重候选；Gambling Therapy 返回 403；10 项离线测试通过，无数据库写入。
+- [#44993018367](https://github.com/119shenhao/gambling/actions/runs/44993018367)：针对 `i-need-to-stop-before-i-loose-everything` 实际下载 GamCare 原帖，`parser_probe_ok`，完整识别 7 条回复；仅只读，不导入。
+- [#44993097907](https://github.com/119shenhao/gambling/actions/runs/44993097907)：12 项 Python 单测通过，包括 mock HTTP/D1 的认领→complete→readback 和解析失败释放；真实 GamCare 7 回复探测再次通过。日志出现的 `imported` 是 **mock 测试输出**，不是 D1 真正写入；真实本轮 `new_topics=0,new_comments=0`。
+- [#44993122908](https://github.com/119shenhao/gambling/actions/runs/44993122908)：Gambling Community npm 代码测试成功，修复了旧测试“来源表必须为空”的硬编码假设。
+- 根据各站内容条款，没有证据表明当前可以将 GamCare/Gambling Therapy/Reddit 他人完整帖子与评论作为本站匿名原创自动转载。因此登记的来源仍 `approved=false`、`reuse_allowed=false`，`importable_sources=0`；自动 `collect` 必须安全报未就绪，不得假报成功。许可确认或用户自有可再发布内容是开启实际自动入库的剩余前置条件。
+- 原独立 ChatGPT 每 6 小时采集任务和每 12 小时生产同步任务继续保持项目隔离；本轮没有修改 Spine 定时任务或生产同步作业、密钥、数据库内容。
+
+**当前结论：** “自动发现、解析、API 编排”已经开发并经过局部真实/模拟验证；**外站全文自动发布未启用、DEV 新增 0**。只有经验证可合法再发布的来源满足上线门槛后才能声明自动采集正常运行。
