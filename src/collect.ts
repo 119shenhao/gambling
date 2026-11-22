@@ -298,12 +298,12 @@ export async function collectRoute(req:Request,env:Env,path:string):Promise<Resp
   stmt(db,`INSERT INTO topics(id,author_id,title,body,source_lang,source_lang_mode,status,symptom_duration_days,content_hash)
    VALUES(?,?,?,?,?,?,?,?,?)`,topicId,UNKNOWN_USER_ID,title,content,source_lang,source_lang_mode,status,duration,fp)
  ];
- if(source_lang_mode==='auto'&&status==='published')writes.push(verificationWrite(db,'topic',topicId,1,source_lang,'tinyld-heavy',source_lang_score));
+ if(source_lang_mode==='auto')writes.push(verificationWrite(db,'topic',topicId,1,source_lang,'tinyld-heavy',source_lang_score));
  for(const tag of tags)writes.push(stmt(db,'INSERT INTO topic_terms(topic_id,term_id) VALUES(?,?)',topicId,tag));
  for(const c of comments){
   writes.push(stmt(db,`INSERT INTO comments(id,topic_id,author_id,parent_comment_id,kind,body,source_lang,source_lang_mode,status)
    VALUES(?,?,?,?,'regular',?,?,?,?)`,c.id,topicId,UNKNOWN_USER_ID,c.parent,c.body,c.source_lang,c.source_lang_mode,c.status));
-  if(c.source_lang_mode==='auto'&&c.status==='published')writes.push(verificationWrite(db,'comment',c.id,1,c.source_lang,'tinyld-heavy',c.score));
+  if(c.source_lang_mode==='auto')writes.push(verificationWrite(db,'comment',c.id,1,c.source_lang,'tinyld-heavy',c.score));
  }
  try{
   await finalize(db,site,sourceId,leaseHash,topicId,fp,false,writes,1,comments.length);
