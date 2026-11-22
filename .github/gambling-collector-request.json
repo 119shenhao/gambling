@@ -1,13 +1,9 @@
 {
-  "request_id": "gambling_20261122_v2ex_251_readback_audit_v2",
-  "mode": "inspect",
+  "request_id": "gambling_20261122_v2ex_verified_resume_all_v1",
+  "mode": "collect",
   "sites": [
-    "v2ex"
+    "all"
   ],
-  "candidates": {
-    "v2ex": [
-      "https://www.v2ex.com/t/1121755"
-    ]
-  },
-  "limit": 1
+  "candidates": {},
+  "limit": 2
 }
