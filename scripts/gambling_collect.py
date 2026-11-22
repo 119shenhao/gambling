@@ -333,6 +333,10 @@ def main():
     total_topics = total_comments = total_duplicates = errors = rejected = 0
     for site in sites:
         source = sources[site]
+        if req["mode"] == "collect" and not available(source):
+            emit("source_not_enabled", site=site,
+                 reason="source_not_enabled_or_parser_not_verified")
+            continue
         try:
             excluded = excluded_ids(site)
             explicit = req["candidates"].get(site, [])
