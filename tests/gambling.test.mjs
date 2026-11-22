@@ -291,6 +291,38 @@ test('compose matches reading-settings gold style without affecting other mobile
  assert.match(js,/data-action="compose"/);
 });
 
+
+test('home gold spade has no opaque dark square',()=>{
+ const css=read('public/styles.css');
+ const spade=css.match(/\.feed-heading::after\s*\{([^}]+)\}/)?.[1];
+ assert.ok(spade,'gold spade pseudo element exists');
+ assert.match(spade,/content:"♠"/);
+ assert.match(spade,/background:transparent/);
+ assert.doesNotMatch(spade,/background:var\(--bg\)/);
+ const divider=css.match(/\.feed-heading::before\s*\{([^}]+)\}/)?.[1];
+ assert.match(divider,/calc\(50% - 21px\)/);
+ assert.match(divider,/calc\(50% \+ 21px\)/);
+});
+test('all localized public notices are about gambling and privacy, not medical care',async()=>{
+ const {languages,dictionaries}=await import('../public/i18n.js');
+ const {readingLabels}=await import('../public/reading-preferences.js');
+ for(const locale of languages){
+  const dict=dictionaries[locale];
+  for(const key of ['communityReminder','privacyProduction','privacyText','publicNote','translationCaution']){
+   assert.ok(typeof dict[key]==='string'&&dict[key].length>20,locale+':'+key);
+   assert.doesNotMatch(dict[key],/医疗|醫療|医療|医学|醫學|診療|诊疗|medical|médic|medizin|ärzt/i);
+  }
+  assert.doesNotMatch(readingLabels(locale).hint,/医疗|醫療|医療|medical|médic|medizin|医学|醫學/i);
+ }
+ const app=read('public/app.js');
+ assert.doesNotMatch(app,/t\('medical'\)/);
+ assert.match(app,/t\('communityReminder'\)/);
+ assert.match(app,/<a href="\/privacy">\$\{t\('privacy'\)\}<\/a>/);
+ assert.match(dictionaries['zh-CN'].communityReminder,/博彩推广/);
+ assert.match(dictionaries['zh-TW'].communityReminder,/博彩推廣/);
+ assert.match(dictionaries.en.communityReminder,/gambling promotions/);
+});
+
 test('approved dynamic die logo preserves a compact brand frame and all navigation',()=>{
  const css=read('public/styles.css'),html=read('public/index.html');
  const svg=read('public/dynamic-dice-option3-complete.svg');
