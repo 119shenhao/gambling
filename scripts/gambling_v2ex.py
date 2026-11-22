@@ -85,8 +85,14 @@ def _text(node):
     value=re.sub(r" *\n *","\n"," ".join(parts)).strip()
     if not value:
         raise ValueError("v2ex_empty_text")
+    # Published posts sometimes mention contact details. Do not expose these
+    # in the imported topic, but also do not drop an otherwise complete
+    # 251-reply recovery discussion merely because one reply contains them.
+    # Same sanitized text flows to staging, dev D1 and exact public readback.
     if PRIVATE.search(value):
-        raise ValueError("v2ex_private_identifier")
+        value = PRIVATE.sub("[联系方式已隐藏]", value)
+        if not value.replace("[联系方式已隐藏]", "").strip():
+            raise ValueError("v2ex_only_private_identifier")
     return value
 
 
