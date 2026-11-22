@@ -149,11 +149,11 @@ export async function collectLongRoute(req:Request,env:Env,path:string):Promise<
   stmt(db,`INSERT OR IGNORE INTO content_language_verifications
    (content_type,content_id,content_version,language,method,score)
    SELECT 'topic',id,content_version,source_lang,'tinyld-heavy',NULL FROM topics
-   WHERE id=? AND status='published' AND source_lang_mode='auto' AND source_lang<>'und'`,existing.topic_id),
+   WHERE id=? AND status<>'deleted' AND source_lang_mode='auto' AND source_lang<>'und'`,existing.topic_id),
   stmt(db,`INSERT OR IGNORE INTO content_language_verifications
    (content_type,content_id,content_version,language,method,score)
    SELECT 'comment',id,content_version,source_lang,'tinyld-heavy',NULL FROM comments
-   WHERE topic_id=? AND status='published' AND source_lang_mode='auto' AND source_lang<>'und'`,existing.topic_id),
+   WHERE topic_id=? AND status<>'deleted' AND source_lang_mode='auto' AND source_lang<>'und'`,existing.topic_id),
   stmt(db,'UPDATE collect_sources SET state=?,lease_token_hash=NULL,lease_expires_at=NULL,completion_token_hash=?,topic_id=?,content_hash=?,completed_duplicate=0,completed_at=?,updated_at=? WHERE site=? AND source_id=? AND state=? AND lease_token_hash=?',
    'completed',tokenHash,existing.topic_id,existing.content_hash,now(),now(),site,sourceId,'claimed',tokenHash),
   stmt(db,'UPDATE collector_long_stages SET status=? WHERE site=? AND source_id=? AND lease_hash=?','completed',site,sourceId,tokenHash),
