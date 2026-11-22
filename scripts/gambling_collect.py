@@ -10,6 +10,7 @@ import re
 import sys
 import time
 from collections import Counter
+from itertools import zip_longest
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode, urlsplit
@@ -266,12 +267,17 @@ def discover_source(source, excluded, cap=60):
             except ValueError:
                 emit("invalid_seed_skipped", site=source["id"])
         emit("source_seed_discovery", site=source["id"], candidates=len(found))
+    interleave_listings = source["id"] == "gamcare"
+    listing_batches = []
     listing_available = False
     listing_error = None
     for listing in source.get("listings", [])[:5]:
         try:
             candidates = discover(source["id"], listing, fetch_source(listing), excluded, cap)
-            found.update({k: v for k, v in candidates.items() if k not in found})
+            if interleave_listings:
+                listing_batches.append(candidates.items())
+            else:
+                found.update({k: v for k, v in candidates.items() if k not in found})
             listing_available = True
             emit("listing_checked", site=source["id"], candidates=len(candidates))
         except ValueError as error:
@@ -280,7 +286,15 @@ def discover_source(source, excluded, cap=60):
         if len(found) >= cap:
             break
         time.sleep(1)
-    if source["id"] == "psychforums" and not listing_available and listing_error:
+    if interleave_listings:
+        for row in zip_longest(*listing_batches):
+            for candidate in row:
+                if candidate is not None:
+                    identifier, url = candidate
+                    found.setdefault(identifier, url)
+                    if len(found) >= cap:
+                        return found
+    if source["id"] in ("gamcare", "psychforums") and not listing_available and listing_error:
         raise listing_error
     return dict(list(found.items())[:cap])
 
