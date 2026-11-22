@@ -1,0 +1,51 @@
+name: Gambling preview collector HTTP smoke
+on:
+  push:
+    branches: [dev]
+    paths: [.github/workflows/dev-collector-http-smoke.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    if: github.repository == '119shenhao/gambling' && github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Verify independent preview collector routes and claim release, no topic writes
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,os,time
+          from urllib.request import Request,urlopen
+          from urllib.error import HTTPError,URLError
+          base='https://dev-gambling-community.119shenhao.workers.dev'
+          def call(path,payload=None):
+              body=json.dumps(payload).encode() if payload is not None else None
+              req=Request(base+path,data=body,headers={'Accept':'application/json',**({'Content-Type':'application/json'} if body is not None else {})})
+              with urlopen(req,timeout=15) as response:
+                  return response.status,json.load(response)
+          for attempt in range(18):
+              try:
+                  status,health=call('/api/health')
+                  if status==200 and health.get('environment')=='preview' and health.get('databaseReady') and health.get('importEnabled') and health.get('collectEnabled'):
+                      break
+              except (HTTPError,URLError,ValueError): pass
+              time.sleep(10)
+          else: raise SystemExit('Preview HTTP collector deployment not ready; no database writes attempted')
+          print('Preview healthy, isolated import and collect routes enabled')
+          status,account=call('/api/import/account')
+          if status!=200 or account.get('account',{}).get('id')!='system-unknown-import': raise SystemExit('Import author missing')
+          site='integration_smoke'
+          status,ex=call('/api/collect/exclusions?site='+site)
+          if status!=200 or ex.get('site')!=site: raise SystemExit('Exclusions API failed')
+          source_id='smoke_'+os.environ['GITHUB_SHA'][:20]
+          status,claim=call('/api/collect/claim',{'site':site,'collector_id':'github-preview-smoke','source_ids':[source_id]})
+          lease=claim['results'][0]
+          if status!=200 or lease['result']!='granted' or claim['lease_seconds']!=21600: raise SystemExit('Claim lease invalid')
+          status,release=call('/api/collect/release',{'site':site,'source_id':source_id,'lease_token':lease['lease_token']})
+          if status!=200 or release['status']!='released': raise SystemExit('Failed to release claim')
+          status,again=call('/api/collect/exclusions?site='+site)
+          if any(x['source_id']==source_id for x in again['items']): raise SystemExit('Released claim still excluded')
+          print('PASS: preview-only import account, exclusions, 6h claim, release and readback. No topic or production writes.')
+          PY

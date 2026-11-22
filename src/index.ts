@@ -13,6 +13,8 @@ import {drainPublicContent,requestProjection} from './projection-demand';
 import {projectionAdminRoute} from './projection-admin';
 import {projectionViewerRoute} from './projection-viewer';
 import {seoRoute} from './seo';
+import {importRoute} from './import';
+import {collectRoute} from './collect';
 
 function wakeProjection(env:Env,ctx:ExecutionContext|undefined) {
  const config=projectionConfig(env);
@@ -41,7 +43,18 @@ export default {
    }
   }
   try{
-   if(path==='/api/import'||path.startsWith('/api/import/')||path==='/api/collect'||path.startsWith('/api/collect/'))fail(404,'not_found');
+   if(path==='/api/import'||path.startsWith('/api/import/')){
+    if(env.APP_ENV!=='preview')fail(404,'not_found');
+    const response=await importRoute(req,env,path);
+    if(req.method==='POST'&&response.status===201)wakeProjection(env,ctx);
+    return response;
+   }
+   if(path==='/api/collect'||path.startsWith('/api/collect/')){
+    if(env.APP_ENV!=='preview')fail(404,'not_found');
+    const response=await collectRoute(req,env,path);
+    if(req.method==='POST'&&response.ok&&(path==='/api/collect/complete'||path==='/api/collect/long/finish'))wakeProjection(env,ctx);
+    return response;
+   }
    if(path==='/api/uploads'||path.startsWith('/api/uploads/'))fail(403,'image_feature_disabled');
    if(path==='/api/health'){
     let ready=false,projectionReady=false,translationReady=false,translationEnabled=false,translationCacheAvailable=false,languageSchemaReady=false,trafficEnabled=false;
@@ -71,7 +84,7 @@ export default {
      ready:projectionReady,enabled:Boolean(config?.enabled),purgeConfigured:Boolean(config?.purgeReady),
      zoneConfigured:Boolean(config?.zoneConfigured),tokenConfigured:Boolean(config?.tokenConfigured)
     };
-    return json({environment:env.APP_ENV==='preview'?'preview':'production',status:ready?'ok':'setup_required',stage:'v1-development',version:'0.5.1-language-proof-atomic.20261122',publicContent,databaseConfigured:Boolean(env.DB),databaseReady:ready,imageUploadsEnabled:false,importEnabled:false,googleConfigured:Boolean(env.GOOGLE_CLIENT_ID&&env.GOOGLE_CLIENT_SECRET),translationReady,translationCacheAvailable,...(env.APP_ENV==='preview'?{translationSetup:{...translationSetup(env),databaseEnabled:translationEnabled},languageDetection:{engine:'tinyld-heavy',schemaReady:languageSchemaReady}}:{}),translationConfigured:translationReady&&translationEnabled&&translationConfigured(env),analyticsEnabled:trafficEnabled,analyticsConfigured:trafficEnabled},ready?200:503);
+    return json({environment:env.APP_ENV==='preview'?'preview':'production',status:ready?'ok':'setup_required',stage:'v1-development',version:'0.5.2-community-parity.20261122',publicContent,databaseConfigured:Boolean(env.DB),databaseReady:ready,imageUploadsEnabled:false,importEnabled:env.APP_ENV==='preview'&&env.IMPORT_ENABLED==='true'&&Boolean(env.IMPORT_DB),collectEnabled:env.APP_ENV==='preview'&&env.COLLECT_ENABLED==='true'&&env.IMPORT_ENABLED==='true'&&Boolean(env.IMPORT_DB),googleConfigured:Boolean(env.GOOGLE_CLIENT_ID&&env.GOOGLE_CLIENT_SECRET),translationReady,translationCacheAvailable,...(env.APP_ENV==='preview'?{translationSetup:{...translationSetup(env),databaseEnabled:translationEnabled},languageDetection:{engine:'tinyld-heavy',schemaReady:languageSchemaReady}}:{}),translationConfigured:translationReady&&translationEnabled&&translationConfigured(env),analyticsEnabled:trafficEnabled,analyticsConfigured:trafficEnabled},ready?200:503);
    }
    if(!env.DB)fail(503,'database_not_configured');
    if(!['GET','HEAD'].includes(req.method))sameOrigin(req);

@@ -1,0 +1,187 @@
+{
+  "sources": [
+    {
+      "id": "gamcare",
+      "limit_per_listing": true,
+      "name": "GamCare Community Forum",
+      "host": "community.gamcare.org.uk",
+      "listings": [
+        "https://community.gamcare.org.uk/forum/family-friends/",
+        "https://community.gamcare.org.uk/forum/overcoming-problem-gambling/",
+        "https://community.gamcare.org.uk/forum/new-members-intros-forum/",
+        "https://community.gamcare.org.uk/forum/recovery-diaries/"
+      ],
+      "adapter": "gambling_forums",
+      "approved": true,
+      "parser_verified": true,
+      "reuse_allowed": true,
+      "permission_evidence": "User-confirmed 2026-11-22: permission obtained to republish complete GamCare forum topics and their replies; statement recorded in project conversation (not independently verified agreement).",
+      "parser_sample": "https://community.gamcare.org.uk/forum/new-members-intros-forum/i-need-to-stop-before-i-loose-everything/",
+      "parser_sample_replies": 7
+    },
+    {
+      "id": "gamblingtherapy",
+      "name": "Gambling Therapy Forum",
+      "host": "gamblingtherapy.org",
+      "listings": [
+        "https://gamblingtherapy.org/forum/"
+      ],
+      "adapter": "gambling_forums",
+      "approved": false,
+      "parser_verified": false,
+      "reuse_allowed": false,
+      "permission_evidence": ""
+    },
+    {
+      "id": "moneysavingexpert",
+      "name": "MoneySavingExpert Forum — Debt Free Diaries",
+      "host": "forums.moneysavingexpert.com",
+      "listings": [
+        "https://forums.moneysavingexpert.com/categories/debt-free-diaries"
+      ],
+      "adapter": "gambling_forums",
+      "approved": true,
+      "parser_verified": true,
+      "reuse_allowed": true,
+      "permission_evidence": "User-confirmed 2026-11-22 in project chat: permission obtained for MoneySavingExpert gambling-related complete topics and replies to be republished; no written agreement independently inspected.",
+      "parser_sample": "https://forums.moneysavingexpert.com/discussion/6512900/redemption-the-journey-of-a-recovering-gambling-addict",
+      "note": "User-confirmed repost permission 2026-11-22; independent preview inspect run 44998458677 verified two actual topics: 6200242 has all 67 replies, 6512900 has 632 total/500 captured (50 pages), 33 tests passing. Media references preserved. Discovery from curated public topic seed backlog plus category listing because site search HTTP 403; exclude completed IDs before any import. DEV-only; do not change production.",
+      "seed_topics": [
+        "https://forums.moneysavingexpert.com/discussion/6200242/gambling-recovery-and-covid-job-loss",
+        "https://forums.moneysavingexpert.com/discussion/6512900/redemption-the-journey-of-a-recovering-gambling-addict",
+        "https://forums.moneysavingexpert.com/discussion/6337668/gambling-addict-debt-diary",
+        "https://forums.moneysavingexpert.com/discussion/6655256/help-after-gambling",
+        "https://forums.moneysavingexpert.com/discussion/6035505/gambling-debt"
+      ],
+      "parser_sample_replies": 500
+    },
+    {
+      "id": "v2ex",
+      "name": "V2EX — Chinese gambling recovery discussions",
+      "host": "www.v2ex.com",
+      "listings": [
+        "https://www.v2ex.com/tag/%E8%B5%8C%E5%8D%9A"
+      ],
+      "adapter": "gambling_forums",
+      "approved": true,
+      "parser_verified": true,
+      "reuse_allowed": true,
+      "permission_evidence": "User explicitly confirmed on 2026-11-22 in project conversation that complete V2EX gambling-related threads and their replies can be republished in Gambling Community; technical full-parser and DEV D1 verification is still pending. Statement recorded as user confirmation, not independently reviewed written agreement.",
+      "parser_sample": "https://www.v2ex.com/t/1121755",
+      "note": "2026-11-22 read-only GitHub Actions run 45003064070: LIVE strict parser read 251 original replies across 3 HTML pages (100+100+51), 45 Python contract tests pass, no truncation; source-wide user-confirmed reuse eligibility recorded in permission_evidence. PII contact fragments replaced with [联系方式已隐藏] in V2EX parser. Enabled for DEV collection with existing 6-hour ChatGPT collector task; initial DEV D1 write and verification to be run next. Never change PROD.",
+      "seed_topics": [
+        "https://www.v2ex.com/t/1121755",
+        "https://www.v2ex.com/t/1018492"
+      ],
+      "parser_sample_replies": 251
+    },
+    {
+      "id": "psychforums",
+      "name": "PsychForums — Gambling Addiction Forum",
+      "host": "www.psychforums.com",
+      "listings": [
+        "https://www.psychforums.com/gambling-addiction-forum-f204/"
+      ],
+      "adapter": "gambling_forums",
+      "approved": false,
+      "parser_verified": true,
+      "reuse_allowed": true,
+      "permission_evidence": "User-confirmed on 2026-11-22 in the project conversation: permission obtained for the two selected sources, PsychForums and Netmums, and explicitly requested import of their content.",
+      "parser_sample": "https://www.psychforums.com/lost-1k-today-for-the-last-time/topic224726.html",
+      "parser_sample_replies": 18
+    },
+    {
+      "id": "douban",
+      "name": "豆瓣 — 戒赌小分队",
+      "host": "www.douban.com",
+      "listings": [
+        "https://www.douban.com/group/586083/"
+      ],
+      "adapter": "gambling_forums",
+      "approved": false,
+      "parser_verified": false,
+      "reuse_allowed": false,
+      "permission_evidence": "",
+      "note": "Candidate only. Public access may require human login; probe only. No bypass and no importer until exact full thread structure and permission verified."
+    },
+    {
+      "id": "tacklinggamblingstigma",
+      "name": "Tackling Gambling Stigma",
+      "host": "tacklinggamblingstigma.com",
+      "listings": [
+        "https://tacklinggamblingstigma.com/contributors/"
+      ],
+      "adapter": "gambling_forums",
+      "approved": true,
+      "parser_verified": true,
+      "reuse_allowed": true,
+      "permission_evidence": "User confirmed 2026-11-22 in the project conversation that all seven shortlisted sources are authorized for reuse; this records the user's statement.",
+      "seed_topics": [
+        "https://tacklinggamblingstigma.com/contributor/ben/",
+        "https://tacklinggamblingstigma.com/contributor/rachel/",
+        "https://tacklinggamblingstigma.com/contributor/julie/"
+      ],
+      "parser_sample": "https://tacklinggamblingstigma.com/contributor/ben/",
+      "parser_sample_replies": 0,
+      "note": "Standalone source, archived or newly listed stories only. Existing scheduled runner verified live discovery and full textual sample parsing; zero original comments and explicit original URL preserved. Evidence: GitHub Actions 45034456974."
+    },
+    {
+      "id": "agr",
+      "name": "Alliance for Gambling Reform",
+      "host": "www.agr.org.au",
+      "listings": [
+        "https://www.agr.org.au/voices"
+      ],
+      "adapter": "gambling_forums",
+      "approved": true,
+      "parser_verified": true,
+      "reuse_allowed": true,
+      "permission_evidence": "User confirmed 2026-11-22 in the project conversation that all seven shortlisted sources are authorized for reuse; this records the user's statement.",
+      "seed_topics": [
+        "https://www.agr.org.au/stories/sunenna",
+        "https://www.agr.org.au/stories/john",
+        "https://www.agr.org.au/stories/jacob",
+        "https://www.agr.org.au/stories/ed"
+      ],
+      "parser_sample": "https://www.agr.org.au/stories/sunenna",
+      "parser_sample_replies": 0,
+      "note": "Standalone source, archived or newly listed stories only. Existing scheduled runner verified live discovery and full textual sample parsing; zero original comments and explicit original URL preserved. Evidence: GitHub Actions 45034456974."
+    },
+    {
+      "id": "gamblingwithlives",
+      "name": "Gambling with Lives",
+      "host": "www.gamblingwithlives.org",
+      "listings": [
+        "https://www.gamblingwithlives.org/remembering/"
+      ],
+      "adapter": "gambling_forums",
+      "approved": true,
+      "parser_verified": true,
+      "reuse_allowed": true,
+      "permission_evidence": "User confirmed 2026-11-22 in the project conversation that all seven shortlisted sources are authorized for reuse; this records the user's statement.",
+      "seed_topics": [
+        "https://www.gamblingwithlives.org/jack-ritchie/"
+      ],
+      "parser_sample": "https://www.gamblingwithlives.org/jack-ritchie/",
+      "parser_sample_replies": 0,
+      "note": "Standalone source, archived or newly listed stories only. Existing scheduled runner verified live discovery and full textual sample parsing; zero original comments and explicit original URL preserved. Evidence: GitHub Actions 45034456974."
+    },
+    {
+      "id": "australiadss",
+      "name": "Australian Department of Social Services",
+      "host": "www.dss.gov.au",
+      "listings": [
+        "https://www.dss.gov.au/gambling/gambling-support-services"
+      ],
+      "adapter": "gambling_forums",
+      "approved": true,
+      "parser_verified": true,
+      "reuse_allowed": true,
+      "permission_evidence": "User confirmed 2026-11-22 in the project conversation that all seven shortlisted sources are authorized for reuse; this records the user's statement.",
+      "seed_topics": [],
+      "parser_sample": "https://www.dss.gov.au/gambling/gambling-support-services/matthews-story",
+      "parser_sample_replies": 0,
+      "note": "Standalone source, archived or newly listed stories only. Existing scheduled runner verified live discovery and full textual sample parsing; zero original comments and explicit original URL preserved. Evidence: GitHub Actions 45034456974."
+    }
+  ]
+}

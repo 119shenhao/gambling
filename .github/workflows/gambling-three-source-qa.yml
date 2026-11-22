@@ -1,0 +1,24 @@
+name: Gambling source-linked three-thread DEV QA
+on:
+  push:
+    branches: [dev]
+    paths: [.github/gambling-source-test-request.json]
+permissions:
+  contents: read
+concurrency:
+  group: gambling-three-sourced-digest-qa
+  cancel-in-progress: false
+jobs:
+  test-collection:
+    if: github.repository == '119shenhao/gambling'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Import and verify three clearly labeled editorial QA digests with nested reply structures
+        run: python scripts/qa_three_problem_gambling_digests.py

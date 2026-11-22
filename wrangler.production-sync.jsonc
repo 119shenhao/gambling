@@ -1,0 +1,13 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "gambling-community-production-sync-cli",
+  "compatibility_date": "2026-11-06",
+  "d1_databases": [
+    {
+      "binding": "PRODUCTION_DB",
+      "database_name": "gambling-community-prod",
+      "database_id": "7bba9ada-589f-493b-8fcf-60265fc0efac",
+      "migrations_dir": "migrations/v1"
+    }
+  ]
+}

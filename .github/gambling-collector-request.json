@@ -1,0 +1,9 @@
+{
+  "request_id": "gambling_20261122_verify_gamcare_board_quota_with_older_pages",
+  "mode": "collect",
+  "sites": [
+    "all"
+  ],
+  "candidates": {},
+  "limit": 2
+}

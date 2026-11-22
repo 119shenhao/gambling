@@ -1,0 +1,21 @@
+{
+  "developer_db_writes": false,
+  "douban": {
+    "html_bytes": 61656,
+    "public_topic_links": 45,
+    "status": "ok"
+  },
+  "probe_job_result": "success",
+  "report_type": "gambling_dev_chinese_sources_read_only_probe",
+  "run_id": 45034133570,
+  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45034133570",
+  "source_enabled_by_this_run": false,
+  "trigger_commit": "e5678afa7373babdd2d309be1c18be1fcb84adec",
+  "v2ex": {
+    "capped": false,
+    "captured": 251,
+    "pages": 3,
+    "source_total": 251,
+    "status": "parser_ok"
+  }
+}

@@ -1,0 +1,60 @@
+name: Gambling independent collector on demand
+on:
+  push:
+    branches: [dev]
+    paths: [.github/gambling-collector-request.json]
+permissions:
+  contents: read
+concurrency:
+  group: gambling-preview-collector
+  cancel-in-progress: false
+jobs:
+  collector:
+    if: github.repository == '119shenhao/gambling'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install independent forum parser
+        run: python -m pip install 'beautifulsoup4==4.13.4'
+      - name: Run offline parser and API-contract tests
+        run: python -m unittest discover -s tests -p 'test_gambling_*.py' -v
+      - name: Run inspection or approved collection against Gambling DEV only
+        shell: bash
+        run: |
+          set -o pipefail
+          python scripts/gambling_collect.py .github/gambling-collector-request.json | tee collector-events.jsonl
+      - name: Upload restricted collector event log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gambling-dev-collector-status
+          path: collector-events.jsonl
+          if-no-files-found: warn
+          retention-days: 3
+  report-dev-collector-status:
+    needs: collector
+    if: always()
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Download same-run collector events
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: gambling-dev-collector-status
+      - name: Publish sanitized collector and DEV D1 audit outcome
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COLLECTOR_JOB_RESULT: ${{ needs.collector.result }}
+        run: python scripts/gambling_publish_collection_status.py
