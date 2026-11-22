@@ -212,3 +212,13 @@ GitHub 请求文件 `.github/gambling-collector-request.json` 的格式为：
 4. 上传失败且确认来源未完成时可 `POST /api/collect/long/abort` 释放此次暂存；若finish响应不明，必须先查完成状态，不能盲目释放或重复写入。
 
 所有接口仅允许已启用 `IMPORT_ENABLED/COLLECT_ENABLED` 的赌博社区DEV Preview Worker（专用 D1），生产站无法执行写入。普通49条以内且无分页、单包符合150KB的帖子仍走原子 `/api/collect/complete`。已发布主帖不可因后续新回复自动补采（已有一次性同步/去重约定）。外站评论结构若无法确认父子关系，不能根据@提及捏造楼中楼。
+
+## 8. 待审核回复的完整性验收（2026-11-22）
+
+新来源的回复可成功存入 DEV D1，但因文字或外部图片引用触发社区的链接数量等规则而被标记为 `pending_review`。这类回复不会出现在普通访客的 `GET /api/topics/{id}` 评论列表中。**用户已明确同意：这些回复作为已成功采集入库计数，但不自动公开。**
+
+公开分页回读仍需核对原文及已显示评论的数量、ID唯一性和逐字内容；若缺少部分评论，只在同时满足以下条件时接受：同源 `site/source_id` 的来源回执已经 completed，`GET /api/collect/verification?site=...&source_id=...` 返回正确的 `topic_id`、`total` 等于导入目标数量、`status_counts.published` 等于公开回读数、`status_counts.pending_review` 恰等于缺失数，且不存在 `blocked`、`deleted` 或未知状态。该 DEV-only API 仅返回汇总计数，不返回待审核正文或身份信息；不能以客户端推测结果代替 D1 实际统计。
+
+日志输出 `readback_pending_review_verified` 时代表“存储成功，其中部分内容待审”，区别于“全部回复已经公开可见”。一旦公开回复正文不符、数据库缺少评论、状态计数不符或无法验证回执，必须继续报错，不能凑数。已完成的来源不得重新导入以掩盖误报。
+
+[真实 67 条帖子只读复验](https://github.com/119shenhao/gambling/actions/runs/45000202855) 已确认：DEV 存储67，公开65，待审核2，GitHub workflow Success。既有按6小时的采集日程及各来源每轮最多2篇不变，生产不受影响。
