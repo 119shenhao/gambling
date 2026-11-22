@@ -1,3 +1,31 @@
 {
-  "sources": []
+  "sources": [
+    {
+      "id": "gamcare",
+      "name": "GamCare Community Forum",
+      "host": "community.gamcare.org.uk",
+      "listings": [
+        "https://community.gamcare.org.uk/forum/new-members-intros-forum/",
+        "https://community.gamcare.org.uk/forum/recovery-diaries/"
+      ],
+      "adapter": "gambling_forums",
+      "approved": false,
+      "parser_verified": false,
+      "reuse_allowed": false,
+      "permission_evidence": ""
+    },
+    {
+      "id": "gamblingtherapy",
+      "name": "Gambling Therapy Forum",
+      "host": "gamblingtherapy.org",
+      "listings": [
+        "https://gamblingtherapy.org/forum/"
+      ],
+      "adapter": "gambling_forums",
+      "approved": false,
+      "parser_verified": false,
+      "reuse_allowed": false,
+      "permission_evidence": ""
+    }
+  ]
 }
