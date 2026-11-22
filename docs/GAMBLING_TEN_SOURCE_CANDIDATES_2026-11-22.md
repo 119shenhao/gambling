@@ -40,3 +40,14 @@
 每个新来源必须依次通过：真实 GitHub Runner 可达性 → 自动发现新帖及原站稳定 source_id → HTML/API 标题和完整原文 → 所有分页和评论/有证据的楼中楼 → 去引用/避免重复和虚构父子关系 → 敏感数据及博彩营销过滤 → 来源使用范围核验 → DEV exclusions、claim、最多500条前缀严格保存和 501 起不存、complete 或 long/start/append/finish → 独立开发 D1 回读（公开+待审核状态严格核对）→ 再将其追加到 `scripts/gambling_sources.json`，使既有 `sites=['all']` 的**原有** 6 小时任务自动纳入。
 
 **本轮只是网页调查和永久记录，不是新站点的 Runner 解析/开发库入库通过记录；没有新开定时器，也没有改变原有采集任务的运行频率。**
+
+## 2026-11-22 中文接入第一阶段开发（更新记录）
+
+- **已提交** `scripts/gambling_chinese_source_probe.py`：针对 V2EX 3 页真实帖子、赌博标签列表和豆瓣戒赌小组公共页面的只读 HTML 结构探测，只输出节点数量、回复数/分页等聚合元数据，不打印用户正文或身份。
+- **已提交** `scripts/gambling_v2ex.py` 独立严格解析器、`tests/test_gambling_v2ex.py`（7 项合成契约测试）、`scripts/gambling_v2ex_live_probe.py`（真实 251 回复主题的内存解析检查）；现有 `gambling_forums.py` 已接入 V2EX 的 ID、自动发现、分页适配分支；`gambling_collect.py` 预留了其长帖分批路径。
+- 将 `v2ex` 与 `douban` 写入 `scripts/gambling_sources.json`，**均为 approved=false / parser_verified=false / reuse_allowed=false**；现有 GamCare 和 MSE 两个来源保持启用，不会将中文来源提前导入 DEV 或生产。
+- **已使用现有** `.github/workflows/gambling-source-probe.yml` 只读工作流，向 `.github/gambling-source-probe-request.json` 写入新的触发请求 `probe-20261122-v2ex-douban-parser-v02`，提交 SHA `90b2f6a072877245312c642a9f805dd63b6a30a6`。
+- **验收未完成**：当前 GitHub 连接器可写入仓库及读取指定运行 ID 的日志，但无法列出刚触发的工作流运行 ID，因此这次 Runner 的测试结论仍须回读确认。离线测试代码提交不等于已经在 GitHub Runner 通过；真实 251 回复的完整解析和 500 封顶仍待读取实际新日志。
+- 豆瓣公共页面可能无法匿名读取，禁止通过登录绕过访问限制。只有真实 Runner、严格完整解析、来源使用资格及 DEV D1 回读全部满足，才可开启这两个新来源。
+- **任务频率保持每 6 小时一次**，每来源每轮上限 2 篇；无新增 GitHub Actions 定时触发器，生产环境未改变。
+
