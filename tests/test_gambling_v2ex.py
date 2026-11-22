@@ -35,6 +35,19 @@ class V2EXParserTests(unittest.TestCase):
                          {"12345":BASE})
         self.assertEqual(v2.discover("https://www.v2ex.com/tag/%E8%B5%8C%E5%8D%9A",html,{"12345"}),{})
 
+    def test_seed_fallback_keeps_gambling_stories_with_debt_only_titles(self):
+        from unittest.mock import patch
+        import gambling_collect as collect
+        site={"id":"v2ex","listings":["https://www.v2ex.com/tag/%E8%B5%8C%E5%8D%9A"],
+              "seed_topics":["https://www.v2ex.com/t/1121755"]}
+        # A listing can omit the word 戒赌 even if the actual post recounts
+        # gambling recovery. A seed remains just a candidate, not permission.
+        with patch.object(collect,"http",return_value=b"<html></html>"), \\
+             patch.object(collect.time,"sleep",return_value=None):
+            candidates=collect.discover_source(site,{})
+            self.assertEqual(candidates,{"1121755":"https://www.v2ex.com/t/1121755"})
+            self.assertEqual(collect.discover_source(site,{"1121755":"completed"}),{})
+
     def test_all_pages_replies_and_supplements(self):
         draft,meta=v2.parse_topic_pages("12345",BASE,page(),
             lambda url:page(int(url.split("=")[-1])))
