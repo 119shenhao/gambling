@@ -1,11 +1,8 @@
 {
-  "request_id": "gambling_20261122_inspect_authorized_standalone_stories",
-  "mode": "inspect",
+  "request_id": "gambling_20261122_collect_four_verified_story_sources",
+  "mode": "collect",
   "sites": [
-    "tacklinggamblingstigma",
-    "agr",
-    "gamblingwithlives",
-    "australiadss"
+    "all"
   ],
   "candidates": {},
   "limit": 2
