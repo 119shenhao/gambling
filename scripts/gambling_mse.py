@@ -12,6 +12,7 @@ TOPIC_RE = re.compile(r"^/discussion/(\d{4,12})/([a-z0-9][a-z0-9-]{0,160})/?$")
 PAGE_RE = re.compile(r"^/discussion/(\d{4,12})/([a-z0-9][a-z0-9-]{0,160})/p(\d{1,4})/?$")
 GAMBLING = re.compile(r"\b(?:gambl(?:e|ing|er|ers)|betting|casino|slots?|roulette|"
                       r"relaps(?:e|ed)|quit(?:ting)?|recovery|debt|lost|losses)\b", re.I)
+GAMBLING_TITLE = re.compile(r"\b(?:gambl\w*|betting|casino|slots?|roulette|bookmaker\w*)\b", re.I)
 PRIVATE = re.compile(r"(?<!\d)(?:[+]?\d[ -]?){10,15}(?!\d)|"
                      r"[\w.+-]+@[\w.-]+\.[a-z]{2,}", re.I)
 INCOMPLETE = re.compile(r"\b(?:load more replies|show more replies|view hidden replies)\b", re.I)
@@ -44,7 +45,7 @@ def discover(listing_url, html, excluded=(), maximum=60):
             continue
         title = node.get_text(" ", strip=True)
         # Debt free diaries is broad. Never offer unrelated financial discussions.
-        if not title or not GAMBLING.search(title):
+        if not title or not GAMBLING_TITLE.search(title):
             continue
         if original_id not in excluded and original_id not in found:
             found[original_id] = target
