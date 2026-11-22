@@ -451,3 +451,9 @@
 - `public/app.js` 的页脚、侧栏、隐私页统一使用新 `communityReminder` 键，移除从旧脊椎论坛遗留的 `medical` 提示；页脚隐私与社区规则链接仍在，修复尾随年份粘连的问题。
 - `public/i18n.js` 将戒赌论坛专用隐私、公开发帖、禁博彩推广文案应用于八种站内语言；繁体字典 `public/i18n-zh-tw.js` 清理旧医疗文字。原文语言及 Azure 翻译用途说明不改。个人中心 `public/reading-preferences.js` 阅读设置说明清除医疗护眼套话。
 - `tests/gambling.test.mjs` 增加 CSS 透明黑桃/分隔线与全语言新文案的自动回归测试。本节仅记录开发分支代码修改，线上部署和浏览器渲染待查看实际运行回执；本次不修改生产数据库、内容同步任务或其他论坛。
+
+## 2026-11-22 登录弹窗 X 焦点圈修复（DEV）
+
+- 真实 iPhone 截图显示弹窗打开时 X 按钮多了一层金色大圆形描边，点空白处消失。根因是 `showModal()` 将浏览器初始焦点分配给弹窗中第一个可操作的关闭按钮，和全局 `button:focus-visible` 的 3px 外边框叠加。
+- `public/index.html` 为弹窗设 `tabindex="-1"`；`public/app.js` 在 `showModal()` 后调用 `dialog.focus({preventScroll:true})`；`public/styles.css` 清除仅弹窗容器自身的焦点轮廓。保留按钮键盘 `:focus-visible`、点击关闭及其固有细框。
+- `tests/gambling.test.mjs` 增加焦点目标和键盘焦点可见性静态回归断言。本次仅在 DEV 修改，实际 iOS Safari 外观仍应由用户实机确认，CI 成功不能代替视觉实测。
