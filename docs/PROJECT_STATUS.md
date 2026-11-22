@@ -397,3 +397,14 @@
 - 在 DEV 源码提交 `0335bbc35ddc389478393849e0e557c6bbdcec72` 中，长帖 `finish` 现将已识别出的主帖及已发布回复的当前版本 `tinyld-heavy` 语言凭据与原文写入同一个 D1 batch；回归断言提交 `1a94b1d6d3b981b5a569cd665334439c0dcd7bbe`。**尚未取得本次修改的线上 CI/部署验收，不能把源码修复说成生产已修复**。
 - **历史数据需要单独、准确的元数据修复**：先只读核对 DEV 原帖和 PROD 副本的 `source_lang/source_lang_mode/content_version`、对应语言验证记录、源 ID 和回复计数；仅对核实为中文原文且 PROD 为 `und` 的记录（回复逐条独立判断）修复原文语言标记和凭据。保持标题、正文、251 条回复、parent ID、作者、时间、状态、同步回执全部不变。因为该贴已同步且已有 receipt，原有一生一次同步工作流不会自动重新写入此篇，不可通过重复触发发布任务期待自动修正。
 - 生产 D1 元数据写入需要单独确认授权，并通过受保护通道先核实 Time Travel 恢复点、执行定向更新及读回验证；不能用前端临时隐藏 `und` 代替真实数据修复。
+
+
+## 2026-11-22 · 原文语言 DEV 单次识别、PROD 纯复制：仅戒赌论坛开发代码
+
+用户最终确认：DEV 采集识别一次，语言字段与当前内容版本的验证记录一起原子保存；DEV→PROD 同步只核对，两者一致原样复制；缺失或冲突先在 DEV 修复；永不将已有有效语言静默降级为 `und`。用户再次强调**只处理戒赌论坛**，禁止碰 Spine。
+
+- `scripts/sync-preview-to-production.mjs` DEV 提交 `aaf7580e0405fd234f969425730ccb6d01285762` 将静默回退改为明确 `source_language_proof_missing_or_stale` / `source_language_proof_conflict`；DEV 已知语言、版本、验证方法、验证语言须一致，否则在写入前终止，不做第二次识别。后续 `2ef6dbffa2eeb25cc29b85420f2b399fcb4399aa` 将校验提前到已有生产同内容帖的回执处理之前，避免绕过检查。手动标记保持显式选择，不伪造模型凭据；真正未知语言允许保存 `und`。
+- 已有 `src/collect.ts`、`src/import.ts` 正常导入时，原文语言和有效凭据写入同一 D1 batch；`src/collect-long.ts` 之前的 V2EX 长帖漏写缺陷已在 `0335bbc35ddc389478393849e0e557c6bbdcec72` 修复（DEV 提交，需远程验收）。
+- 新增 `scripts/repair-preview-language-proofs.mjs`，仅操作 `gambling-community-dev`，通过 `src/source-language.ts` 原始 `tinyld-heavy` 实现独立复核已识别但缺失凭据的 DEV 历史帖和回复；只有重新识别与既有 `source_lang` 一致时才允许 DEV 补写凭据，已有冲突记录不自动覆盖。默认只读，`--apply` 须设置具体开发 D1 ID 确认值，写后读回。不迁移/重导正文或回帖。
+- `tests/sync-behavior.test.mjs`、`tests/gambling.test.mjs` 已加入跨语言、旧凭据、冲突、长帖、预览库限制和禁止二次检测测试；`docs/LANGUAGE_SYNC_RULES.md`、`docs/REQUIREMENTS.md` 已记录最终规范。
+- **代码提交不等于远程生效**：CI 状态、受保护执行器固定代码升级、DEV 旧数据实库审计、PROD 历史 `und` 修复目前均需分别验证/批准。已有 PROD 受保护执行器仍固定审核提交 `94dded5100fd3d3ecc1758f9fba13d82be04c694`，**不会自动切换到本次 DEV 修改**；不得改自动同步任务频率或冒充生产已经修复。
