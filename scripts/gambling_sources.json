@@ -111,15 +111,18 @@
         "https://tacklinggamblingstigma.com/contributors/"
       ],
       "adapter": "gambling_forums",
-      "approved": false,
-      "parser_verified": false,
+      "approved": true,
+      "parser_verified": true,
       "reuse_allowed": true,
       "permission_evidence": "User confirmed 2026-11-22 in the project conversation that all seven shortlisted sources are authorized for reuse; this records the user's statement.",
       "seed_topics": [
         "https://tacklinggamblingstigma.com/contributor/ben/",
         "https://tacklinggamblingstigma.com/contributor/rachel/",
         "https://tacklinggamblingstigma.com/contributor/julie/"
-      ]
+      ],
+      "parser_sample": "https://tacklinggamblingstigma.com/contributor/ben/",
+      "parser_sample_replies": 0,
+      "note": "Standalone source, archived or newly listed stories only. Existing scheduled runner verified live discovery and full textual sample parsing; zero original comments and explicit original URL preserved. Evidence: GitHub Actions 45034456974."
     },
     {
       "id": "agr",
@@ -129,8 +132,8 @@
         "https://www.agr.org.au/voices"
       ],
       "adapter": "gambling_forums",
-      "approved": false,
-      "parser_verified": false,
+      "approved": true,
+      "parser_verified": true,
       "reuse_allowed": true,
       "permission_evidence": "User confirmed 2026-11-22 in the project conversation that all seven shortlisted sources are authorized for reuse; this records the user's statement.",
       "seed_topics": [
@@ -138,7 +141,10 @@
         "https://www.agr.org.au/stories/john",
         "https://www.agr.org.au/stories/jacob",
         "https://www.agr.org.au/stories/ed"
-      ]
+      ],
+      "parser_sample": "https://www.agr.org.au/stories/sunenna",
+      "parser_sample_replies": 0,
+      "note": "Standalone source, archived or newly listed stories only. Existing scheduled runner verified live discovery and full textual sample parsing; zero original comments and explicit original URL preserved. Evidence: GitHub Actions 45034456974."
     },
     {
       "id": "gamblingwithlives",
@@ -148,13 +154,16 @@
         "https://www.gamblingwithlives.org/remembering/"
       ],
       "adapter": "gambling_forums",
-      "approved": false,
-      "parser_verified": false,
+      "approved": true,
+      "parser_verified": true,
       "reuse_allowed": true,
       "permission_evidence": "User confirmed 2026-11-22 in the project conversation that all seven shortlisted sources are authorized for reuse; this records the user's statement.",
       "seed_topics": [
         "https://www.gamblingwithlives.org/jack-ritchie/"
-      ]
+      ],
+      "parser_sample": "https://www.gamblingwithlives.org/jack-ritchie/",
+      "parser_sample_replies": 0,
+      "note": "Standalone source, archived or newly listed stories only. Existing scheduled runner verified live discovery and full textual sample parsing; zero original comments and explicit original URL preserved. Evidence: GitHub Actions 45034456974."
     },
     {
       "id": "australiadss",
@@ -164,11 +173,14 @@
         "https://www.dss.gov.au/gambling/gambling-support-services"
       ],
       "adapter": "gambling_forums",
-      "approved": false,
-      "parser_verified": false,
+      "approved": true,
+      "parser_verified": true,
       "reuse_allowed": true,
       "permission_evidence": "User confirmed 2026-11-22 in the project conversation that all seven shortlisted sources are authorized for reuse; this records the user's statement.",
-      "seed_topics": []
+      "seed_topics": [],
+      "parser_sample": "https://www.dss.gov.au/gambling/gambling-support-services/matthews-story",
+      "parser_sample_replies": 0,
+      "note": "Standalone source, archived or newly listed stories only. Existing scheduled runner verified live discovery and full textual sample parsing; zero original comments and explicit original URL preserved. Evidence: GitHub Actions 45034456974."
     }
   ]
 }
