@@ -416,3 +416,29 @@ test('DEV language recognition and evidence are atomic even before moderation ap
  assert.doesNotMatch(normal,/source_lang_mode==='auto'&&status==='published'/);
  assert.doesNotMatch(direct,/language\.mode==='auto'&&status==='published'/);
 });
+
+test('R2/CDN activation is prepared in DEV but is fail-closed until real CDN + purge token exist',()=>{
+ const c=JSON.parse(read('wrangler.jsonc'));
+ const p=c.previews.vars;
+ assert.equal(c.keep_vars,true);
+ for(const key of ['PUBLIC_CONTENT_ENABLED','PUBLIC_CONTENT_READS','PUBLIC_CONTENT_FALLBACK','PUBLIC_CONTENT_ON_DEMAND'])
+  assert.equal(p[key],'true',key);
+ assert.equal(p.PUBLIC_CONTENT_BASE_URL,'https://gambling-data-dev.nbn369.com');
+ assert.equal(p.PUBLIC_CONTENT_ORIGIN,'https://dev-gambling-community.119shenhao.workers.dev');
+ assert.equal(p.CDN_ZONE_ID,'7857d08dff2a46bf824914c687a21413');
+ assert.equal(p.PUBLIC_CONTENT_PAGE_SIZE,'50');
+ assert.equal(c.previews.r2_buckets.find(x=>x.binding==='PUBLIC_CONTENT_R2')?.bucket_name,'gambling-community-public-dev');
+ assert.equal(c.d1_databases[0].database_name,'gambling-community-prod');
+ assert.equal(c.vars.PUBLIC_CONTENT_ENABLED,'false','never enable production from DEV');
+ assert.equal(c.previews.vars.IMPORT_ENABLED,'true');
+ assert.equal(c.vars.IMPORT_ENABLED,'false');
+ assert.equal(c.vars.COLLECT_ENABLED,'false');
+ assert.equal(c.vars.TRANSLATION_ENABLED,'false');
+ assert.equal(c.previews.vars.CDN_PURGE_API_TOKEN,undefined,'token must stay Cloudflare Secret only');
+ const code=read('src/index.ts'),projection=read('src/public-projection.ts'),reader=read('public/public-content.js');
+ assert.match(code,/if\(!ctx\|\|!config\?\.enabled\|\|!config\.purgeReady\)return/);
+ assert.match(projection,/tokenConfigured=Boolean\(env\.CDN_PURGE_API_TOKEN\)/);
+ assert.match(projection,/purgeReady:zoneConfigured&&tokenConfigured/);
+ assert.match(reader,/health\.publicContent\.fallback/);
+ assert.match(reader,/x-gambling-projection-miss/);
+});

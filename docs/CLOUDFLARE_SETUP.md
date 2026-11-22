@@ -158,3 +158,17 @@ Cloudflare 文档：`https://developers.cloudflare.com/workers/previews/configur
 - [Cloudflare Preview 强制回读构建 9b001975](https://github.com/119shenhao/gambling/commit/9b0019750d464ed4aba1c4f0b4c8531720406f9b) **success**；因为临时程序在构建阶段必须完成一次精确 OWNER 管理角色回读，否则构建报错，因此证实 **DEV D1 目标已验证 Owner 的 admin 角色存在**。生产 D1 未访问，其他用户未修改。
 - 完成后**删除**临时授权脚本和构建调用，永久保留正式的签名 JWT + hashed Center Owner 角色匹配逻辑，之后不再运行 D1 强制初始化。Cloudflare Secret/D1/R2 严格隔离和构建后密钥守护继续启用。
 - **生产仅预置代码配置，未完成真实授权**：仓库 `main` 目前只有 README，正式论坛尚未上线、生产 Identity Center 登录开关关闭。待用户单独确认正式发布并实际登录后，生产 Owner 通过相应摘要自动获得 admin，不跨库复制账号、不提前初始化生产管理员，也不得提前报告为已完成。
+
+## 2026-11-23 R2 公开内容投影激活流程（等待 Cloudflare 外部条件验证）
+
+**这不是已经启用的生产 CDN。** 论坛的 R2 bucket binding 已存在，但 CDN 域名、CORS 及密钥属于 Cloudflare 控制台配置，GitHub 中的变量不能代替。先在 DEV 联调，禁止将 DEV 的 D1/R2 复制到 PROD。
+
+1. Cloudflare R2 → `gambling-community-public-dev` → Settings → Public access → Custom Domains → Connect Domain `gambling-data-dev.nbn369.com`；对应生产桶 `gambling-community-public-prod` 连接 `gambling-data.nbn369.com`。两个域名必须分别连到自己的桶。**不要**用 `r2.dev` 作为缓存域名，也不要将开发域名指向生产桶。
+2. 为两个 R2 bucket 配置 CORS GET/HEAD，允许前台来源 `https://dev-gambling-community.119shenhao.workers.dev` 和 `https://gambling.nbn369.com`（按各站实际来源最小授权）；检查公开 JSON 从对应页面请求时存在正确的 `Access-Control-Allow-Origin`。
+3. Cloudflare 的 Zone `nbn369.com` 创建针对对应 `gambling-data-dev.nbn369.com` / `gambling-data.nbn369.com` 的 JSON Cache Rule，Cache eligibility = Eligible for cache，Edge TTL 60 秒；默认 JSON 不必然缓存，须特别配置。发布后使用响应的 `CF-Cache-Status` 验证。
+4. 创建仅授权 Zone Cache Purge（限定 `nbn369.com`）的 API Token，分别放到已有 DEV Preview Worker 和 PROD Worker 环境的 Cloudflare **Secret** `CDN_PURGE_API_TOKEN`。**不要**将 token、Google 或 Azure Secret 写进 GitHub 的 `wrangler.jsonc`、文档或聊天。
+5. **开发库 D1 额度正常后**：确认 DEV Worker `/api/health` 的 `publicContent.ready=true`、`publicContent.enabled=true`、`publicContent.purgeConfigured=true`、`publicContent.baseUrl=https://gambling-data-dev.nbn369.com`；线上首次 CDN 404 → Worker fallback 返回正常帖子 → 后台填充 R2 → 再次访问 CDN JSON；分别验证 feed/detail/comments/translated locale、内容编辑删除后的 purge、跨来源 CORS。
+6. DEV 验收后，按生产保护发布：PROD `PUBLIC_CONTENT_ENABLED=true`、`PUBLIC_CONTENT_READS=true`、`PUBLIC_CONTENT_FALLBACK=true`、`PUBLIC_CONTENT_ON_DEMAND=true`，`PUBLIC_CONTENT_BASE_URL=https://gambling-data.nbn369.com`，`CDN_ZONE_ID` 使用该站 Cloudflare zone id，保持 PROD Secret/Variables/D1/R2 其余值。确认生产域名和 purge token 已就绪再上线；不能同时启动无界批量回填。
+7. GitHub DEV 工作流 `gambling-r2-readiness.yml` 只做公网 DNS/TLS/HTTP/CORS 读取和只读健康检查，不调用 D1 改动或触发队列。DNS 或 CORS 未通过时不表示 R2 已开启。
+
+项目先前所有“计划域名未上线”历史记录仍保留，不把准备代码写成已正式上线。

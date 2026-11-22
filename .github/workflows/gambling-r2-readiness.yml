@@ -1,0 +1,52 @@
+name: Gambling R2 public CDN readiness (read-only)
+on:
+  push:
+    branches: [dev]
+    paths:
+      - wrangler.jsonc
+      - .github/workflows/gambling-r2-readiness.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-cdn-hosts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Check independent dev/prod R2 custom-domain DNS and CORS without database writes
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,socket,urllib.request,urllib.error,ssl,os
+          cases=[
+            ("preview","gambling-data-dev.nbn369.com","https://dev-gambling-community.119shenhao.workers.dev"),
+            ("production","gambling-data.nbn369.com","https://gambling.nbn369.com"),
+          ]
+          rows=[]
+          for env,hostname,origin in cases:
+            item={"environment":env,"hostname":hostname,"dns":False,"tls_http":False,"cors":"unverified"}
+            try:
+              item["dns"]=bool(socket.getaddrinfo(hostname,443,type=socket.SOCK_STREAM))
+              request=urllib.request.Request(f"https://{hostname}/feeds/latest/page-1.json",headers={"Origin":origin,"User-Agent":"Gambling-R2-Readiness/1.0"},method="GET")
+              try:
+                with urllib.request.urlopen(request,timeout=12) as response:
+                  status=response.status
+                  cors=response.headers.get("Access-Control-Allow-Origin")
+              except urllib.error.HTTPError as exc:
+                status=exc.code
+                cors=exc.headers.get("Access-Control-Allow-Origin")
+              item["http_status"]=status
+              item["tls_http"]=True
+              item["cors"]="accepted" if cors in (origin,"*") else "missing_or_unverified"
+            except Exception as exc:
+              item["diagnosis"]=type(exc).__name__
+            rows.append(item)
+          print(json.dumps(rows,ensure_ascii=False,sort_keys=True))
+          with open(os.environ["GITHUB_STEP_SUMMARY"],"a") as out:
+            print("### R2 public CDN external prerequisites (read-only)",file=out)
+            print("These checks do not prove correct Cloudflare R2 bucket association or purge-token permissions. A 404 can be normal before first materialization.",file=out)
+            for r in rows:
+              print("- "+json.dumps(r,sort_keys=True),file=out)
+          PY

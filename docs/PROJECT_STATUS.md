@@ -457,3 +457,9 @@
 - 真实 iPhone 截图显示弹窗打开时 X 按钮多了一层金色大圆形描边，点空白处消失。根因是 `showModal()` 将浏览器初始焦点分配给弹窗中第一个可操作的关闭按钮，和全局 `button:focus-visible` 的 3px 外边框叠加。
 - `public/index.html` 为弹窗设 `tabindex="-1"`；`public/app.js` 在 `showModal()` 后调用 `dialog.focus({preventScroll:true})`；`public/styles.css` 清除仅弹窗容器自身的焦点轮廓。保留按钮键盘 `:focus-visible`、点击关闭及其固有细框。
 - `tests/gambling.test.mjs` 增加焦点目标和键盘焦点可见性静态回归断言。本次仅在 DEV 修改，实际 iOS Safari 外观仍应由用户实机确认，CI 成功不能代替视觉实测。
+
+## 2026-11-23 R2/CDN 公开内容功能激活审查（DEV 配置准备）
+
+- 用户要求启用而不再仅保留 R2 投影代码。DEV `wrangler.jsonc.previews.vars` 已准备 `PUBLIC_CONTENT_ENABLED/READS/FALLBACK/ON_DEMAND=true`、独立 `PUBLIC_CONTENT_BASE_URL` 和 `CDN_ZONE_ID`。
+- **上线仍受外部条件阻塞**：R2 custom domains 和 CORS 配置未能从 GitHub 读取或验证；`CDN_PURGE_API_TOKEN` 必须由 Cloudflare Secret 设置。现有 `projectionConfig` 的 `purgeReady` 缺失就保持 fail-closed，不触发 D1 到 R2 的投影，更不会把开发的公开 JSON 发到生产。
+- 新增只读 DNS/TLS/CORS/health 预检工作流和静态回归，生产 `main` 未修改。待 DEV 真实在线 CDN/原文/译文/缓存失效验收后，再保护生产配置发布。图片上传未实现、管理员 PV 统计可能增加 D1 写入、生产 Import/Collect 只能 DEV 运行，不能盲目打开。
