@@ -9,10 +9,10 @@
         "https://community.gamcare.org.uk/forum/recovery-diaries/"
       ],
       "adapter": "gambling_forums",
-      "approved": false,
+      "approved": true,
       "parser_verified": true,
-      "reuse_allowed": false,
-      "permission_evidence": "",
+      "reuse_allowed": true,
+      "permission_evidence": "User-confirmed 2026-11-22: permission obtained to republish complete GamCare forum topics and their replies; statement recorded in project conversation (not independently verified agreement).",
       "parser_sample": "https://community.gamcare.org.uk/forum/new-members-intros-forum/i-need-to-stop-before-i-loose-everything/",
       "parser_sample_replies": 7
     },
