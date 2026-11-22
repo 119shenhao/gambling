@@ -268,3 +268,4 @@
 - 视觉参考为 Crime Life Simulator Docs 镜像中的 Casino Life Simulator 赌场大厅。论坛沿用酒红、暖金描边和菱形纹理，用静态 CSS 表现。首页展示已有的本地化站名和口号，正文与评论使用纯色阅读面板。
 - 默认阅读配色改为深酒红色，个人中心仍可切换柔和暖色并调整字号。手机导航保留四个入口，搜索、帖子和弹窗使用同一套主题。
 - 本地 TypeScript、25 项测试、独立本地 D1 迁移检查和版本化前端构建均已通过。
+- [GitHub CI #44995255890](https://github.com/119shenhao/gambling/actions/runs/44995255890) 与该提交的 Cloudflare DEV Preview 构建成功。开发站已实际响应前端版本 `03d96c1105bbfb51`。桌面浏览器检查了英文与简体中文首页、帖子详情和回复展示、搜索入口、访客发帖登录弹窗、暖色配色及字号切换。iPhone Safari 真机视觉验收待补。
