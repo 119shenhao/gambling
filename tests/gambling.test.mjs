@@ -335,3 +335,24 @@ test('long-thread importer persists language evidence before production sync',()
  assert.match(sync,/source_language_proof_missing_or_stale/);
  assert.match(sync,/source_language_proof_conflict/);
 });
+
+test('Gambling DEV-only language proof repair uses the production collector detector, never a second sync detector',()=>{
+ const repair=read('scripts/repair-preview-language-proofs.mjs');
+ const source=read('src/source-language.ts');
+ const sync=read('scripts/sync-preview-to-production.mjs');
+ assert.match(repair,/entryPoints:\['src\/source-language\.ts'\]/);
+ assert.match(repair,/recognize\(row\.title,row\.body\):recognize\(row\.body\)/);
+ assert.match(repair,/evidence\.language!==row\.source_lang/);
+ assert.match(repair,/conflicting_current_language_proof/);
+ assert.match(repair,/GAMBLING_PREVIEW_LANGUAGE_REPAIR_CONFIRM/);
+ assert.match(repair,/wrangler\.preview-migrations\.jsonc/);
+ assert.match(repair,/binding\)!=='PREVIEW_DB'/);
+ assert.doesNotMatch(repair,/PRODUCTION_DB|SPINE_|spine-community/);
+ assert.match(source,/tinyld\/heavy/);
+ assert.doesNotMatch(sync,/detectSourceLanguageEvidence|tinyld\/heavy|AzureTranslator/);
+ assert.match(sync,/source_language_proof_missing_or_stale/);
+ assert.match(sync,/source_language_proof_conflict/);
+ assert.match(sync,/resolveSyncLanguage\(topic\);\s*const existing=verifyTopic/);
+ const syntax=spawnSync(process.execPath,['--check','scripts/repair-preview-language-proofs.mjs'],{encoding:'utf8'});
+ assert.equal(syntax.status,0,syntax.stderr);
+});
