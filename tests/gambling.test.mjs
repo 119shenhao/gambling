@@ -199,7 +199,12 @@ test('safe production sync is offline by default and uses only gambling D1',()=>
  assert.doesNotMatch(src,/spine-topic-v1|SPINE_SYNC_PRODUCTION_CONFIRM/);
  const collectorSources=JSON.parse(read('scripts/gambling_sources.json')).sources;
  assert.ok(collectorSources.length>=1);
- assert.ok(collectorSources.every(s=>s.approved===false && s.reuse_allowed===false));
+ const gamcare=collectorSources.find(s=>s.id==='gamcare');
+ assert.ok(gamcare && gamcare.approved===true && gamcare.reuse_allowed===true &&
+   gamcare.parser_verified===true && typeof gamcare.permission_evidence==='string' &&
+   gamcare.permission_evidence.length>30);
+ assert.ok(collectorSources.filter(s=>s.id!=='gamcare').every(s=>
+   s.approved===false && s.reuse_allowed===false));
  assert.ok(collectorSources.every(s=>s.adapter==='gambling_forums'));
  assert.ok(!collectorSources.some(s=>s.id==='spine'));
   assert.ok(['inspect','collect'].includes(JSON.parse(read('.github/gambling-collector-request.json')).mode));
