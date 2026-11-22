@@ -323,6 +323,18 @@ test('all localized public notices are about gambling and privacy, not medical c
  assert.match(dictionaries.en.communityReminder,/gambling promotions/);
 });
 
+test('opening a modal focuses its dialog, not the close button',()=>{
+ const html=read('public/index.html');
+ const app=read('public/app.js');
+ const css=read('public/styles.css');
+ assert.match(html,/<dialog id="modal" tabindex="-1">/);
+ assert.match(app,/dialog\.showModal\(\);dialog\.focus\(\{preventScroll:true\}\)/);
+ assert.match(css,/dialog:focus \{outline:none;\}/);
+ assert.match(css,/button:focus-visible/);
+ assert.match(css,/dialog \.dialog-close \{/);
+ assert.match(html,/data-action="close-modal"/);
+});
+
 test('approved dynamic die logo preserves a compact brand frame and all navigation',()=>{
  const css=read('public/styles.css'),html=read('public/index.html');
  const svg=read('public/dynamic-dice-option3-complete.svg');
