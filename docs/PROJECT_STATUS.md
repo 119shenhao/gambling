@@ -330,3 +330,9 @@
 - **用户确认规则**：待审核评论计入**已成功入库**，但在审核通过前不强制公开。为避免仅凭差额误判，`/api/collect/verification?site=...&source_id=...` 在 DEV **仅返回已完成来源、topic_id和实际 D1 按状态计数**，不暴露待审核正文/作者。采集端要求完成回执、确切 topic_id、D1 总数=目标数、公开内容逐字一致、公开量+待审核量=目标数，且没有 blocked/deleted/未知状态，才能判定通过；否则仍报错。
 - **真实修复复验 #45000202855 成功**：`completed_audit_ok`、`readback_pending_review_verified`，核对 topic_id `7d5b2d38-287a-4c6c-801b-fb1be7c9979d`、stored=67、public=65、pending_review=2；无重新写库，`errors=0`，35项 Python 单测通过。JS/TS 综合 CI #45000202813 成功。
 - 每6小时的 ChatGPT 独立采集日程未更改，生产 Worker、生产 D1、`main` 和 spine 论坛均未操作。本节的统计是各次运行各自新增，不可把历史成功帖子重算一次。
+
+### 2026-11-22 待审核验收修复后的正式采集回归
+
+- [正常采集 #45000258945](https://github.com/119shenhao/gambling/actions/runs/45000258945) **Success**：恢复 `mode=collect,sites=["all"],candidates={},limit=2` 后本轮独立 DEV 新增 **4篇主帖、26条回复**，`errors=0`、`duplicates=0`，8个不合格候选安全跳过；其中 GamCare 新增2篇7回复，MoneySavingExpert 新增2篇19回复。工作流的 unittest 中 `imported` 事件仅为模拟，真实入库计数只以运行末尾 `site_summary/run_summary` 为准。
+- 真实 MoneySavingExpert 本轮新增：源帖 `6655256` 7回复、`6035505` 12回复，正常回读通过。此前 `6200242` 已经是完成回执且已核对DB总数67（65公开+2待审核），未重入库、没有重复计数。新验收规则不改变管理审核状态，也不会把待审核评论显示给访客。
+- 自动采集任务原有**每6小时**频率与各启用来源每轮最多2篇保持不变，正式生产环境不动。MoneySavingExpert 网站搜索返回403；当前主要依赖种子和栏目列表，已知种子经采集后可能耗尽，不能据此宣称长期稳定发现新帖；后续需要继续拓展可靠的公开发现途径。
