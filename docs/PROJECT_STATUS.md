@@ -381,3 +381,9 @@
 本次从最初「12款骰子方案」第3号原画高分辨率方形裁图重新制作：保持骰子的所有面、点数、金色环绕轨迹不动；在独立图像中留出四周透明安全边距，以匹配原画曲线的细金描边补足边框连续性（不在 CSS 额外套第二个边框），生成 `public/dynamic-dice-option3-complete.svg`。文件内嵌 128×128 PNG，SHA-256 `1984f8b12032bd157c5e48f420130afbaada50511614ca4cf81f32515d5574c3`，对比旧版 80×80 图像，右侧金边现在完整并与画面边缘隔开。首页 `public/index.html` 指向**新的文件名**，避免缓存旧图；CSS 现有两主题去重边框逻辑不变。
 
 **改动范围**：仅 `119shenhao/gambling/dev` 的品牌资源、首页引用、静态回归测试和文档；不修改 `main`、生产 Worker/D1 或论坛业务逻辑。已在本地使用 Chromium/Playwright 按 390px 手机 CSS 视口、DPR=3 的 35px 图标实际渲染检查，并与用户选定原图、此前错图对照，确认源素材完整。Node 回归测试同时检验新资源名称、128×128 PNG 和固定 SHA-256，防止未来误用缺边的旧图。**云端在线 URL 当前无法通过可用工具访问，Cloudflare 自动构建、真实站部署、Safari 实机最终显示仍需线上回执，不可将本地验收表述为线上成功。**
+
+## 2026-11-22 Casino 赌场大厅原生菱形背景移植（DEV）
+
+按用户明确同意，使用 `119shenhao/crime-life-simulator-docs/main` 的**真实源码**：`source-mirror/project_inner_game/casino_life_simulator/assets/diamond-tile.svg`、`styles.css` 的 `.background-light`。已在戒赌社区 `dev` 添加**字节内容一致**的 `public/casino-diamond-tile.svg`；更新 `public/styles.css` 深色主题下的 body 和 topbar，使用 91×103 方片的比例缩放及原赌场中心柔光/左右黑红暗角/纵向阴影叠层，取消旧的 CSS 交叉线纹理。该背景静态平铺以免影响持续阅读。暖色阅读主题、3号骰子品牌素材、导航按钮、深绿帖子卡片及全部业务逻辑保留。测试 `tests/gambling.test.mjs` 增加原 SVG、配色、比例、渐变和暖色主题的回归断言。
+
+本轮**仅提交 `119shenhao/gambling/dev`**；`main`、生产 Cloudflare Worker/D1、帖子采集/同步和 Identity Center 不变。GitHub Actions 与 Cloudflare 预览部署需另行检查运行回执；如果无法读取真实开发站，不把源码提交或本地静态预览表述为线上验收。
