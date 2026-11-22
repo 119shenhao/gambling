@@ -10,6 +10,8 @@ from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
 from gambling_mse import parse_topic_pages, source_id
+from bs4 import BeautifulSoup
+from collections import Counter
 
 SAMPLES = [
     "https://forums.moneysavingexpert.com/discussion/6200242/gambling-recovery-and-covid-job-loss",
@@ -49,7 +51,24 @@ def main():
         record = {"site":"moneysavingexpert", "source_id":identifier,
                   "read_only":True, "database_writes":False}
         try:
-            draft, meta = parse_topic_pages(identifier,url,fetch(url),fetch)
+            first = fetch(url)
+            doc = BeautifulSoup(first, "html.parser")
+            bodies = doc.select("li.ItemComment .Message, .ItemDiscussion .Message")
+            media = Counter()
+            for body in bodies:
+                clone = BeautifulSoup(str(body), "html.parser")
+                for skipped in clone.select("blockquote, .Quote, .Signature, .UserSignature, .User-Signature, .PostSignature"):
+                    skipped.decompose()
+                for node in clone.select("img, video, iframe, audio, .attachment, [data-attachment]"):
+                    tag = node.name
+                    classes = sorted(node.get("class", []))[:4]
+                    domain = ""
+                    if tag == "img":
+                        domain = urlsplit(node.get("src", "")).hostname or "relative"
+                    media[(tag, tuple(classes), domain, bool(node.get("alt")),bool(node.get("title")))]+=1
+            record["media_types"] = [{"tag":t,"classes":list(c),"src_host":h,"has_alt":a,"has_title":ti,"count":n} for (t,c,h,a,ti),n in media.most_common(20)]
+            record["body_nodes"] = len(bodies)
+            draft, meta = parse_topic_pages(identifier,url,first,fetch)
             record.update({"status":"parser_ok", "captured":len(draft["comments"]), **meta})
         except (ValueError, TypeError, KeyError) as error:
             record.update({"status":"parser_rejected", "reason":str(error)[:120]})
