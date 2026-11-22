@@ -292,6 +292,8 @@ test('approved dynamic die logo preserves a compact brand frame and all navigati
  const css=read('public/styles.css'),html=read('public/index.html');
  const svg=read('public/dynamic-dice.svg');
  assert.match(css,/\.brand-icon \{border:0; background:transparent; box-shadow:none;\}/);
+ assert.match(css,/:root:not\(\[data-reading-theme="warm"\]\) \.brand-icon,/);
+ assert.match(css,/:root\[data-reading-theme="warm"\] \.brand-icon \{border:0;/);
  assert.match(css,/\.brand-icon img \{display:block; width:100%; height:100%; object-fit:contain;/);
  assert.match(html,/<span class="brand-icon" aria-hidden="true"><img src="\/dynamic-dice\.svg"/);
  assert.match(svg,/data:image\/png;base64,/);
