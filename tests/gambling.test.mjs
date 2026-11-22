@@ -165,3 +165,24 @@ test('verified DEV and future PROD Identity Center Owners have separate hashed r
  assert.match(src,/if\(!isAdmin&&env\.ADMIN_CENTER_OWNER_SHA256\)/);
  assert.match(read('src/auth.ts'),/await ensureVerifiedCenterOwnerAdmin\(env,uid,claims\.sub\)/);
 });
+
+test('collector HTTP surfaces remain isolated to Gambling Preview and preserve production deny',()=>{
+ const c=JSON.parse(read('wrangler.jsonc'));
+ assert.equal(c.vars.IMPORT_ENABLED,'false');
+ assert.equal(c.vars.COLLECT_ENABLED,'false');
+ assert.equal(c.previews.vars.IMPORT_ENABLED,'true');
+ assert.equal(c.previews.vars.COLLECT_ENABLED,'true');
+ const isolated=c.previews.d1_databases.find(d=>d.binding==='IMPORT_DB');
+ assert.equal(isolated.database_id,'a92cf620-2a0b-46e1-a0ff-2e0c94218f37');
+ assert.equal(c.d1_databases.some(d=>d.binding==='IMPORT_DB'),false);
+ const imp=read('src/import.ts'),col=read('src/collect.ts'),index=read('src/index.ts');
+ assert.match(imp,/APP_ENV==='preview'/);
+ assert.match(imp,/dev-gambling-community[.]119shenhao[.]workers[.]dev/);
+ assert.match(imp,/env[.]IMPORT_DB/);
+ assert.match(col,/collectEnabled/);
+ assert.match(col,/claim_not_owned_or_expired/);
+ assert.match(index,/await importRoute\(req,env,path\)/);
+ assert.match(index,/await collectRoute\(req,env,path\)/);
+ assert.match(read('scripts/preview-migrate.mjs'),/migrations\/preview-only\/0001_collector_queue[.]sql/);
+ assert.match(read('migrations/preview-only/0001_collector_queue.sql'),/CREATE TABLE IF NOT EXISTS collector_candidates/);
+});
