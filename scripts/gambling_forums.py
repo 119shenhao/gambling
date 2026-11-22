@@ -30,6 +30,9 @@ CONTENT_SELECTOR = (
 
 def source_id(site, url):
     """Use the forum's canonical topic slug, never a generated random ID."""
+    if site == "v2ex":
+        from gambling_v2ex import source_id as v2ex_source_id
+        return v2ex_source_id(url)
     if site == "moneysavingexpert":
         from gambling_mse import source_id as mse_source_id
         return mse_source_id(url)
@@ -52,6 +55,9 @@ def source_id(site, url):
 
 def discover(site, listing_url, html, excluded=(), maximum=60):
     """Return stable ID->canonical URL pairs without loading full thread bodies."""
+    if site == "v2ex":
+        from gambling_v2ex import discover as v2ex_discover
+        return v2ex_discover(listing_url, html, excluded, maximum)
     if site == "moneysavingexpert":
         from gambling_mse import discover as mse_discover
         return mse_discover(listing_url, html, excluded, maximum)
@@ -209,6 +215,9 @@ def parse_topic_pages(site, expected_id, page_url, first_html, fetch):
     """
     if source_id(site, page_url) != expected_id:
         raise ValueError("source_id_mismatch")
+    if site == "v2ex":
+        from gambling_v2ex import parse_topic_pages as v2ex_pages
+        return v2ex_pages(expected_id,page_url,first_html,fetch)
     if site == "moneysavingexpert":
         from gambling_mse import parse_topic_pages as mse_pages
         return mse_pages(expected_id, page_url, first_html, fetch)
