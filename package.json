@@ -10,7 +10,8 @@
     "verify": "npm run check && npm test",
     "db:local": "wrangler d1 migrations apply DB --local --config wrangler.local.jsonc",
     "build": "node scripts/prepare-build.mjs",
-    "sync:production": "node scripts/sync-preview-to-production.mjs"
+    "sync:production": "node scripts/sync-preview-to-production.mjs",
+    "repair:preview-language": "node scripts/repair-preview-language-proofs.mjs"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "5.20261104.1",
