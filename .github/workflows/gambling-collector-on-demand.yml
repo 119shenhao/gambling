@@ -1,0 +1,24 @@
+name: Gambling authorized collector
+on:
+  push:
+    branches: [dev]
+    paths: [.github/gambling-collector-request.json]
+permissions:
+  contents: read
+concurrency:
+  group: gambling-preview-collector
+  cancel-in-progress: false
+jobs:
+  collector:
+    if: github.repository == '119shenhao/gambling'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify authorized-source registry and development endpoint
+        run: python scripts/gambling_collect.py .github/gambling-collector-request.json
