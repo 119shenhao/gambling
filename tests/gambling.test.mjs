@@ -169,3 +169,28 @@ test('verified DEV and PROD Identity Center Owners have separate hashed role sel
  assert.match(src,/if\(!isAdmin&&env\.ADMIN_CENTER_OWNER_SHA256\)/);
  assert.match(read('src/auth.ts'),/await ensureVerifiedCenterOwnerAdmin\(env,uid,claims\.sub\)/);
 });
+
+test('production UI uses the approved Casino Life Simulator diamond backdrop without changing deployment safety',()=>{
+ const html=read('public/index.html');
+ const css=read('public/styles.css');
+ const tile=read('public/casino-diamond-tile.svg');
+ const logo=read('public/dynamic-dice-option3-complete.svg');
+ const config=JSON.parse(read('wrangler.jsonc'));
+ assert.match(html,/dynamic-dice-option3-complete\.svg/);
+ assert.match(css,/--diamond-pattern: url\("\/casino-diamond-tile\.svg"\)/);
+ assert.match(css,/--casino-diamond-w: min\(9\.67vw, 91px\)/);
+ assert.match(css,/--casino-diamond-h: min\(10\.95vw, 103px\)/);
+ assert.match(css,/linear-gradient\(90deg, #1d000bc4, transparent 20%, transparent 80%, #1d000bc4\)/);
+ assert.match(tile,/width="91" height="103" viewBox="0 0 91 103"/);
+ assert.match(tile,/<rect width="91" height="103" fill="#50010d"\/>/);
+ assert.match(tile,/fill="#640110"/);
+ assert.match(logo,/viewBox="0 0 128 128"/);
+ assert.match(css,/\.sidebar \.primary-nav \.nav-compose \{/);
+ assert.match(css,/:root\[data-reading-theme="warm"\] \{/);
+ assert.equal(config.keep_vars,true);
+ assert.equal(config.vars.IDENTITY_LOGIN_ENABLED,'true');
+ assert.equal(config.vars.TRANSLATION_DAILY_LIMIT,'200000');
+ assert.equal(config.vars.TRANSLATION_MONTHLY_LIMIT,'1800000');
+ assert.equal(config.previews.d1_databases[0].database_name,'gambling-community-dev');
+ assert.equal(config.d1_databases[0].database_name,'gambling-community-prod');
+});
