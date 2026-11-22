@@ -42,8 +42,8 @@ class V2EXParserTests(unittest.TestCase):
               "seed_topics":["https://www.v2ex.com/t/1121755"]}
         # A listing can omit the word 戒赌 even if the actual post recounts
         # gambling recovery. A seed remains just a candidate, not permission.
-        with patch.object(collect,"http",return_value=b"<html></html>"), \\
-             patch.object(collect.time,"sleep",return_value=None):
+        with (patch.object(collect,"http",return_value=b"<html></html>"),
+              patch.object(collect.time,"sleep",return_value=None)):
             candidates=collect.discover_source(site,{})
             self.assertEqual(candidates,{"1121755":"https://www.v2ex.com/t/1121755"})
             self.assertEqual(collect.discover_source(site,{"1121755":"completed"}),{})
