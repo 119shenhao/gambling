@@ -195,3 +195,18 @@
 - 当前 Center PROD 的 `gambling-community-prod` 已注册单一回调，但仍 **disabled，且无有效生产 OAuth client secret verifier**。现有自动化 D1 token 对 Cloudflare Workers Script API 返回403，无权代写生产 Worker Secret。不能声称生产 Google 登录或管理员网页登录已成功。
 - 以后要完成网页登录，只需单独为生产 Worker 设置高熵 `IDENTITY_CLIENT_SECRET`（不能与 DEV 或 Spine 共用）、在 Center PROD 登记 SHA256 base64url verifier、启用此独立 client，然后将对应生产 `IDENTITY_LOGIN_ENABLED` 置 true 并上线验证 `/api/me` 管理员角色。保持 `keep_vars:true`、不覆盖现有 `TRANSLATOR_KEY` 等 Secrets。
 - 过时的首次上线 Draft PR [#3](https://github.com/119shenhao/gambling/pull/3) 已关闭，避免较旧 release 分支覆盖 `main` 已上线的版本。以后新的生产更改应从**最新 main** 定向修改，而非合并旧代码快照。
+
+
+## 2026-11-22 开发环境 HTTP 采集与生产同步预备（尚未正式采集/同步）
+
+用户要求参考 Spine 已验收模式：开发站以 HTTP 采集原文及回复写入独立开发库，生产库通过受保护同步作业一次性接收已发布、无回执的主帖及当时公开评论；另建 ChatGPT 每6小时采集、每12小时同步定时任务。
+
+- DEV 代码已恢复预览专用 `/api/import/*`、`/api/collect/*`，添加 DEV `IMPORT_DB` 同 UUID 独立绑定（仅戒赌社区 DEV D1），正式 `IMPORT_ENABLED=false`、`COLLECT_ENABLED=false` 不变；`migrations/preview-only/0001_collector_queue.sql` 只在 DEV 构建迁移，不能进入生产迁移链。代码提交 [07c92f81](https://github.com/119shenhao/gambling/commit/07c92f81fbb16f01a24a5beeaf16b3d2d6f8a3da)，[CI #44976891166](https://github.com/119shenhao/gambling/actions/runs/44976891166) PASS。
+- 独立同步 CLI、独立 Cloudflare D1 配置、安全的私有授权导出采集器和来源注册表见提交 [d4f4a2e6](https://github.com/119shenhao/gambling/commit/d4f4a2e608779f99fc3261f68d3f58efb0991bf6)；[CI #44976999174](https://github.com/119shenhao/gambling/actions/runs/44976999174) PASS。预览/生产 D1 UUID 经静态检查，内容指纹前缀为 gambling-topic-v1，不能与 Spine 混用。
+- 开发分支新增 `.github/workflows/gambling-collector-on-demand.yml` 和 `.github/workflows/gambling-sync-posts.yml`，提交 [5f603eef](https://github.com/119shenhao/gambling/commit/5f603eefbac4ee5a4ad948262bd01786bff03dec)，[CI #44977060680](https://github.com/119shenhao/gambling/actions/runs/44977060680) PASS；没有在 Actions 创建自动 cron，也没有派发生产同步。
+- ChatGPT 两项定时任务已经创建启用，采集每6小时（北京时间12:00起），同步每12小时（北京时间13:00起）；任务必须执行就绪门禁，未验收时仅报告阻碍。GitHub 源列表 `scripts/gambling_sources.json` 目前为空，不允许移植颈椎腰椎的医学数据来源与授权。每次真实采集须先获该站授权、验证 parser，完整回复及去重/claim/complete 安全校验才允许启用。
+- [DEV 采集只读请求 #44977172957](https://github.com/119shenhao/gambling/actions/runs/44977172957) SUCCESS，日志确认 Preview HTTP 就绪，`importEnabled=true`、`collectEnabled=true`，但 `registered_sources=0`，`new_topics=0`。这不是自动采集已有业务网站成功的证明。开发 HTTP 认领→释放的线上 Smoke 见 [#44977141531](https://github.com/119shenhao/gambling/actions/runs/44977141531)，须等待最终日志后另行记录结论，不能预先称通过。
+- 正式生产内容同步未验收：受控 Workflow 仍仅在 dev 分支，首次 D1 dry-run、Time Travel、正式写入及新 Job 成功记录尚不存在；且 GitHub 独立 Secret `GAMBLING_PROD_D1_API_TOKEN` 和账号变量配置尚未验证。任务安全门禁禁止提前写生产。首次受控验收并按发布流程切换后，才可自动重跑已验证作业。
+- 保留两个论坛所有 Cloudflare 变量、Secret、Identity Center 配置及独立 D1/R2；本次未更改 main、生产 D1 或公开生产登录/翻译开关。
+
+详见 [COLLECTION_AND_SYNC.md](COLLECTION_AND_SYNC.md)。
