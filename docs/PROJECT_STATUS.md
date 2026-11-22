@@ -213,3 +213,16 @@
 - [生产线上只读自动验收 #45005940608](https://github.com/119shenhao/gambling/actions/runs/45005940608) **success**：`https://gambling.nbn369.com/api/health` 的 `environment=production`、D1 Ready、`translationConfigured=true`，同时正式 Google SSO 跳转保持正确。受控生产构建在部署前检查已有 Azure Worker Secret、生产/开发 UUID 隔离、翻译迁移和 F0 验证标记；对生产 D1 的配额、开关及回执做原子写入和二次回读。**没有轮换或暴露 Secret，也没有动 Spine 或 DEV D1。**
 - 线上成功后已从 `scripts/prepare-build.mjs` 删除一次性初始化调用；普通 Cloudflare 构建不再重写翻译 D1 配额或重新打开管理员手动暂停的翻译。保留一次性脚本作为不自动执行的审计记录。
 - 验收范围是生产配置、数据库开关及线上 readiness；本轮未用真实用户帖主动触发 Azure 新翻译、未取得 Azure Portal 的资源级用量，因此不把该在线检查冒充跨站配额总控或真实支付/用量对账。用户可在生产管理页面查看额度并按需要暂停。
+
+
+## 2026-11-22 用户批准 Casino UI 生产发布（单独 UI 发布分支）
+
+用户明确批准把已经在 dev 验收的戒赌社区「酒红色菱形+左右黑红渐变+深绿色阅读卡片+金色3号动感骰子+移动导航及发帖按钮」发布到正式站。本次**不将整个 dev 合并 main**：GitHub main 与 dev 已分叉并分别包含生产和采集/开发更改，因此使用从 main 当前生产提交创建的独立 `release/casino-ui-20261122` 分支，只移植经过确认的前端 UI 文件：
+
+- `public/styles.css`、`public/index.html`、`public/app.js`（dev 与 main 的 app.js 差异仅包括手机端管理入口布局和 feed 标题 H1）、`public/reading-preferences.js`（阅读主题名称和新主题对应）。
+- `public/casino-diamond-tile.svg`：与 `crime-life-simulator-docs` 大厅原始 `91×103` 菱形 SVG 完全相同；背景渐变来自赌场 `styles.css`，采取论坛静态平铺与左右暗角。
+- `public/dynamic-dice-option3-complete.svg`：用户最终确认、外圈金边完整的第三号动感骰子。
+
+CI 额外校验 UI 纹理、骰子、暖色阅读主题，并断言生产 `IDENTITY_LOGIN_ENABLED=true`、`keep_vars=true`、翻译日上限20万字/月上限180万字、生产和开发 D1 独立。**不改变 `src/`、`wrangler.jsonc`、`migrations/`、`.github/`、`scripts/` 或数据库内容、账号、Secrets、采集/同步任务。** 使用 GitHub PR 合并到 main 后依赖现有 Cloudflare main 自动构建，检查生产在线 readiness 与静态资源；不会自动迁移、导入或删除帖文。
+
+发布状态需要依据实际 GitHub PR、CI、Cloudflare Worker Build 和生产线上验证进一步更新；CI 通过本身不证明最终实机无缓存。
