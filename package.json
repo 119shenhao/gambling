@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node scripts/dev.mjs",
     "check": "tsc --noEmit",
-    "test": "node --test tests/gambling.test.mjs",
+    "test": "node --test tests/gambling.test.mjs tests/sync-behavior.test.mjs",
     "verify": "npm run check && npm test",
     "db:local": "wrangler d1 migrations apply DB --local --config wrangler.local.jsonc",
     "build": "node scripts/prepare-build.mjs",
