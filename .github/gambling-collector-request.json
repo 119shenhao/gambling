@@ -1,8 +1,8 @@
 {
-  "request_id": "gambling_psychforums_retry_20261122141544692_z4bt2c",
-  "mode": "inspect",
+  "request_id": "gambling_20261122_restore_default_after_psychforums_probe",
+  "mode": "collect",
   "sites": [
-    "psychforums"
+    "all"
   ],
   "candidates": {},
   "limit": 2
