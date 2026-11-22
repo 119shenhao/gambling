@@ -197,7 +197,11 @@ test('safe production sync is offline by default and uses only gambling D1',()=>
  assert.match(src,/verifyComments/);
  assert.match(src,/verifyWrittenLanguageEvidence/);
  assert.doesNotMatch(src,/spine-topic-v1|SPINE_SYNC_PRODUCTION_CONFIRM/);
- assert.equal(JSON.parse(read('scripts/gambling_sources.json')).sources.length,0);
+ const collectorSources=JSON.parse(read('scripts/gambling_sources.json')).sources;
+ assert.ok(collectorSources.length>=1);
+ assert.ok(collectorSources.every(s=>s.approved===false && s.reuse_allowed===false));
+ assert.ok(collectorSources.every(s=>s.adapter==='gambling_forums'));
+ assert.ok(!collectorSources.some(s=>s.id==='spine'));
  assert.equal(JSON.parse(read('.github/gambling-collector-request.json')).mode,'inspect');
  const py=spawnSync('python3',['-m','py_compile','scripts/gambling_collect.py'],{encoding:'utf8'});
  assert.equal(py.status,0,py.stderr);
