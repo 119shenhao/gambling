@@ -30,3 +30,15 @@
 - 通过在 `identity-center/main/.github/gambling-content-sync-request.json` 提交唯一 request_id、`mode=sync`，触发经批准固定 SHA 的同步脚本：先核对目标 D1、独立源码 CI/SQL 回归、只读预检查及 Time Travel 恢复点，然后按发布与一次性回执规则执行；已同步主帖永远跳过，绝不补传后续评论；完成再回读 `examined=0`。无 API 写入口或结构迁移。
 - ChatGPT 固定任务「戒赌论坛同步生产帖子」已更新为采用认证中心的受保护工作流，频率仍每12小时。**不要再触发赌博仓库原先缺少 secret 的 `gambling-sync-posts.yml`**；将来要迁移到独立新令牌，需要另行验收。用户不需要通过聊天提供任何密钥。
 - 采集定时任务每6小时仍处于启用状态，但 `scripts/gambling_sources.json` 仍无稳定解析的真实戒赌站点。后续只有配置好的来源才能运行真正定时采集。
+
+## 2026-11-22 独立外站解析器开发与远程只读核验
+
+- 戒赌论坛 `dev` 分支独立新增 `scripts/gambling_forums.py`，提供 GamCare 与 Gambling Therapy 的规范 URL/稳定主题 slug、列表候选发现、HTML 正文及回复读取、分页/评论数/正文上限/隐私数据保守校验；不使用 Spine 的采集代码、医学来源或任务。
+- `scripts/gambling_collect.py` 已接入网站发现、全量 exclusions 分页、6 小时 claim、complete、失败/结果不明时谨慎释放、正文/回复 API 回读与按来源计数；`inspect` 模式只读探测候选帖结构，不会导入。
+- `.github/workflows/gambling-collector-on-demand.yml` 安装独立解析依赖并在调用 Worker 前运行 `tests/test_gambling_collector.py`；仍只监听 gambling/dev 的独立请求文件变化，未新增 GitHub Actions cron，原 ChatGPT 独立任务保持不变。
+- [首次真实 inspect GitHub Actions #44992825630](https://github.com/119shenhao/gambling/actions/runs/44992825630) 执行成功：10 项 Python 离线测试通过，DEV `/api/health` 通过，GamCare 两个论坛列表分别发现 26、22 个候选，合并去重为 **39 个**；Gambling Therapy 列表 HTTP 403，0 个候选。该 inspect 并未 POST claim/complete，**新增主帖/回复 0**。
+- `scripts/gambling_sources.json` 目前列出了两个独立候选适配器，但 `approved=false`、`parser_verified=false`、`reuse_allowed=false`，均没有已验证的转载许可证明；仅有公开网页不等于自动允许复制并匿名发布，因此**当前没有可合法自动导入的已启用来源**。同意开启 `collect` 前必须验证具体来源的使用范围及完整真实网页解析，并保留原站来源记录，不把外部用户内容误标为本站原创。
+- 现有 JS 旧测试曾假设 `sources.length===0`，已按“可登记来源但默认禁止导入”的新规则修订。技术上来源发现打通，不等于当前可以进行未经许可的整篇转载。
+- [真实正文解析只读验收 #44992931664](https://github.com/119shenhao/gambling/actions/runs/44992931664) 已发起；需以最终状态和日志为准，不能把作业触发当成正文解析成功。
+
+**下一步验收门槛：** 确定至少一个具有允许完整内容再发布的来源，单站解析器对该来源的标题/正文/所有回复通过线上探测，完成原文及 parent 关系回读、重复检查，方可将对应来源标记已验证并允许 ChatGPT 每 6 小时的独立任务执行正式 `collect`。对暂时 403 的来源不绕过访问限制。
