@@ -1,14 +1,9 @@
 {
-  "request_id": "gamcare-audit-old-entries-20261122-150000",
-  "mode": "inspect",
+  "request_id": "gamcare-ongoing-collect-20261122-151400",
+  "mode": "collect",
   "sites": [
-    "gamcare"
+    "all"
   ],
-  "candidates": {
-    "gamcare": [
-      "https://community.gamcare.org.uk/forum/new-members-intros-forum/new-start-for-50/",
-      "https://community.gamcare.org.uk/forum/new-members-intros-forum/stuart-well-done-on-a-year-gf/"
-    ]
-  },
+  "candidates": {},
   "limit": 2
 }
