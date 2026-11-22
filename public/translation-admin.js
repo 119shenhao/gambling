@@ -41,7 +41,7 @@ export async function renderTranslationAdmin(target,api,esc,locale){
   ${bad?`<div class="notice">${tr('限制状态','Limits')}: ${bad}</div>`:''}
   <h3>${tr('翻译启用状态','Translation activation')}</h3>
   <div class="admin-row" id="translation-activation">
-   <p class="subtle">${tr('本论坛与颈椎论坛共用同一 Azure F0 资源。必须先配置开发 Worker Secret，实际用量请在 Azure 门户核对。','This forum shares Azure F0 with the Spine forum. Configure the DEV Worker Secret first, and check total Azure usage in Azure Portal.')}</p>
+   <p class="subtle">${tr('本论坛与颈椎论坛共用同一 Azure F0 资源。开发和生产各自使用已有的 Worker Secret；实际合计用量请在 Azure 门户核对。','This forum shares Azure F0 with the Spine forum. Each environment uses its own configured Worker Secret. Check shared Azure usage in Azure Portal.')}</p>
    <strong>${azure.translationEnabled?tr('正在启用','Enabled'):tr('当前暂停','Paused')}</strong>
    <button type="button" class="button ${azure.translationEnabled?'':'primary'}" data-action="toggle-translation" data-enabled="${azure.translationEnabled===true}" ${!azure.translationEnabled&&azure.status==='not_configured'?'disabled':''}>${azure.translationEnabled?tr('暂停自动翻译','Pause automatic translation'):tr('启用自动翻译','Enable automatic translation')}</button>
   </div>
