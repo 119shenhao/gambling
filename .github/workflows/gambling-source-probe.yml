@@ -32,7 +32,10 @@ jobs:
       - name: Probe Chinese source HTML structure without importing content
         run: python scripts/gambling_chinese_source_probe.py | tee chinese-probe.jsonl
       - name: Parse real V2EX 251-reply thread in memory (no import)
-        run: python scripts/gambling_v2ex_live_probe.py | tee v2ex-probe.json
+        shell: bash
+        run: |
+          set -o pipefail
+          python scripts/gambling_v2ex_live_probe.py | tee v2ex-probe.json
       - name: Upload sanitized probe status records
         if: always()
         uses: actions/upload-artifact@v4
