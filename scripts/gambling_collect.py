@@ -108,27 +108,47 @@ def validate(draft):
 
 
 def readback(topic_id, draft, n):
+    """Read all DEV detail pages, not just the first 20 comments."""
     if not re.fullmatch(r"[0-9a-f-]{36}", topic_id or ""):
         raise ValueError("invalid_topic_id")
-    result = api("/api/topics/" + topic_id)
-    saved = result.get("topic", {})
-    if any(saved.get(field) != draft[field] for field in ("title", "body", "source_lang")):
-        raise ValueError("readback_topic_mismatch")
-    records = result.get("comments", [])
-    if result.get("next") is not None or len(records) != n:
-        raise ValueError("readback_count_or_pagination_mismatch")
+    rows = []
+    cursor = None
+    visited = set()
+    for _ in range(5):
+        path = "/api/topics/" + topic_id + (("?before=" + str(cursor)) if cursor is not None else "")
+        result = api(path)
+        saved = result.get("topic", {})
+        if any(saved.get(field) != draft[field] for field in ("title", "body", "source_lang")):
+            raise ValueError("readback_topic_mismatch")
+        page = result.get("comments", [])
+        if not isinstance(page, list):
+            raise ValueError("readback_invalid_page")
+        rows.extend(page)
+        if len(rows) > 49:
+            raise ValueError("readback_reply_overflow")
+        nxt = result.get("next")
+        if nxt is None:
+            break
+        if (type(nxt) is not int or nxt < 1 or nxt in visited or
+                (cursor is not None and nxt <= cursor)):
+            raise ValueError("readback_invalid_cursor")
+        visited.add(nxt)
+        cursor = nxt
+    else:
+        raise ValueError("readback_pagination_unfinished")
+    if len(rows) != n or len({row.get("id") for row in rows}) != n:
+        raise ValueError("readback_count_mismatch")
     expected = Counter((item["body"], item.get("source_lang", draft["source_lang"]))
                        for item in flatten(draft["comments"]))
-    received = Counter((row.get("body"), row.get("source_lang")) for row in records)
+    received = Counter((row.get("body"), row.get("source_lang")) for row in rows)
     if expected != received:
         raise ValueError("readback_reply_mismatch")
-    # A flat source must remain flat; nested source reply IDs are not inferred
-    # merely from quoted text or @mentions.
-    if any(row.get("parent_comment_id") is not None for row in records):
+    # Current GamCare/Gambling Therapy HTML adapters yield flat replies.
+    # Never infer nesting from quotes or @mentions.
+    if any(row.get("parent_comment_id") is not None for row in rows):
         if not any(c.get("replies") for c in draft["comments"]):
             raise ValueError("readback_parent_mismatch")
     return True
-
 
 def available(source):
     return (source.get("approved") is True and
