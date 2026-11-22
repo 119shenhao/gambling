@@ -111,3 +111,7 @@
 - [初始只读检查 #45034133570](https://github.com/119shenhao/gambling/actions/runs/45034133570) 中，Mumsnet 列表和三个帖子页面请求均返回 HTTP 402；myFICO 列表和两篇样本均返回 HTTP 403。两站的当前采集通道不可用，待站方提供对运行器可用的访问方式。
 - Gambling Commission 的报告及章节可读，个案位于研究报告内部，与统计、研究结论及引用混排。当前作为背景资料，未启用整篇报告导入。
 - 独立文章走既有开发采集协议的单次原子提交。文章携带原站 URL，原站无回复时保存零条。论坛主题仍必须完整校验原站真实回复，数量和分页规则沿用现有代码。独立文章的试运行记录以 [Actions #45034456974](https://github.com/119shenhao/gambling/actions/runs/45034456974) 的逐来源输出为准。
+
+- 只读验收实际通过 24 个文章样本，个别页面的 HTTP 错误、正文结构或隐私校验共拒绝 5 例。通过完整正文校验的站点为 Tackling Gambling Stigma（目录发现 48 个条目）、Alliance for Gambling Reform（目录及已知公开故事合计 8 个候选）、Gambling with Lives（纪念目录发现 16 个条目）和澳大利亚社会服务部（1 篇文字故事；候选耗尽后零新增属于正常）。
+- [正常采集及 DEV 回读 #45034668675](https://github.com/119shenhao/gambling/actions/runs/45034668675) 成功，错误 0。新增来源分别写入 2、2、2、1 篇独立文章，合计 **7 篇、0 条原站回复**。每篇原文、来源 URL、入库计数和实际回读一致；同轮既有 GamCare 新增 2 篇、5 条回复，全轮共 9 篇、5 条回复。
+- `scripts/gambling_sources.json` 的四个站均已标记授权和解析验收通过，常规请求为 `mode=collect,sites=["all"],candidates={},limit=2`。既有「戒赌论坛独立采集入库」按该注册表取源。数据写入目标为独立开发 D1。
