@@ -1,15 +1,9 @@
 {
-  "request_id": "gambling_20261122_probe_harm_and_family_boards",
-  "mode": "inspect",
+  "request_id": "gambling_20261122_collect_harm_and_family_boards",
+  "mode": "collect",
   "sites": [
-    "gamcare"
+    "all"
   ],
-  "candidates": {
-    "gamcare": [
-      "https://community.gamcare.org.uk/forum/family-friends/husband-gambling-again-2/",
-      "https://community.gamcare.org.uk/forum/family-friends/how-do-i-survive-this/",
-      "https://community.gamcare.org.uk/forum/overcoming-problem-gambling/lost-everything-4/"
-    ]
-  },
+  "candidates": {},
   "limit": 2
 }
