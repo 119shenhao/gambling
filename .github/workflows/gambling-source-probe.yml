@@ -31,4 +31,5 @@ jobs:
         run: python scripts/gambling_mse_visibility_diagnose.py
       - name: Probe Chinese source HTML structure without importing content
         run: python scripts/gambling_chinese_source_probe.py
-
+      - name: Parse real V2EX 251-reply thread in memory (no import)
+        run: python scripts/gambling_v2ex_live_probe.py
