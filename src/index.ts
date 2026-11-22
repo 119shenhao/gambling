@@ -50,7 +50,7 @@ export default {
    }
    if(path==='/api/collect'||path.startsWith('/api/collect/')){
     const response=await collectRoute(req,env,path);
-    if(req.method==='POST'&&response.ok&&path==='/api/collect/complete')wakeProjection(env,ctx);
+    if(req.method==='POST'&&response.ok&&(path==='/api/collect/complete'||path==='/api/collect/long/finish'))wakeProjection(env,ctx);
     return response;
    }
    if(path==='/api/uploads'||path.startsWith('/api/uploads/'))fail(403,'image_feature_disabled');
