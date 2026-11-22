@@ -91,7 +91,6 @@ value2:['Kind conversations, without judgment','友善交流，尊重不同经�
 value3:['One community, many languages','多种语言，共享一个社区','Una comunidad, muchos idiomas','Uma comunidade, muitos idiomas','Eine Community, viele Sprachen','Une communauté, plusieurs langues','多言語で、ひとつのコミュニティ'],
 careTitle:['Your story. Your pace.','按自己的节奏分享。','Tu historia. A tu ritmo.','Sua história. Seu ritmo.','Deine Geschichte. Dein Tempo.','Votre histoire. À votre rythme.','あなたのペースで。'],
 careBody:['You can read without an account. When you share, use a nickname and keep identifying details private.','无需登录即可阅读。分享时可使用昵称，请避免公开可识别身份的信息。','Lee sin cuenta. Usa un apodo y protege tus datos personales.','Leia sem conta. Use um apelido e proteja seus dados.','Lies ohne Konto. Nutze einen Spitznamen und schütze private Angaben.','Lisez sans compte. Utilisez un pseudonyme et protégez vos données.','アカウントなしで読めます。投稿にはニックネームを使い、個人情報を守りましょう。'],
-medical:['Peer experiences are not medical advice. For personal care decisions, consult a qualified clinician.','患者个人经历不能替代医疗建议。个人诊疗决策请咨询合格的医务人员。','Las experiencias no sustituyen el consejo médico. Consulta a un profesional.','Experiências pessoais não substituem orientação médica. Consulte um profissional.','Persönliche Erfahrungen ersetzen keine ärztliche Beratung.','Les expériences personnelles ne remplacent pas un avis médical.','個人の体験は医療上の助言ではありません。診療の判断は医療専門家にご相談ください。'],
 privacy:['Privacy & community guidelines','隐私与社区规则','Privacidad y normas','Privacidade e regras','Datenschutz und Regeln','Confidentialité et règles','プライバシーとルール'],
 backLink:['Back to discussions','返回讨论','Volver a conversaciones','Voltar às conversas','Zurück zu Diskussionen','Retour aux discussions','投稿一覧へ'],
 title:['Title','标题','Título','Título','Titel','Titre','タイトル'],
@@ -134,7 +133,7 @@ translationFallback:['Original shown · translation unavailable','显示原文 �
 detectLanguage:['Detect automatically','自动识别','Detectar automáticamente','Detectar automaticamente','Automatisch erkennen','Détecter automatiquement','自動検出'],
 sourceLanguageCode:['Specify a language code','指定语言代码','Indicar código de idioma','Informar código do idioma','Sprachcode angeben','Indiquer le code de langue','言語コードを指定'],
 translationPrivacy:['Public posts and replies may be sent to Microsoft Azure Translator for machine translation into the reader’s language. Please keep identifying details out of public text.','公开帖子和回复的文字可能发送给 Microsoft Azure Translator，用于机器翻译成读者选择的语言。请勿在公开内容中写入可识别身份的信息。','Los textos de publicaciones y respuestas públicas pueden enviarse a Microsoft Azure Translator para su traducción automática al idioma del lector. Evita incluir datos que te identifiquen.','O texto de publicações e respostas públicas pode ser enviado ao Microsoft Azure Translator para tradução automática para o idioma do leitor. Evite incluir dados que identifiquem você.','Öffentliche Beiträge und Antworten können zur maschinellen Übersetzung in die Sprache der Lesenden an Microsoft Azure Translator übermittelt werden. Veröffentliche keine identifizierenden Angaben.','Le texte des publications et réponses publiques peut être envoyé à Microsoft Azure Translator pour être traduit automatiquement dans la langue de lecture. Évitez de publier des informations permettant de vous identifier.','公開された投稿や返信の文章は、閲覧者の言語への機械翻訳のために Microsoft Azure Translator に送信されることがあります。個人を特定できる情報は公開しないでください。'],
-translationCaution:['Medical terms and doses may be mistranslated. Check the original.','医疗术语与剂量可能译错，请核对原文。','Los términos médicos pueden traducirse mal. Revisa el original.','Termos médicos podem conter erros. Consulte o original.','Medizinische Begriffe können falsch übersetzt sein. Prüfe das Original.','Les termes médicaux peuvent être mal traduits. Vérifiez l’original.','医療用語や用量の誤訳に注意し、原文を確認してください。'],
+translationCaution:['Machine translation can miss context. Check the original.','机器翻译可能遗漏语境，请核对原文。','La traducción automática puede perder matices. Consulta el original.','A tradução automática pode perder nuances. Confira o original.','Maschinelle Übersetzungen können Nuancen verlieren. Prüfe das Original.','La traduction automatique peut perdre des nuances. Vérifiez l’original.','機械翻訳では文脈が失われる場合があります。原文をご確認ください。'],
 notifications:['Notifications','通知','Notificaciones','Notificações','Benachrichtigungen','Notifications','通知'],
 markAll:['Mark all as read','全部标记已读','Marcar todo leído','Marcar tudo como lido','Alle als gelesen markieren','Tout marquer comme lu','すべて既読にする'],
 noNotifications:['You are all caught up.','暂无新通知。','Estás al día.','Tudo em dia.','Du bist auf dem neuesten Stand.','Vous êtes à jour.','新しい通知はありません。'],
@@ -188,7 +187,6 @@ addTerm:['Add a category or label','添加分类或标签','Añadir categoría o
 aliases:['Search aliases, separated by commas','搜索同义词（逗号分隔）','Sinónimos separados por comas','Sinônimos separados por vírgulas','Suchbegriffe, durch Komma getrennt','Synonymes séparés par des virgules','検索用類義語（カンマ区切り）'],
 emptyList:['Nothing here yet','这里暂时没有内容','Todavía no hay elementos','Ainda não há itens','Noch keine Einträge','Aucun élément pour le moment','まだ項目がありません'],
 requestNoteProduction:['Requests are reviewed by the site owner. Replies from other people may be preserved.','申请由站长处理，其他用户的回复可能保留。','El responsable revisará las solicitudes. Las respuestas de otras personas pueden conservarse.','As solicitações são analisadas pelo administrador. Respostas de outras pessoas podem ser preservadas.','Anträge werden vom Betreiber geprüft. Antworten anderer Personen können erhalten bleiben.','Les demandes sont examinées par le responsable. Les réponses des autres peuvent être conservées.','申請は運営者が確認します。他の利用者の返信は保持される場合があります。'],
-privacyProduction:['Posts and replies are public. Please use a nickname and avoid sharing identifying details. Google is used for sign-in. You can request account or personal data deletion; deleting content removes its public text while placeholders may preserve other people’s replies. Image uploads and email notifications are not enabled. Personal experiences do not replace medical care.','帖子和回复默认公开。请使用昵称，避免发布可识别个人身份的信息。Google 用于登录。您可以申请删除账号或个人数据；删除内容后公开正文会被移除，但可能保留占位以维持其他用户回复。暂未开放图片上传和邮件通知。个人经验不能代替医疗诊疗。','Las publicaciones y respuestas son públicas. Usa un apodo y evita datos personales identificables. Google se usa para iniciar sesión. Puedes solicitar la eliminación de tu cuenta o datos; al borrar contenido puede quedar un marcador para conservar respuestas ajenas. No están habilitadas las imágenes ni las notificaciones por correo. Las experiencias no sustituyen la atención médica.','Publicações e respostas são públicas. Use um apelido e evite dados que identifiquem pessoas. O Google é usado para entrar. Você pode solicitar exclusão da conta ou de dados; mensagens apagadas podem manter um marcador para preservar respostas de outras pessoas. Imagens e avisos por e-mail estão desativados. Experiências não substituem cuidados médicos.','Beiträge und Antworten sind öffentlich. Verwenden Sie einen Spitznamen und vermeiden Sie identifizierende Angaben. Google dient der Anmeldung. Sie können die Löschung Ihres Kontos oder Ihrer Daten beantragen; Platzhalter können Antworten anderer bewahren. Bilderuploads und E-Mail-Benachrichtigungen sind deaktiviert. Erfahrungen ersetzen keine medizinische Betreuung.','Les publications et réponses sont publiques. Utilisez un pseudonyme et évitez les données identifiantes. Google sert à la connexion. Vous pouvez demander la suppression de votre compte ou de vos données ; un espace réservé peut conserver les réponses des autres. Les images et notifications par courriel sont désactivées. Les expériences ne remplacent pas les soins médicaux.','投稿と返信は公開されます。ニックネームを使い、個人を特定できる情報を避けてください。Googleはログインに使用されます。アカウントや個人データの削除を申請できます。他の利用者の返信を残すため、削除済み投稿に表示上の枠が残る場合があります。画像投稿とメール通知は無効です。個人の体験談は医療の代わりにはなりません。'],
 previewOnly:['Development preview · use fictional test data only','开发预览 · 请只使用虚构测试数据','Vista de desarrollo · solo datos ficticios','Prévia de desenvolvimento · apenas dados fictícios','Entwicklungsvorschau · nur fiktive Testdaten','Aperçu de développement · données fictives uniquement','開発プレビュー・架空のテストデータのみ'],
 analyticsToggle:['Traffic statistics','流量统计开关','Estadísticas de tráfico','Estatísticas de tráfego','Besucherstatistik','Statistiques de trafic','アクセス統計'],
 analyticsOn:['Enabled · new visits are recorded.','已开启 · 新的页面访问将被记录。','Activado · se registran nuevas visitas.','Ativado · novas visitas são registradas.','Aktiviert · neue Aufrufe werden erfasst.','Activé · les nouvelles visites sont enregistrées.','有効 · 新しい訪問を記録します。'],
@@ -197,7 +195,6 @@ analyticsEnable:['Enable traffic tracking','开启流量统计','Activar estadí
 analyticsDisable:['Disable traffic tracking','关闭流量统计','Desactivar estadísticas','Desativar estatísticas','Statistik deaktivieren','Désactiver les statistiques','アクセス統計を無効にする'],
 analyticsNote:['UTC · UV and 5-minute active peaks are estimates. Only page views are counted, not API requests.','UTC 时间；UV 和五分钟活跃峰值为估算；PV 仅统计页面浏览，不含 API 请求。','UTC · UV y actividad son estimaciones. Solo se cuentan vistas de página.','UTC · UV e atividade são estimativas. Apenas visualizações de página.','UTC · Besucher und Aktivität sind Schätzwerte. Nur Seitenaufrufe werden gezählt.','UTC · Visiteurs et activité sont des estimations. Seules les pages vues sont comptées.','UTC・訪問者数と5分間のピークは推定値です。ページ閲覧のみ計測します。'],
 analyticsSetup:['Traffic statistics are not configured yet.','流量统计尚未配置。','Las estadísticas de tráfico aún no están configuradas.','As estatísticas de tráfego ainda não estão configuradas.','Besucherstatistiken sind noch nicht eingerichtet.','Les statistiques de trafic ne sont pas encore configurées.','アクセス統計はまだ設定されていません。'],
-privacyText:['This development preview is for fictional test data. Public posts and replies can be read by anyone. Use a nickname. Deleted text is removed from public pages, translations and search; discussion placeholders preserve other people’s replies. Google is used only to sign in. Content translation stays disabled until a provider and privacy terms are configured. No image uploads, email notifications or paid services are enabled. Data export and deletion requests are available in your account. Public launch requires a finalized privacy policy and retention rules.','此开发预览仅用于虚构测试数据。公开帖子与回复可被所有人阅读，请使用昵称。删除后，正文会从公开页面、译文及搜索中移除，保留占位以维持他人回复的关系。Google 仅用于登录。内容翻译在服务及隐私条款配置完成前保持关闭。不开放图片、邮件通知或付费服务。个人中心提供数据导出及删除申请。正式开放前仍需完成隐私政策及数据保留规则。','Esta vista previa es solo para datos ficticios. Las publicaciones son públicas. Usa un apodo. Al eliminar contenido, se retira el texto y se conservan las respuestas de otras personas. Google se usa para iniciar sesión. La traducción permanece desactivada hasta su configuración. No hay imágenes, correos ni servicios de pago. Las solicitudes de datos están en tu cuenta.','Esta prévia é apenas para dados fictícios. As publicações são públicas. Use um apelido. O texto excluído é removido e as respostas de outras pessoas são preservadas. Google é usado para login. A tradução permanece desativada até a configuração. Não há imagens, e-mails ou serviços pagos. Solicitações de dados ficam na sua conta.','Diese Vorschau ist nur für fiktive Testdaten. Beiträge sind öffentlich. Nutze einen Spitznamen. Gelöschter Text wird entfernt, Antworten anderer bleiben erhalten. Google dient der Anmeldung. Übersetzung bleibt bis zur Konfiguration deaktiviert. Keine Bilder, E-Mails oder kostenpflichtigen Dienste. Datenanfragen sind im Konto verfügbar.','Cet aperçu est réservé aux données fictives. Les publications sont publiques. Utilisez un pseudonyme. Le texte supprimé est retiré et les réponses des autres sont conservées. Google sert à la connexion. La traduction reste désactivée avant configuration. Pas d’images, d’e-mails ou de services payants. Les demandes de données sont dans votre compte.','このプレビューには架空のデータのみ入力してください。投稿は公開されます。ニックネームを使いましょう。削除した本文は公開画面・翻訳・検索から除去し、他の方の返信は残します。Googleはログインに使用します。翻訳は設定完了まで無効です。画像、メール通知、有料サービスは利用しません。データ出力・削除申請はアカウント画面から行えます。']
 };
 const baseLanguages=['en','zh-CN','es','pt-BR','de','fr','ja'];
 export const dictionaries=Object.fromEntries(baseLanguages.map((l,i)=>[l,Object.fromEntries(Object.entries(rows).map(([k,v])=>[k,v[i]||v[0]]))]));
@@ -215,7 +212,6 @@ const gamblingCopy={
     "stories": "Personal experiences",
     "search": "Explore discussions",
     "searchPlaceholder": "Experiences, questions, impacts…",
-    "medical": "Personal accounts are not professional financial, legal or healthcare advice.",
     "approach": "Real experiences, open discussion.",
     "approachBody": "One community, many languages. Everyone can describe events and form their own conclusions.",
     "welcome": "Real stories and different perspectives are welcome.",
@@ -237,7 +233,6 @@ const gamblingCopy={
     "stories": "个人经历",
     "search": "浏览讨论",
     "searchPlaceholder": "搜索经历、问题与影响……",
-    "medical": "请保护隐私。个人经历不能替代专业法律、财务或医疗建议。",
     "approach": "记录真实经历，交流戒赌经验。",
     "approachBody": "不同语言，共享一个社区。中文社区鼓励戒赌，尊重事实与个人经历。",
     "welcome": "真实经历值得被看见。",
@@ -259,7 +254,6 @@ const gamblingCopy={
     "stories": "個人經歷",
     "search": "瀏覽討論",
     "searchPlaceholder": "搜尋經歷、問題與影響……",
-    "medical": "請保護隱私。個人經驗不能取代專業法律、財務或醫療建議。",
     "approach": "記錄真實經歷，交流戒賭經驗。",
     "approachBody": "不同語言，共用一個社群。中文社群鼓勵戒賭，尊重事實與個人經歷。",
     "welcome": "真實經歷值得被看見。",
@@ -279,7 +273,6 @@ const gamblingCopy={
     "neck": "Impacto económico",
     "back": "Familia y relaciones",
     "searchPlaceholder": "Experiencias, preguntas e impactos…",
-    "medical": "Los testimonios no sustituyen el asesoramiento profesional.",
     "translationCaution": "La traducción automática puede perder matices. Consulte el original.",
     "symptom": "Personal experiences",
     "treatment": "Personal experiences",
@@ -294,7 +287,6 @@ const gamblingCopy={
     "neck": "Impacto financeiro",
     "back": "Família e relações",
     "searchPlaceholder": "Experiências, perguntas e impactos…",
-    "medical": "Relatos pessoais não substituem orientação profissional.",
     "translationCaution": "A tradução automática pode perder nuances. Confira o original.",
     "symptom": "Personal experiences",
     "treatment": "Personal experiences",
@@ -309,7 +301,6 @@ const gamblingCopy={
     "neck": "Finanzielle Folgen",
     "back": "Familie und Beziehungen",
     "searchPlaceholder": "Erfahrungen, Fragen und Folgen…",
-    "medical": "Persönliche Berichte ersetzen keine fachliche Beratung.",
     "translationCaution": "Maschinelle Übersetzungen können Nuancen verlieren. Prüfe das Original.",
     "symptom": "Personal experiences",
     "treatment": "Personal experiences",
@@ -324,7 +315,6 @@ const gamblingCopy={
     "neck": "Conséquences financières",
     "back": "Famille et relations",
     "searchPlaceholder": "Expériences, questions et impacts…",
-    "medical": "Les témoignages ne remplacent pas les conseils de professionnels.",
     "translationCaution": "Les traductions automatiques peuvent perdre des nuances. Vérifiez l'original.",
     "symptom": "Personal experiences",
     "treatment": "Personal experiences",
@@ -339,7 +329,6 @@ const gamblingCopy={
     "neck": "経済的な影響",
     "back": "家族と人間関係",
     "searchPlaceholder": "経験・質問・影響を検索…",
-    "medical": "個人の体験は専門家の助言に代わるものではありません。",
     "translationCaution": "機械翻訳では文脈が失われる場合があります。原文をご確認ください。",
     "symptom": "Personal experiences",
     "treatment": "Personal experiences",
@@ -414,3 +403,58 @@ const neutralPrivacyCopy={
   }
 };
 for(const [locale,changes] of Object.entries(neutralPrivacyCopy))Object.assign(dictionaries[locale],changes);
+
+// Final Gambling Community notices; overrides the inherited forum copy in all eight locales.
+const gamblingSafetyNotices={
+  "en": [
+    "Share experiences respectfully. Protect privacy; no gambling promotions or betting solicitations.",
+    "Posts and replies are public. Use a nickname. Never share identifying details or account information. You may request account or data deletion; other people's replies may remain. This community discusses gambling experiences and impacts; gambling promotions and betting solicitations are prohibited.",
+    "Development preview: use fictional test data only. Public posts can be read by anyone. Protect your identity and account information. You may request deletion; others' replies may remain. Do not share betting links or promotions.",
+    "Posts and replies are public. Do not disclose personal or account details or promote gambling."
+  ],
+  "zh-CN": [
+    "分享真实经历，尊重不同处境。请保护隐私，不发布博彩推广或诱导投注内容。",
+    "帖子与回复默认公开。请使用昵称，避免透露真实姓名、联系方式、账户信息或可识别他人的资料。可申请删除账号或个人数据，其他用户的回复可能保留。这里交流赌博经历及其影响，禁止博彩推广、投注链接及诱导下注内容。",
+    "开发预览请仅使用虚构测试数据。帖子和回复公开可见，请保护个人身份及账户信息。可申请删除数据，其他用户的回复可能保留。禁止博彩推广、投注链接或诱导下注。",
+    "帖子和回复公开可见。请保护个人身份、联系方式及账户信息，不要发布博彩推广或诱导下注内容。"
+  ],
+  "zh-TW": [
+    "分享真實經歷，尊重不同處境。請保護隱私，不發布博彩推廣或誘導投注內容。",
+    "貼文與回覆預設公開。請使用暱稱，避免透露真實姓名、聯絡方式、帳戶資訊或可辨識他人的資料。可申請刪除帳號或個人資料，其他使用者的回覆可能保留。這裡交流賭博經歷及其影響，禁止博彩推廣、投注連結及誘導下注內容。",
+    "開發預覽僅使用虛構測試資料。貼文與回覆公開可見，請保護身分及帳戶資訊。可申請刪除資料，其他使用者回覆可能保留。禁止博彩推廣、投注連結或誘導下注。",
+    "貼文與回覆公開可見。請保護個人身分、聯絡方式及帳戶資訊，不要發布博彩推廣或誘導下注內容。"
+  ],
+  "es": [
+    "Comparte experiencias con respeto. Protege la privacidad; no promociones de apuestas ni invitaciones a apostar.",
+    "Las publicaciones y respuestas son públicas. Usa un seudónimo. No compartas identidades, contactos ni datos de cuentas. Puedes solicitar la eliminación de datos, aunque las respuestas ajenas pueden permanecer. Aquí se debaten experiencias y consecuencias de los juegos de azar; se prohíben la publicidad y la incitación a apostar.",
+    "Vista de desarrollo: usa solo datos ficticios. Las publicaciones son públicas; protege tu identidad y tus cuentas. Puedes solicitar la eliminación. No publiques promociones o enlaces de apuestas.",
+    "Las publicaciones son públicas. Protege tus datos; no promociones de apuestas."
+  ],
+  "pt-BR": [
+    "Compartilhe experiências com respeito. Proteja a privacidade; sem promoções ou convites para apostar.",
+    "Publicações e respostas são públicas. Use um apelido e não divulgue identidades, contatos ou dados de contas. Você pode solicitar exclusão; respostas de outras pessoas podem permanecer. Aqui discutimos experiências e impactos dos jogos de azar; promoções de apostas são proibidas.",
+    "Prévia de desenvolvimento: use apenas dados fictícios. Publicações são públicas; proteja identidades e dados de contas. É possível solicitar exclusão. Não publique promoções nem links de apostas.",
+    "Publicações são públicas. Proteja seus dados e não promova apostas."
+  ],
+  "de": [
+    "Teile Erfahrungen respektvoll. Schütze persönliche Daten; keine Glücksspielwerbung oder Wettaufrufe.",
+    "Beiträge und Antworten sind öffentlich. Nutze einen Spitznamen und teile keine identifizierenden Angaben, Kontakte oder Kontonummern. Löschanträge sind möglich; Antworten anderer können bleiben. Hier werden Erfahrungen und Folgen von Glücksspiel besprochen; Werbung und Wettaufrufe sind untersagt.",
+    "Entwicklungsvorschau: nur fiktive Testdaten. Beiträge sind öffentlich; schütze Identität und Kontodaten. Löschanträge sind möglich. Keine Glücksspielwerbung oder Wettlinks.",
+    "Beiträge sind öffentlich. Schütze persönliche Daten; keine Glücksspielwerbung."
+  ],
+  "fr": [
+    "Partagez vos expériences avec respect. Protégez la vie privée ; aucune promotion des jeux d'argent ni incitation à parier.",
+    "Les publications et réponses sont publiques. Utilisez un pseudonyme et ne divulguez aucune identité, coordonnée ou donnée de compte. La suppression peut être demandée ; les réponses d'autrui peuvent rester. Cette communauté traite des expériences et des effets des jeux d'argent ; leur promotion est interdite.",
+    "Aperçu de développement : données fictives uniquement. Les messages sont publics ; protégez les identités et les comptes. Vous pouvez demander la suppression. Pas de publicité ni de liens de paris.",
+    "Les messages sont publics. Protégez vos données ; aucune promotion de paris."
+  ],
+  "ja": [
+    "体験を尊重し合い、個人情報を守りましょう。ギャンブルの宣伝や賭けへの勧誘は禁止です。",
+    "投稿と返信は公開されます。ニックネームを使い、実名、連絡先や口座情報を公開しないでください。アカウントや個人データの削除を申請できますが、他の利用者の返信は残る場合があります。このコミュニティはギャンブルの体験や影響を話し合う場です。宣伝や賭けへの勧誘は禁止です。",
+    "開発プレビューでは架空のテストデータのみ使用してください。投稿は公開されます。実名や口座情報を守り、削除が必要なら申請してください。ギャンブルの宣伝や賭けの勧誘は禁止です。",
+    "投稿は公開されます。個人情報を守り、ギャンブルの宣伝や賭けへの勧誘をしないでください。"
+  ]
+};
+for(const [locale,[communityReminder,privacyProduction,privacyText,publicNote]] of Object.entries(gamblingSafetyNotices)){
+ Object.assign(dictionaries[locale],{communityReminder,privacyProduction,privacyText,publicNote});
+}
