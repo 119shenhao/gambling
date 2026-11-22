@@ -102,6 +102,73 @@
       "reuse_allowed": false,
       "permission_evidence": "",
       "note": "Candidate only. Public access may require human login; probe only. No bypass and no importer until exact full thread structure and permission verified."
+    },
+    {
+      "id": "tacklinggamblingstigma",
+      "name": "Tackling Gambling Stigma",
+      "host": "tacklinggamblingstigma.com",
+      "listings": [
+        "https://tacklinggamblingstigma.com/contributors/"
+      ],
+      "adapter": "gambling_forums",
+      "approved": false,
+      "parser_verified": false,
+      "reuse_allowed": true,
+      "permission_evidence": "User confirmed 2026-11-22 in the project conversation that all seven shortlisted sources are authorized for reuse; this records the user's statement.",
+      "seed_topics": [
+        "https://tacklinggamblingstigma.com/contributor/ben/",
+        "https://tacklinggamblingstigma.com/contributor/rachel/",
+        "https://tacklinggamblingstigma.com/contributor/julie/"
+      ]
+    },
+    {
+      "id": "agr",
+      "name": "Alliance for Gambling Reform",
+      "host": "www.agr.org.au",
+      "listings": [
+        "https://www.agr.org.au/voices"
+      ],
+      "adapter": "gambling_forums",
+      "approved": false,
+      "parser_verified": false,
+      "reuse_allowed": true,
+      "permission_evidence": "User confirmed 2026-11-22 in the project conversation that all seven shortlisted sources are authorized for reuse; this records the user's statement.",
+      "seed_topics": [
+        "https://www.agr.org.au/stories/sunenna",
+        "https://www.agr.org.au/stories/john",
+        "https://www.agr.org.au/stories/jacob",
+        "https://www.agr.org.au/stories/ed"
+      ]
+    },
+    {
+      "id": "gamblingwithlives",
+      "name": "Gambling with Lives",
+      "host": "www.gamblingwithlives.org",
+      "listings": [
+        "https://www.gamblingwithlives.org/remembering/"
+      ],
+      "adapter": "gambling_forums",
+      "approved": false,
+      "parser_verified": false,
+      "reuse_allowed": true,
+      "permission_evidence": "User confirmed 2026-11-22 in the project conversation that all seven shortlisted sources are authorized for reuse; this records the user's statement.",
+      "seed_topics": [
+        "https://www.gamblingwithlives.org/jack-ritchie/"
+      ]
+    },
+    {
+      "id": "australiadss",
+      "name": "Australian Department of Social Services",
+      "host": "www.dss.gov.au",
+      "listings": [
+        "https://www.dss.gov.au/gambling/gambling-support-services"
+      ],
+      "adapter": "gambling_forums",
+      "approved": false,
+      "parser_verified": false,
+      "reuse_allowed": true,
+      "permission_evidence": "User confirmed 2026-11-22 in the project conversation that all seven shortlisted sources are authorized for reuse; this records the user's statement.",
+      "seed_topics": []
     }
   ]
 }
