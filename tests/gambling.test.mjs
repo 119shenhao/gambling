@@ -302,3 +302,22 @@ test('approved dynamic die logo preserves a compact brand frame and all navigati
  assert.match(svg,/data:image\/png;base64,/);
  assert.doesNotMatch(svg,/<ellipse|<animate|<script/);
 });
+
+
+test('casino lobby background uses the authentic solid diamond tile and vignette',()=>{
+ const tile=read('public/casino-diamond-tile.svg');
+ const css=read('public/styles.css');
+ assert.equal(tile,'<svg xmlns="http://www.w3.org/2000/svg" width="91" height="103" viewBox="0 0 91 103">\n'
+   +'<rect width="91" height="103" fill="#50010d"/>\n'
+   +'<path d="M45.5 0 91 51.5 45.5 103 0 51.5Z" fill="#640110"/>\n'
+   +'</svg>\n');
+ assert.match(css,/--diamond-pattern: url\("\/casino-diamond-tile\.svg"\)/);
+ assert.match(css,/--casino-diamond-w: min\(9\.67vw, 91px\)/);
+ assert.match(css,/--casino-diamond-h: min\(10\.95vw, 103px\)/);
+ assert.match(css,/radial-gradient\(ellipse 56% 27% at 51% 31%, #c71a2a55, transparent 80%\)/);
+ assert.match(css,/linear-gradient\(90deg, #1d000bc4, transparent 20%, transparent 80%, #1d000bc4\)/);
+ assert.match(css,/linear-gradient\(180deg, #22000b44, transparent 36%, #2400079c 77%, #17000be8\)/);
+ assert.match(css,/:root\[data-reading-theme="warm"\] \{[\s\S]*?--diamond-pattern: none;/);
+ assert.match(css,/background-repeat: no-repeat, no-repeat, no-repeat, repeat;/);
+ assert.doesNotMatch(css,/animation:\s*.*diamond/i);
+});
