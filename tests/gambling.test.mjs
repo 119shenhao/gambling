@@ -202,3 +202,26 @@ test('safe production sync is offline by default and uses only gambling D1',()=>
  const py=spawnSync('python3',['-m','py_compile','scripts/gambling_collect.py'],{encoding:'utf8'});
  assert.equal(py.status,0,py.stderr);
 });
+
+test('sync candidate rows preserve language proof and idempotent Anonymous author mapping',async()=>{
+ const {fingerprint,resolveSyncLanguage,sortComments,buildInserts}=await import('../scripts/sync-preview-to-production.mjs');
+ const fp=fingerprint('  A  ',' B ');
+ assert.match(fp,/^[a-f0-9]{64}$/);
+ assert.deepEqual(resolveSyncLanguage({status:'published',source_lang:'en',source_lang_mode:'manual',content_version:1}),
+   {label:'en',mode:'manual',method:null,score:null});
+ assert.equal(resolveSyncLanguage({status:'published',source_lang:'en',source_lang_mode:'auto',
+   content_version:2,verified_version:1,verified_method:'tinyld-heavy',verified_language:'en'}).label,'und');
+ const nested=sortComments([
+   {id:'child',parent_comment_id:'parent',status:'published',kind:'regular'},
+   {id:'parent',parent_comment_id:null,status:'published',kind:'regular'},
+   {id:'hidden',parent_comment_id:null,status:'hidden',kind:'regular'}
+ ]);
+ assert.deepEqual(nested.map(x=>x.id),['parent','child']);
+ const topic={id:'00000000-0000-4000-8000-000000000001',title:'A',body:'B',
+   status:'published',source_lang:'und',source_lang_mode:'legacy',content_version:1,
+   symptom_duration_days:null,created_at:1};
+ const sql=buildInserts(topic,[],[],fingerprint('A','B'));
+ assert.match(sql,/system-unknown-import/);
+ assert.match(sql,/INSERT OR IGNORE INTO topics/);
+ assert.doesNotMatch(sql,/spine-topic-v1|spine-community/);
+});
