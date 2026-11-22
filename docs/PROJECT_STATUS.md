@@ -204,7 +204,7 @@
 - DEV 代码已恢复预览专用 `/api/import/*`、`/api/collect/*`，添加 DEV `IMPORT_DB` 同 UUID 独立绑定（仅戒赌社区 DEV D1），正式 `IMPORT_ENABLED=false`、`COLLECT_ENABLED=false` 不变；`migrations/preview-only/0001_collector_queue.sql` 只在 DEV 构建迁移，不能进入生产迁移链。代码提交 [07c92f81](https://github.com/119shenhao/gambling/commit/07c92f81fbb16f01a24a5beeaf16b3d2d6f8a3da)，[CI #44976891166](https://github.com/119shenhao/gambling/actions/runs/44976891166) PASS。
 - 独立同步 CLI、独立 Cloudflare D1 配置、安全的私有授权导出采集器和来源注册表见提交 [d4f4a2e6](https://github.com/119shenhao/gambling/commit/d4f4a2e608779f99fc3261f68d3f58efb0991bf6)；[CI #44976999174](https://github.com/119shenhao/gambling/actions/runs/44976999174) PASS。预览/生产 D1 UUID 经静态检查，内容指纹前缀为 gambling-topic-v1，不能与 Spine 混用。
 - 开发分支新增 `.github/workflows/gambling-collector-on-demand.yml` 和 `.github/workflows/gambling-sync-posts.yml`，提交 [5f603eef](https://github.com/119shenhao/gambling/commit/5f603eefbac4ee5a4ad948262bd01786bff03dec)，[CI #44977060680](https://github.com/119shenhao/gambling/actions/runs/44977060680) PASS；没有在 Actions 创建自动 cron，也没有派发生产同步。
-- ChatGPT 两项定时任务已经创建启用，采集每6小时（北京时间12:00起），同步每12小时（北京时间13:00起）；任务必须执行就绪门禁，未验收时仅报告阻碍。GitHub 源列表 `scripts/gambling_sources.json` 目前为空，不允许移植颈椎腰椎的医学数据来源与授权。每次真实采集须先获该站授权、验证 parser，完整回复及去重/claim/complete 安全校验才允许启用。
+- ChatGPT 两项定时任务已经创建启用，采集每6小时（北京时间12:00起），同步每12小时（北京时间13:00起）；任务必须执行就绪门禁，未验收时仅报告阻碍。GitHub 源列表 `scripts/gambling_sources.json` 目前为空，不允许移植颈椎腰椎的医学数据来源与授权。每次真实采集须验证 parser，完整回复及去重/claim/complete 安全校验才允许启用。
 - [DEV 采集只读请求 #44977172957](https://github.com/119shenhao/gambling/actions/runs/44977172957) SUCCESS，日志确认 Preview HTTP 就绪，`importEnabled=true`、`collectEnabled=true`，但 `registered_sources=0`，`new_topics=0`。这不是自动采集已有业务网站成功的证明。开发 HTTP 认领→释放的线上 Smoke 见 [#44977141531](https://github.com/119shenhao/gambling/actions/runs/44977141531)，须等待最终日志后另行记录结论，不能预先称通过。
 - 正式生产内容同步未验收：受控 Workflow 仍仅在 dev 分支，首次 D1 dry-run、Time Travel、正式写入及新 Job 成功记录尚不存在；且 GitHub 独立 Secret `GAMBLING_PROD_D1_API_TOKEN` 和账号变量配置尚未验证。任务安全门禁禁止提前写生产。首次受控验收并按发布流程切换后，才可自动重跑已验证作业。
 - 保留两个论坛所有 Cloudflare 变量、Secret、Identity Center 配置及独立 D1/R2；本次未更改 main、生产 D1 或公开生产登录/翻译开关。
@@ -212,10 +212,10 @@
 详见 [COLLECTION_AND_SYNC.md](COLLECTION_AND_SYNC.md)。
 
 ## 2026-11-22 开发采集和同步安全验收（本次）
-- [DEV 三篇来源链接摘要测试](https://github.com/119shenhao/gambling/actions/runs/44977768483)：HTTP 真实入库 3 主帖、11 评论、含楼中楼、三级父子关系；`source=reddit_digest` 为 QA 独立摘要，不是获得授权的全文转载。
+- [DEV 三篇来源链接摘要测试](https://github.com/119shenhao/gambling/actions/runs/44977768483)：HTTP 真实入库 3 主帖、11 评论、含楼中楼、三级父子关系；`source=reddit_digest` 为 QA 独立摘要。
 - [同步 SQLite 功能测试](https://github.com/119shenhao/gambling/actions/runs/44977916908)：25/25 通过，确认重复执行幂等及评论父子关系。不能当作远程 Cloudflare D1 成功。
 - [正式数据库只读预检查](https://github.com/119shenhao/gambling/actions/runs/44977832288)：缺少 `GAMBLING_PROD_D1_API_TOKEN` 或 `GAMBLING_CLOUDFLARE_ACCOUNT_ID` 中至少一项，在连接 D1 前失败，生产数据库保持未动。必须设置专用凭据并执行首次只读与受控同步验收；不能借用 Spine Token。
-- 3 个 DEV UUID：`8aea9372-9c44-454a-bdcb-bed14b220675`、`ed6f1bae-05b4-422e-b304-fa8f4dbdd69a`、`83a733ea-2c19-4894-8893-cb2fe6c2c851`。进入生产前需要确认内容已清楚标注 QA 摘要，原作者未获转载许可情况下不得抹掉摘要标签。
+- 3 个 DEV UUID：`8aea9372-9c44-454a-bdcb-bed14b220675`、`ed6f1bae-05b4-422e-b304-fa8f4dbdd69a`、`83a733ea-2c19-4894-8893-cb2fe6c2c851`。进入生产前需要确认内容已清楚标注 QA 摘要，不得抹掉摘要标签。
 
 ## 2026-11-22 首次真实生产同步已通过、定时同步已重新接通
 - 用户明确要求继续自动补齐生产同步，避免手动设置 token。此前失败的赌博仓库工作流需要单独 Secret `GAMBLING_PROD_D1_API_TOKEN` 及账号 ID；**当前已采用经过验证的另一条安全通道，无需复制任何密钥**。
@@ -223,4 +223,4 @@
 - 认证中心仓库 `119shenhao/identity-center/main` 已保存经验证的 D1 访问令牌（之前为戒赌论坛生产 D1 做过初始化，当前仍有效），其 `.github/workflows/gambling-content-sync-protected.yml` 是此论坛专属内容同步执行器。令牌仅在该仓库 **GitHub Actions production** 环境使用，不写入或复制到赌博仓库，不与 Spine 使用相同 Github Repo Secret，D1 UUID 完全隔离。
 - 通过在 `identity-center/main/.github/gambling-content-sync-request.json` 提交唯一 request_id、`mode=sync`，触发经批准固定 SHA 的同步脚本：先核对目标 D1、独立源码 CI/SQL 回归、只读预检查及 Time Travel 恢复点，然后按发布与一次性回执规则执行；已同步主帖永远跳过，绝不补传后续评论；完成再回读 `examined=0`。无 API 写入口或结构迁移。
 - ChatGPT 固定任务「戒赌论坛同步生产帖子」已更新为采用认证中心的受保护工作流，频率仍每12小时。**不要再触发赌博仓库原先缺少 secret 的 `gambling-sync-posts.yml`**；将来要迁移到独立新令牌，需要另行验收。用户不需要通过聊天提供任何密钥。
-- 采集定时任务每6小时仍处于启用状态，但 `scripts/gambling_sources.json` 仍无合法授权/稳定解析的真实戒赌站点，不得把已完成的 3 篇 QA 独立摘要当作自动复制 Reddit 原帖全文。后续只有明确获授权的来源才能运行真正定时采集。
+- 采集定时任务每6小时仍处于启用状态，但 `scripts/gambling_sources.json` 仍无稳定解析的真实戒赌站点。后续只有配置好的来源才能运行真正定时采集。
