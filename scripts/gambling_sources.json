@@ -73,6 +73,21 @@
       "parser_sample_replies": 251
     },
     {
+      "id": "psychforums",
+      "name": "PsychForums — Gambling Addiction Forum",
+      "host": "www.psychforums.com",
+      "listings": [
+        "https://www.psychforums.com/gambling-addiction-forum-f204/"
+      ],
+      "adapter": "gambling_forums",
+      "approved": false,
+      "parser_verified": true,
+      "reuse_allowed": true,
+      "permission_evidence": "User-confirmed on 2026-11-22 in the project conversation: permission obtained for the two selected sources, PsychForums and Netmums, and explicitly requested import of their content.",
+      "parser_sample": "https://www.psychforums.com/lost-1k-today-for-the-last-time/topic224726.html",
+      "parser_sample_replies": 18
+    },
+    {
       "id": "douban",
       "name": "豆瓣 — 戒赌小分队",
       "host": "www.douban.com",

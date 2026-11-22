@@ -1,9 +1,14 @@
 {
-  "request_id": "gambling_20261122_user_requested_fresh_collect_01",
-  "mode": "collect",
+  "request_id": "gambling_20261122_psychforums_runner_verification",
+  "mode": "inspect",
   "sites": [
-    "all"
+    "psychforums"
   ],
-  "candidates": {},
+  "candidates": {
+    "psychforums": [
+      "https://www.psychforums.com/2-steps-fwd-and-3-steps-back-my-recovery-process/topic224453.html",
+      "https://www.psychforums.com/lost-1k-today-for-the-last-time/topic224726.html"
+    ]
+  },
   "limit": 2
 }

@@ -21,6 +21,7 @@ PREVIEW = "https://dev-gambling-community.119shenhao.workers.dev"
 SITE_RE = re.compile(r"^[a-z0-9][a-z0-9_-]{1,31}$")
 SOURCE_RE = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
 MAX_BYTES = 150_000
+PAGINATED_SITES = ("gamcare", "moneysavingexpert", "v2ex", "psychforums")
 
 
 class RejectedCandidate(ValueError):
@@ -379,7 +380,7 @@ def collect_one(site, source, identifier, url, export_dir):
         else:
             source_html = http(url)
             try:
-                if site in ("gamcare", "moneysavingexpert", "v2ex"):
+                if site in PAGINATED_SITES:
                     draft, metadata = parse_topic_pages(site, identifier, url, source_html, http)
                 else:
                     draft = parse_topic(site, identifier, url, source_html)
@@ -496,7 +497,7 @@ def main():
                 inspection = candidates if explicit else eligible
                 for identifier, url in list(inspection.items())[:10]:
                     try:
-                        if site in ("gamcare", "moneysavingexpert", "v2ex"):
+                        if site in PAGINATED_SITES:
                             draft, meta = parse_topic_pages(site, identifier, url, http(url), http)
                         else:
                             draft = parse_topic(site, identifier, url, http(url))
