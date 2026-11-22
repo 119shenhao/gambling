@@ -262,3 +262,9 @@
 - [该提交整体 CI #44994042376](https://github.com/119shenhao/gambling/actions/runs/44994042376) PASS，独立 Python 解析与编排单测 17/17 通过。上方已有7篇39回复是之前的真实里程碑，本次新增后 **累积9篇真实 GamCare 主帖、49条真实回帖**，不包括此前QA测试数据；9篇均经当轮回读或历史只读审计通过。
 - `.github/gambling-collector-request.json` 已恢复为常规 `mode=collect, sites=["all"], candidates={}, limit=2`。ChatGPT 每6小时戒赌论坛独立定时任务继续开启；不使用 Spine 的定时器/脚本/密钥。此轮操作限定 DEV D1，不直接操作正式数据库或生产发布。生产同步属于另一个独立的既有定时任务。
 - 用户的 GamCare 完整帖子和回复再发布许可为用户对话内声明，`scripts/gambling_sources.json` 如实记录；没有将此声明扩展到其它站点，也没有将它说成独立审验的书面许可证。系统导入账户为 Anonymous，`collect_sources` 保留来源站点与原始稳定 ID。
+
+## 2026-11-22 戒赌社区酒红与金色界面（DEV）
+
+- 视觉参考为 Crime Life Simulator Docs 镜像中的 Casino Life Simulator 赌场大厅。论坛沿用酒红、暖金描边和菱形纹理，用静态 CSS 表现。首页展示已有的本地化站名和口号，正文与评论使用纯色阅读面板。
+- 默认阅读配色改为深酒红色，个人中心仍可切换柔和暖色并调整字号。手机导航保留四个入口，搜索、帖子和弹窗使用同一套主题。
+- 本地 TypeScript、25 项测试、独立本地 D1 迁移检查和版本化前端构建均已通过。
