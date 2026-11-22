@@ -427,3 +427,15 @@
 - 正式站在线检查 [#45027269679](https://github.com/119shenhao/gambling/actions/runs/45027269679) **success**：正式 Worker `GET /api/health` 返回版本 `0.5.1-language-proof-atomic.20261122`、数据库 ready，正式 `GET /api/topics/5aae46c6-56d8-468d-8d24-76bc689f09d2` 返回原文 `zh-CN`；SSO 和 Azure 设置检查正常。相应可复查报告 `docs/GAMBLING_PROD_LANGUAGE_LIVE_LATEST.json`。
 - 剩余142条历史 `und` 已通过受保护只读检查 [#45026992693](https://github.com/119shenhao/identity-center/actions/runs/45026992693) 全量确认：DEV 原始 `source_lang` 也是 `und` 的回复142条，**不是同步把已识别的语言降级**；DEV 来源缺失、DEV已识别而验证缺失、生产内容不一致、生产验证冲突均为0。长度分布：≤8字符19、9–30字符58、>30字符65。由于没有经过可靠语言判定，严格保留这142条 `und`；不可一键设为中文或英文。若以后独立改善原文识别器，应在DEV逐条确认证据后走明确批准的历史元数据更新，不能在同步时猜测。
 - 受保护执行器 [`identity-center`](https://github.com/119shenhao/identity-center/blob/main/docs/GAMBLING_CONTENT_SYNC_EXECUTOR.md) 和 ChatGPT 每12小时自动同步任务均使用固定 SHA `09df153ce9fdc57b435adf92b2aceeea393f3678`，不新建 GitHub cron、不重复同步已有回执的帖子。
+
+
+## 2026-11-22 原文语言同步修复正式收尾：DEV 和 PROD 最终验收
+
+**本节为最新结论，覆盖上文“尚未验收”“固定旧版 SHA”“历史 und 待修复”的旧快照；只针对戒赌论坛。** 正式详细验收已记录于 `main/docs/PROJECT_STATUS.md` 同名结项段落。
+
+- 采集时在 DEV 保存原文语言及验证记录；生产只核对版本/标签/方法并复制，不重新识别、不悄悄降级为 `und`。受保护执行器与每12小时自动任务固定已验证 `09df153ce9fdc57b435adf92b2aceeea393f3678`，原排程未更改。
+- [新版同步真实执行 #45026829285](https://github.com/119shenhao/identity-center/actions/runs/45026829285)：新增 2 篇、5 回复、2 回执，复查 `examined=0`；用户已查看两边帖子/回复一致。
+- [生产在线验收 #45027269679](https://github.com/119shenhao/gambling/actions/runs/45027269679)：生产 Worker 版本 `0.5.1-language-proof-atomic.20261122`，D1 ready，V2EX `zh-CN`，Google SSO/Azure 仍正常。
+- [历史语言元数据修复 #45024860737](https://github.com/119shenhao/identity-center/actions/runs/45024860737)：6篇主帖+857回复修复并回读。
+- [最终只读核验 #45026992693](https://github.com/119shenhao/identity-center/actions/runs/45026992693)：剩余142条评论在 DEV 和 PROD 都是 `und`，`dev_source_missing=0`、`dev_source_nonund_unverified=0`，并非同步丢失原文语言。按准确性原则保留原始未知标记，不得批量猜测；人工确认属于可选内容治理工作，不再视为此同步故障遗留。
+- 结论：本次用户要求的生产发布、未来同步用新实现、历史错误修复与远端验收均已完成；后续新增来源仍须经过相同严格语言证据检查。不得触碰 `spine-community`。
