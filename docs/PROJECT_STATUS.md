@@ -346,3 +346,7 @@
 - 由于GitHub连接器查询push-triggered Actions存在局限，已在同一采集工作流增加脱敏结果写回 `docs/GAMBLING_COLLECTOR_LATEST.json`；仅记录运行ID、来源ID、聚合数和topic_id，不复制用户正文、邮件、电话号码和lease_token。可据此直接回读后续采集运行；不会另建GitHub Actions定时器。
 - **已恢复常规 `.github/gambling-collector-request.json`**：`mode=collect`、`sites=["all"]`、`candidates={}`、`limit=2`，请求提交SHA `2d0533f1e2b54e5b5f22f9e4fab11a6e09b36f01`。既有ChatGPT每6小时独立采集任务自动包括3个已启用站（GamCare/MoneySavingExpert/V2EX），其余来源保持禁用。恢复后的第一轮全来源实际运行结果须单独回读报告，不可预先宣称通过。
 - 严守开发/生产隔离：本轮开发、采集和验收都只针对 `119shenhao/gambling/dev` 和其专有DEV D1；未触发正式发布或生产数据写入，未修改每12小时生产同步任务。豆瓣仍待后续单独开发。
+
+## 2026-11-22 发帖按钮独立视觉强调（移动端）
+
+用户对比实机截图后确认：仅让导航第4项「发帖」与前3项明显区分，但不要前一张金光闪烁、徽章装饰的华丽效果。最终采取**更深的墨绿色微渐变、粗体发帖文字、略厚的柔和暗金边框和极轻的内侧高光**；原位置、尺寸、文案与加号不变，其余导航、帖子卡片及功能不变。仅在 `dev/public/styles.css` 添加针对手机默认深色主题的局部覆盖，保留暖色阅读主题及其它语种；未修改 `main`、生产 Worker/D1 或任何同步/采集任务。需在开发预览真实手机端验收显示效果，暂不把已提交称为已部署成功。
