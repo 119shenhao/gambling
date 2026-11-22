@@ -47,15 +47,15 @@ def probe(site, role, url):
         record["topic_links"] = len({
             urljoin(final, a["href"]).split("?")[0]
             for a in soup.select("a[href]")
-            if re.search(r"/topic\\d+|/discussion/\\d+", a["href"], re.I)
+            if re.search(r"/topic\d+|/discussion/\d+", a["href"], re.I)
         })
         record["post_containers"] = len(soup.select("div.post, article.post, .Comment, .comment, .Message, .ItemComment, [id^='post-']"))
         record["post_bodies"] = len(soup.select(".postbody .content, .post .content, .Message, .message, .userContent, .Item-Body, .Comment .Message"))
         record["pagination_links"] = len(soup.select("a[href*='/page'], a[href*='-10.html'], a[href*='/p2'], a[href*='/p49'], .pagination a"))
         summary = soup.get_text(" ", strip=True)
-        m = re.search(r"\\b(\\d{1,5})\\s+posts?\\b", summary, re.I)
+        m = re.search(r"\b(\d{1,5})\s+posts?\b", summary, re.I)
         record["declared_posts"] = int(m[1]) if m else None
-        match = re.search(r"\\bPage\\s+(\\d+)\\s+of\\s+(\\d+)\\b", summary, re.I)
+        match = re.search(r"\bPage\s+(\d+)\s+of\s+(\d+)\b", summary, re.I)
         record["page_label"] = [int(match[1]), int(match[2])] if match else None
         record["html_bytes"] = len(data)
         # Never log body text, usernames, or comment contents.
