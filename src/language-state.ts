@@ -9,7 +9,8 @@ export function verificationWrite(db:D1Database,type:ContentType,contentId:strin
  language:string,method:string,score:number|null) {
  if(!permitted.has(method))throw Error('unrecognized_language_detector');
  const table=type==='topic'?'topics':'comments';
- // Save one-time original-language evidence at storage, including pending moderation.\n // Deleted or stale versions must never acquire new evidence.
+ // Record evidence at initial DEV storage even for pending moderation; proof is private.
+ // Deleted or outdated content never receives a new proof.
  return stmt(db,`INSERT OR IGNORE INTO content_language_verifications
    (content_type,content_id,content_version,language,method,score)
    SELECT ?,?,?,?,?,? WHERE EXISTS(SELECT 1 FROM ${table}

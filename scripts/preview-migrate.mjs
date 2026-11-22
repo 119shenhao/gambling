@@ -13,17 +13,18 @@ if(!previewBuild){
  const production=conf.d1_databases||[];
  const p=preview.filter(x=>x.binding==='DB');
  const x=(mig.d1_databases||[]).filter(x=>x.binding==='PREVIEW_DB');
+ const i=preview.filter(x=>x.binding==='IMPORT_DB');
  const uuid=/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
  const sourceDBs=new Set(['5919ff78-b8fc-46ab-85f0-01fe5e6a41b0','4362537a-5748-4a05-b0c4-219c3db36996','66c36ee9-2cab-4e85-bc02-645819344297']);
  if(conf.name!=='gambling-community'||conf.vars?.APP_ENV!=='production'||conf.previews?.vars?.APP_ENV!=='preview'||
-    p.length!==1||x.length!==1||!uuid.test(p[0].database_id)||
+    p.length!==1||i.length!==1||i[0].database_name!==p[0].database_name||i[0].database_id!==p[0].database_id||x.length!==1||!uuid.test(p[0].database_id)||
     p[0].database_name!=='gambling-community-dev'||x[0].database_name!=='gambling-community-dev'||
     p[0].database_id!==x[0].database_id||p[0].database_id!=='a92cf620-2a0b-46e1-a0ff-2e0c94218f37'||production.length!==1||production[0].database_name!=='gambling-community-prod'||production[0].database_id!=='7bba9ada-589f-493b-8fcf-60265fc0efac'||p[0].migrations_dir!=='migrations/v1'||x[0].migrations_dir!=='migrations/v1'||
     production.some(d=>d.database_id===p[0].database_id)||
     sourceDBs.has(p[0].database_id)||sourceDBs.has(production[0].database_id)||
     (conf.previews?.r2_buckets||[]).filter(b=>b.binding==='PUBLIC_CONTENT_R2'&&b.bucket_name==='gambling-community-public-dev').length!==1||
     (conf.r2_buckets||[]).filter(b=>b.binding==='PUBLIC_CONTENT_R2'&&b.bucket_name==='gambling-community-public-prod').length!==1||
-    conf.previews?.vars?.IMPORT_ENABLED!=='false'||conf.previews?.vars?.COLLECT_ENABLED!=='false')
+    conf.previews?.vars?.IMPORT_ENABLED!=='true'||conf.previews?.vars?.COLLECT_ENABLED!=='true'||conf.vars?.IMPORT_ENABLED!=='false'||conf.vars?.COLLECT_ENABLED!=='false')
    throw Error('Preview binding does not match the isolated gambling-community-dev resource; no migration attempted.');
  const cli='node_modules/wrangler/bin/wrangler.js';
  function remote(args){
@@ -39,6 +40,12 @@ if(!previewBuild){
  if(found.size>0&&!['users','topics','settings'].every(t=>found.has(t)))
   throw Error('Unrecognized partial Preview schema; refusing to modify D1.');
  remote(['migrations','apply',...opts]);
+ // Separate preview-only coordination queue. Never migrate it into production.
+ remote(['execute',...opts,'--file','migrations/preview-only/0001_collector_queue.sql']);
+ remote(['execute',...opts,'--file','migrations/preview-only/0002_collector_long.sql']);
+ const queues=JSON.parse(remote(['execute',...opts,'--command',
+   "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('collector_candidates','collector_source_state','collector_long_stages','collector_long_replies')",'--json']));
+ if(new Set(queues.flatMap(x=>x.results||[]).map(x=>x.name)).size!==4)throw Error('Preview collector long-reply staging unavailable');
  const after=JSON.parse(remote(['execute',...opts,'--command',"SELECT value FROM settings WHERE key='schema_version'",'--json']));
  if(!after.some(r=>(r.results||[]).some(x=>x.value==='1')))throw Error('Preview schema version check failed after migration.');
  console.log('Verified migrations on gambling-community-dev only. Production D1 not accessed.');

@@ -1,0 +1,6 @@
+{
+  "request_id": "probe-20261122-authorized-story-sources",
+  "mode": "story_source_probe",
+  "database_writes": false,
+  "schedule_changes": false
+}

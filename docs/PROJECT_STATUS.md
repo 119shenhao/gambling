@@ -251,3 +251,12 @@ CI 额外校验 UI 纹理、骰子、暖色阅读主题，并断言生产 `IDENT
 - **历史错误已修正：** [生产元数据修复 #45024860737](https://github.com/119shenhao/identity-center/actions/runs/45024860737) 核实生产恢复点后，在 DEV 补齐并回读 863 条语言凭据，生产修复 6 篇主帖、857 条回复（总 863）并核验；不重导正文、作者、评论树、同步回执。
 - **剩余 142 条 `und` 已核实归因并安全结案：** [只读复查 #45026992693](https://github.com/119shenhao/identity-center/actions/runs/45026992693) 明确 `prod_und_topics=0`、`prod_und_comments=142`、`dev_source_still_und=142`，DEV 原文未识别，并非同步时丢失语言或验证记录；`dev_source_missing=0`、`dev_source_nonund_unverified=0`。其中正文长度 ≤8 字符19条、9～30字符58条、>30字符65条。没有可信的语言证据，按用户规则保留 `und`，不凭猜测统一改为英文或中文；未来如有可靠人工确认，可按单条人工审核流程处理，此不构成当前同步缺陷或未完成部署。
 - **本次任务结果：** 代码修复、受保护固定版本升级、实库历史修复、新版生产同步真实演练、生产线上部署检查均已闭环；自动同步保留原计划。不可将历史 142 条真实 `und` 重新描述成生产同步错误，亦不可绕过语言证据检查。
+
+
+## 2026-11-22 戒赌论坛整套功能版本发布：候选构建和正式验收
+
+- 用户确认本次发布目标：开发环境已经完成的**全部适用于生产的功能**（包含此前验收的赌场 UI、金色“发帖”、黑桃透明底、登录弹窗焦点修复和八语言文案）应进入 PROD；DEV 与 PROD 共用业务程序，但各自保存配置、Secret、D1、R2、身份认证客户端及运行状态。
+- 基线：生产 `main` 的正式 Worker、Google 身份认证和 Azure 已上线验证，DEV/main 分叉且不允许直接用 DEV 的生产配置覆盖 main。正式环境保持 `IDENTITY_LOGIN_ENABLED=true`、`TRANSLATION_ENABLED=true`、`TRANSLATION_DAILY_LIMIT=200000`、`TRANSLATION_MONTHLY_LIMIT=1800000`、`keep_vars=true`；生产独有 `src/admin.ts`、`src/translation.ts`、`public/translation-admin.js`、`scripts/prepare-build.mjs` 保留；开发采集接口只允许 `APP_ENV=preview`，生产 `IMPORT_ENABLED=false`、`COLLECT_ENABLED=false`。
+- 发布保留原生产数据与权限：不迁移用户、帖子、评论和回执；不调用内容同步任务；不更改生产 D1/R2 UUID、Secret 明文、Cloudflare 控制台配置或 Identity Center；21 个正式 `migrations/v1` 文件在 DEV/main 内容一致，故本版本无需新增生产数据库迁移。
+- 新版代码预期健康版本 `0.5.2-community-parity.20261122`。生产只读检查包括版本、D1 Ready、原文语言、SSO 账号选择、Azure、翻译额度和公开页面；Cloudflare 构建/密钥保留及 UI 验收须以实际在线结果判定。
+- 本段首先纳入发布候选分支；**发布前**不表示已经部署。正式结果以合并 PR、生产 Actions、Cloudflare 实际运行及验收链接补录，失败时停止而非覆盖原生产数据库。
