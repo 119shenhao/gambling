@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -267,8 +268,7 @@ test('approved mobile casino-felt theme keeps reading preferences and four prima
  assert.equal(png.readUInt32BE(16),128);
  assert.equal(png.readUInt32BE(20),128);
  // A byte-for-byte checksum guards against reintroducing the earlier cropped rim.
- const crypto=await import('node:crypto');
- assert.equal(crypto.createHash('sha256').update(png).digest('hex'),'1984f8b12032bd157c5e48f420130afbaada50511614ca4cf81f32515d5574c3');
+ assert.equal(createHash('sha256').update(png).digest('hex'),'1984f8b12032bd157c5e48f420130afbaada50511614ca4cf81f32515d5574c3');
  assert.doesNotMatch(html,/M16 3C12 9 5 12/);
  assert.match(app,/class="primary-nav"/);
  assert.match(app,/class="nav-link nav-compose"/);
