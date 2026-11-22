@@ -1,12 +1,12 @@
 {
-  "request_id": "collect-first-paged-25-replies-20261122-1527",
-  "mode": "collect",
+  "request_id": "inspect-132-reply-gamcare-20261122-1540",
+  "mode": "inspect",
   "sites": [
     "gamcare"
   ],
   "candidates": {
     "gamcare": [
-      "https://community.gamcare.org.uk/forum/recovery-diaries/to-gamble-is-to-lose-more-than-money/"
+      "https://community.gamcare.org.uk/forum/recovery-diaries/i-have-a-problem-2/"
     ]
   },
   "limit": 1
