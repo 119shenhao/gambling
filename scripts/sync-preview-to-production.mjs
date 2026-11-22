@@ -23,25 +23,44 @@ const sqlValue=v=>v===null||v===undefined?'NULL':typeof v==='number'&&Number.isF
 const normalize=v=>v.normalize('NFKC').replace(/\s+/gu,' ').trim().toLowerCase();
 const validLanguage=v=>typeof v==='string'&&v!=='und'&&/^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8})?$/.test(v);
 const verifiedMethods=new Set(['tinyld-heavy','azure-auto','admin-manual']);
-// This is a publication decision, not a best-effort translation guess.
-// Only explicit current choices or a verification for the exact current content
-// version can become an indexed source-language label.
+// Publication is a copy of the original-language decision made in DEV.
+// Never re-detect, guess, or silently downgrade an already identified language.
+// A missing/stale/conflicting proof must be repaired in DEV before retrying.
 export function resolveSyncLanguage(row){
  if(row.status==='deleted')return {label:'und',mode:'legacy',method:null,score:null};
+ const label=row.source_lang,mode=row.source_lang_mode;
+ const identity=String(row.id||'unknown-content');
  const version=Number(row.content_version);
- const current=Number.isInteger(version)&&version>=1&&
-  Number(row.verified_version)===version&&
+ const hasVersion=Number.isInteger(version)&&version>=1;
+ const verifiedVersion=row.verified_version==null?null:Number(row.verified_version);
+ const hasProof=row.verified_method!=null||row.verified_language!=null||row.verified_version!=null;
+ const current=hasVersion&&verifiedVersion===version&&
   verifiedMethods.has(row.verified_method)&&validLanguage(row.verified_language);
- if(current&&row.verified_method==='admin-manual')
-  return {label:row.verified_language,mode:'manual',method:'admin-manual',score:row.verified_score};
- if(row.source_lang_mode==='manual'){
-  return {label:validLanguage(row.source_lang)?row.source_lang:'und',mode:'manual',method:null,score:null};
+ if(label==='und'){
+  // Truly undetermined content is allowed, but a positive current proof or an
+  // old positive proof is an inconsistency to fix at the source, not discard.
+  if(hasProof&&validLanguage(row.verified_language))
+   throw Error('source_language_proof_conflict: '+identity+' (und versus verified '+row.verified_language+')');
+  return {label:'und',mode:'legacy',method:null,score:null};
  }
- if(current){
-  return {label:row.verified_language,mode:'auto',method:row.verified_method,
-   score:typeof row.verified_score==='number'&&row.verified_score>=0&&row.verified_score<=1?row.verified_score:null};
+ if(!validLanguage(label))
+  throw Error('invalid_source_language: '+identity);
+ if(mode==='manual'){
+  // An explicit author's language choice is not a machine classification and
+  // does not require pretending it was made by tinyld-heavy.
+  if(hasProof&&(!current||row.verified_language!==label))
+   throw Error('source_language_proof_conflict: '+identity+' (manual choice)');
+  return {label,mode:'manual',method:current?row.verified_method:null,
+   score:current&&typeof row.verified_score==='number'&&row.verified_score>=0&&row.verified_score<=1?row.verified_score:null};
  }
- return {label:'und',mode:'legacy',method:null,score:null};
+ if(mode!=='auto')
+  throw Error('source_language_proof_missing: '+identity+' (unverified original language)');
+ if(!current)
+  throw Error('source_language_proof_missing_or_stale: '+identity+' (repair in development before sync)');
+ if(row.verified_language!==label)
+  throw Error('source_language_proof_conflict: '+identity+' ('+label+' versus '+row.verified_language+')');
+ return {label,mode:'auto',method:row.verified_method,
+  score:typeof row.verified_score==='number'&&row.verified_score>=0&&row.verified_score<=1?row.verified_score:null};
 }
 const currentLanguageProjection=(alias,type)=>
  "LEFT JOIN content_language_verifications v ON v.content_type='"+type+"'"+
