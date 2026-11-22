@@ -256,9 +256,14 @@ test('approved mobile casino-felt theme keeps reading preferences and four prima
  assert.match(css,/--frame:\s*#c7a765/);
  assert.match(css,/grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
  assert.match(css,/\[data-reading-theme="warm"\] \.topic-card/);
- assert.match(html,/<g transform="rotate\(-10 16 16\)">/);
- assert.match(html,/<rect x="5\.5" y="5\.5" width="21" height="21" rx="4"/);
- assert.equal((html.match(/<circle cx="(?:11|16|21)" cy="(?:11|16|21)" r="2"\/>/g)||[]).length,5); // gold five-pip die replaces header spade
+ assert.match(html,/<img src="\/dynamic-dice\.svg" alt="" width="31" height="31"/);
+ const dice=read('public/dynamic-dice.svg');
+ assert.match(dice,/viewBox="0 0 48 48"/);
+ assert.match(dice,/dice-gold-top/);
+ assert.match(dice,/dice-gold-left/);
+ assert.match(dice,/dice-gold-right/);
+ assert.match(dice,/dice-orbit-gold/);
+ assert.match(dice,/Foreground sweep completes the static dynamic-ring appearance/);
  assert.doesNotMatch(html,/M16 3C12 9 5 12/);
  assert.match(app,/class="primary-nav"/);
  assert.match(app,/class="nav-link nav-compose"/);
@@ -279,4 +284,14 @@ test('compose action is visually distinct without affecting the other mobile tab
  assert.match(css,/font-weight:750/);
  assert.match(css,/\.sidebar \.primary-nav \.nav-compose::before \{display:none;\}/);
  assert.match(js,/data-action="compose"/);
+});
+
+test('approved dynamic die logo preserves a compact brand frame and all navigation',()=>{
+ const css=read('public/styles.css'),html=read('public/index.html');
+ const svg=read('public/dynamic-dice.svg');
+ assert.match(css,/\.brand-icon img \{ display:block; width:31px; height:31px;/);
+ assert.match(html,/<span class="brand-icon" aria-hidden="true"><img src="\/dynamic-dice\.svg"/);
+ assert.equal((svg.match(/<ellipse /g)||[]).length,8);
+ assert.match(svg,/Rearward loop|Behind the die/);
+ assert.doesNotMatch(svg,/<animate|<script/);
 });
