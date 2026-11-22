@@ -4,6 +4,7 @@ Never imports content or logs personal posts; tests public HTTP reachability,
 stable topic links, visible comment structures and pagination metadata only.
 """
 import json
+import os
 import re
 from urllib.error import HTTPError, URLError
 from urllib.parse import urljoin, urlsplit
@@ -66,7 +67,10 @@ def probe(site, role, url):
     print(json.dumps(record, sort_keys=True), flush=True)
 
 if __name__ == "__main__":
-    for entry in TARGETS:
+    selected = TARGETS
+    if os.environ.get("MSE_ONLY") == "1":
+        selected = [item for item in TARGETS if item[0] == "moneysavingexpert"]
+    for entry in selected:
         probe(*entry)
 
 
