@@ -12,12 +12,12 @@ ORIGINS = {
     "gamcare": ("community.gamcare.org.uk", "/forum/"),
     "gamblingtherapy": ("gamblingtherapy.org", "/forum/topic/"),
 }
-GAMBLING = re.compile(r"\\b(?:gambl(?:e|ing|er|ers)|betting|casino|slots?|roulette|"
-                      r"relaps(?:e|ed)|quit(?:ting)?|recovery|debt|lost|losses)\\b", re.I)
-PRIVATE = re.compile(r"(?<!\\d)(?:[+]?\\d[ -]?){10,15}(?!\\d)|"
-                     r"[\\w.+-]+@[\\w.-]+\\.[a-z]{2,}", re.I)
-INCOMPLETE = re.compile(r"\\b(?:load more replies|show more replies|"
-                        r"view hidden replies|read more replies)\\b", re.I)
+GAMBLING = re.compile(r"\b(?:gambl(?:e|ing|er|ers)|betting|casino|slots?|roulette|"
+                      r"relaps(?:e|ed)|quit(?:ting)?|recovery|debt|lost|losses)\b", re.I)
+PRIVATE = re.compile(r"(?<!\d)(?:[+]?\d[ -]?){10,15}(?!\d)|"
+                     r"[\w.+-]+@[\w.-]+\.[a-z]{2,}", re.I)
+INCOMPLETE = re.compile(r"\b(?:load more replies|show more replies|"
+                        r"view hidden replies|read more replies)\b", re.I)
 POST_SELECTOR = (
     ".wpforo-post, .wpf-post, article[id^='post-'], "
     ".bbp-reply, .bbp-topic, [id^='wpf-post-']"
@@ -87,14 +87,14 @@ def _visible_text(node):
             if n.name in {"script", "style", "noscript", "button", "svg"}:
                 return
             if n.name == "br":
-                parts.append("\\n")
+                parts.append("\n")
                 return
             for child in n.children:
                 walk(child)
             if n.name in {"p", "div", "li", "blockquote"}:
-                parts.append("\\n")
+                parts.append("\n")
     walk(node)
-    return re.sub(r" *\\n *", "\\n", " ".join(parts)).strip()
+    return re.sub(r" *\n *", "\n", " ".join(parts)).strip()
 
 
 def _required(node, reason):
@@ -150,7 +150,7 @@ def parse_topic(site, expected_id, page_url, html):
     # Validate count when the theme exposes a count; refuse an incomplete tree.
     count_node = page.select_one(".wpforo-topic-stat, .wpf-topic-stat, .wpf-topic-posts")
     if count_node:
-        match = re.search(r"\\b(\\d{1,4})\\s+posts?\\b", count_node.get_text(" ", strip=True), re.I)
+        match = re.search(r"\b(\d{1,4})\s+posts?\b", count_node.get_text(" ", strip=True), re.I)
         if match and int(match[1]) != len(nodes):
             raise ValueError("public_reply_count_mismatch")
     if len(bodies[0]) > 30000 or any(len(s) > 12000 for s in bodies[1:]):
