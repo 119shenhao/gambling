@@ -200,5 +200,34 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(calls, ["/api/collect/claim", "/api/collect/release"])
 
 
+    def test_audit_completed_uses_exact_published_full_body_readback(self):
+        topic = parse_topic(self.site, "trying-to-stop", self.url, fixture())
+        topic_id = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+        feed = {"topics": [{"id": topic_id, "title": topic["title"]}], "next": None}
+        detail = {"topic": {"title": topic["title"], "body": topic["body"],
+                            "source_lang": "en"},
+                  "comments": [
+                      {"id": "a", "body": topic["comments"][0]["body"],
+                       "source_lang": "en", "parent_comment_id": None},
+                      {"id": "b", "body": topic["comments"][1]["body"],
+                       "source_lang": "und", "parent_comment_id": None}],
+                  "next": None}
+        def mock_api(url):
+            if url.startswith("/api/topics?"):
+                return feed
+            if url == "/api/topics/" + topic_id:
+                return detail
+            raise AssertionError(url)
+        with patch.object(collect, "api", side_effect=mock_api):
+            self.assertEqual(collect.lookup_published_topic_id(topic), topic_id)
+            collect.audit_completed(self.site, "trying-to-stop", self.url, topic, 2)
+
+    def test_audit_missing_source_cannot_claim_as_verified(self):
+        topic = parse_topic(self.site, "trying-to-stop", self.url, fixture())
+        with patch.object(collect, "api", return_value={"topics": [], "next": None}):
+            with self.assertRaisesRegex(ValueError, "completed_topic_not_visible"):
+                collect.audit_completed(self.site, "trying-to-stop", self.url, topic, 2)
+
+
 if __name__ == "__main__":
     unittest.main()
