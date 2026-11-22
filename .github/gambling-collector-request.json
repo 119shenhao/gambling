@@ -1,9 +1,14 @@
 {
-  "request_id": "gambling-hourly-20261122-1458-r1",
-  "mode": "collect",
+  "request_id": "mse_read_only_inspect_20261122_r1",
+  "mode": "inspect",
   "sites": [
-    "all"
+    "moneysavingexpert"
   ],
-  "candidates": {},
+  "candidates": {
+    "moneysavingexpert": [
+      "https://forums.moneysavingexpert.com/discussion/6200242/gambling-recovery-and-covid-job-loss",
+      "https://forums.moneysavingexpert.com/discussion/6512900/redemption-the-journey-of-a-recovering-gambling-addict"
+    ]
+  },
   "limit": 2
 }
