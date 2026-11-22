@@ -1,13 +1,9 @@
 {
-  "request_id": "gamcare-first-full-import-20261122-14341",
+  "request_id": "gamcare-auto-discovery-20261122-14390",
   "mode": "collect",
   "sites": [
-    "gamcare"
+    "all"
   ],
-  "candidates": {
-    "gamcare": [
-      "https://community.gamcare.org.uk/forum/new-members-intros-forum/i-need-to-stop-before-i-loose-everything/"
-    ]
-  },
-  "limit": 1
+  "candidates": {},
+  "limit": 2
 }
