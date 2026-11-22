@@ -87,7 +87,8 @@
 
 - 选题以当事人或家属可追溯的公开经历为依据。纳入赌博债务、破产、失业、住房损失、家庭冲突、分居离婚和失去亲人等影响；故事可仍在发展，康复可作为后续。论坛内容保留原始语境与回帖，来源资料作者的自述不视为独立查证。
 - 已有许可覆盖 GamCare 论坛的主帖和回复。本次新增 [Family & Friends](https://community.gamcare.org.uk/forum/family-friends/) 和 [Overcoming Gambling Harms](https://community.gamcare.org.uk/forum/overcoming-problem-gambling/) 两个发现入口。四个板块的候选交错合并，新增板块优先；每站的采集额度、去重和回复校验仍由原采集代码负责。
-- [现有工作流只读探测 #45033174072](https://github.com/119shenhao/gambling/actions/runs/45033174072) 在相同运行器完成两个新板块的 3 篇样本，读到 3、9、9 条回复，错误 0、入库 0。自动发现和开发入库以常规采集作业回执为准。
+- [现有工作流只读探测 #45033174072](https://github.com/119shenhao/gambling/actions/runs/45033174072) 在相同运行器完整读取两个新板块的 3 篇样本及 21 条回复，错误 0、入库 0。
+- [常规采集 #45033418551](https://github.com/119shenhao/gambling/actions/runs/45033418551) 通过 51 项离线测试；两个新增板块各发现 20 个候选。DEV 真实入库并回读 2 篇、13 条回复，两个入库样本均来自亲友互助板块（`new-here-worried-mum` 4 条、`where-to-go-from-here` 9 条）；错误 0。赌博伤害板块已通过列表发现与样本只读解析，本轮未产生该板块的入库回执。请求保持常规 `collect`、`sites=["all"]`、`limit=2`。
 
 ### 待验收的英文外站
 
@@ -99,5 +100,7 @@
 | [Gambling with Lives](https://www.gamblingwithlives.org/newsletter/inquests-gareth-and-stephen/) | 公开记录赌博相关死亡的家庭经历及验尸官结论。 | 独立文章，待确认转载范围。 |
 | [myFICO Bankruptcy](https://ficoforums.myfico.com/t5/Bankruptcy/Income-Increase-During-Chapter-13/td-p/4832222) | 当事人自述为赌博借约 5 万美元无抵押债务并申请破产，可读主帖和回复。样本为历史帖。 | 待确认全文及回复的再发布许可和运行器访问。 |
 | [英国 Gambling Commission](https://www.gamblingcommission.gov.uk/report/lived-experiences-of-affected-others-qualitative-research/consequences) | 研究中的匿名访谈案例，涉及瞒债、家庭储蓄损失及婚姻变故。 | 独立报告内的案例，[全文复用条款](https://www.gamblingcommission.gov.uk/about-us/page/terms-of-use) 要求权利人批准。 |
+
+| [澳大利亚社会服务部](https://www.dss.gov.au/gambling/gambling-support-services/matthews-story) | 官方文字案例记录网络赌博如何耗尽当事人的家庭财务。 | [版权声明](https://www.dss.gov.au/using-our-website/copyright) 下站方材料通常适用 CC BY 4.0，第三方材料与图片等例外；待核对访谈引语的适用范围。 |
 
 独立案例文章目前只登记来源与链接。现有定时采集协议要求每个论坛主题至少有一条真实回复。
