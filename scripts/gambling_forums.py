@@ -40,8 +40,10 @@ def source_id(site, url):
             not re.fullmatch(r"[a-z0-9-]{1,128}", slug)):
         raise ValueError("invalid_topic_url")
     # Category/listing links aren't topics, even if their slugs look valid.
-    if site == "gamcare" and len(parsed.path.strip("/").split("/")) < 3:
-        raise ValueError("not_topic_url")
+    if site == "gamcare":
+        parts = parsed.path.strip("/").split("/")
+        if len(parts) != 3 or parts[1] in {"paged", "page", "category"} or slug.isdigit():
+            raise ValueError("not_topic_url")
     return slug
 
 
