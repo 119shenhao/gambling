@@ -1,4 +1,4 @@
-name: Gambling authorized collector
+name: Gambling independent collector on demand
 on:
   push:
     branches: [dev]
@@ -12,7 +12,7 @@ jobs:
   collector:
     if: github.repository == '119shenhao/gambling'
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
         with:
@@ -20,5 +20,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Verify authorized-source registry and development endpoint
+      - name: Install independent forum parser
+        run: python -m pip install 'beautifulsoup4==4.13.4'
+      - name: Run offline parser and API-contract tests
+        run: python -m unittest discover -s tests -p 'test_gambling_collector.py' -v
+      - name: Run inspection or approved collection against Gambling DEV only
         run: python scripts/gambling_collect.py .github/gambling-collector-request.json
