@@ -53,3 +53,18 @@
 - **本次实际累计：9篇真实 GamCare 主帖、49条真实回复**，均已当轮回读或历史只读复核，不包含此前3篇 `[QA DIGEST]` 和11条测试回复。本轮只写隔离 DEV D1，未触发生产同步。
 - 技术修复：不完整/隐私风险内容记为 `candidate_rejected`；服务端独立语言识别将短评论标记 `und` 不再导致虚假的正文不一致；仍严格验证主帖及各级评论原文、数量、分页与父子关系；支持只读审计已完成来源，避免重复写入。
 - 保留 ChatGPT 专属每6小时的戒赌采集任务及既有每12小时独立生产同步任务；不新建 GitHub Actions cron、不使用 Spine 调度器、数据库、密钥或内容。此轮没有访问或修改正式生产 D1。
+
+## 2026-11-22 采集长帖改造：每篇最多500条真实回复
+
+**用户确认规则**：不能因为有50条或更多回复而放弃整篇主帖；外站实际不超过500条时逐页采集全部回复，超过500条时**按原站顺序仅取前500条（第501条不保存）**。评论和楼中楼合并计数，保留可验证的父子关系；如缺页/正文丢失则拒绝该候选，不能谎称“完整”。
+
+- 仅在 `119shenhao/gambling/dev` 增加 `scripts/gambling_forums.py::parse_topic_pages`：按GamCare原帖 `/paged/N/` 连续读取，校对全站显示的帖子总数（扣除主帖），限制前500回复、最多40个页面；记录 `source_total/capped/pages`。首次真实演练直接读取2页25条，后又读10页142条。
+- `scripts/gambling_collect.py` 新增分批编排 `complete_staged`，原单包不超过49条继续走旧 `collect/complete`；跨页或大帖采用 `/api/collect/long/start → append → finish`，每批10条；完成后对DEV API全部评论分页回读，最高500条。源帖已完成/指纹重复时跳过。
+- `src/collect-long.ts`：独立DEV长期暂存元数据与回复，单次上传最多20条，offset必须连续、支持相同批次重试和跨批parent_index。只在全部 `target_count` 条暂存且验证序号无缺口时，用**一个D1事务**创建主帖、最多500评论、source完成回执，不能公开半成品。暂存表 `migrations/preview-only/0002_collector_long.sql` 限定 ordinal 0至499，记录 `source_total` 和 `capped`；仅开发预览自动迁移，**不在生产迁移链**。
+- [GamCare两页25回复真实DEV入库 #44995042695](https://github.com/119shenhao/gambling/actions/runs/44995042695) PASS：topic_id `e4439865-eef8-4932-a888-c5d99c722c52`，新增1主帖、25回复，回读数量与原文匹配。
+- [GamCare十页142回复真实DEV入库 #44995221312](https://github.com/119shenhao/gambling/actions/runs/44995221312) PASS：topic_id `f9d8e0d6-b6b3-46b8-a957-5347db346513`，新增1主帖、142回复，回读通过。证明大于49条不再自动拒绝。
+- Python单测覆盖：GamCare两页、原站501条时恰好截取前500不含第501、缺失分页拒绝、preview SQL 500条上限阻止第501写入；新服务端配置、TS CI也通过独立检查。**501封顶已通过程序/SQL测试，但尚没有成功的真实超过500条帖子入库验收，不能夸大。**
+- [Charly's life >500回复只读探测 #44995338423](https://github.com/119shenhao/gambling/actions/runs/44995338423)：因源网页某条回复 `empty_post_or_reply` 无法取得完整正文而安全拒绝；未入库，并非因超出500直接跳过。此问题属于真实来源可读性，后续可定位/改进，但不能编造丢失回复。
+- 已更新 ChatGPT 独立「戒赌论坛独立采集入库」每6小时任务指令支持分页500上限；不触碰独立的Spine任务或本论坛生产同步任务。
+
+**状态**：开发环境已证明能真实入库跨页142条；500封顶逻辑已编码、单测验证，仍需要一篇可完整读取、实际>500回复的外站候选，做完整端到端采集验证。生产D1未因本次开发改动。
