@@ -58,3 +58,13 @@
 - 补充测试 `test_seed_fallback_keeps_gambling_stories_with_debt_only_titles` 验证即使栏目 HTML 无结果，种子仍存在，但完成来源 ID 必须被排除。
 - 已提交新一轮只读 Actions 触发请求（`.github/gambling-source-probe-request.json`，`probe-20261122-v2ex-seed-regression-v03`），提交 SHA `34b79484e9782eb56b334579c5d7772b5399fb22`。**提交成功不代表 Actions 已通过**；未取得本次 GitHub Actions run ID/日志及 DEV D1 回读前，V2EX、豆瓣都继续保持 disabled。
 - 现有戒赌采集任务每6小时执行、每已启用站每次最多2篇、正式2个来源不变。没有新增定时器、没有触碰生产环境。
+
+## 2026-11-22 V2EX 联系方式保护修复与重新验收
+
+- 真实只读 GitHub Actions run [45002707666](https://github.com/119shenhao/gambling/actions/runs/45002707666) 的 V2EX 结果为 `parser_rejected: v2ex_private_identifier`。Github 工作流的旧 `| tee` 未启用 pipefail，可能产生绿色工作流但真实解析失败；已修复该问题。
+- 已证实 V2EX 测试帖 `1121755` 公开 3 页，分别100/100/51条评论，总计251条；栏目公共页面有118条 `/t/` 链接。结构可读不代表全文已解析成功。
+- `scripts/gambling_v2ex.py` 的旧行为是识别出疑似手机号/邮箱即拒绝整个帖。现在保留非敏感内容，只把匹配联系方式替换为 `[联系方式已隐藏]`，对完全只有私人联系方式的回复仍保守拒绝；补了遮蔽/只有私人内容/空内容三种单元测试。
+- `scripts/gambling_sources.json` 记录了用户2026-11-22确认的V2EX完整主帖及回帖使用许可，仅 `approved=true`、`reuse_allowed=true`，**`parser_verified=false` 仍关闭**，因此既有定时任务尚不会写入V2EX。
+- 已通过独立 `.github/gambling-source-probe-request.json` 提交 `probe-20261122-v2ex-pii-redaction-v05`，要求 GitHub Runner 再次读取真实原文与全部251条回复；GitHub Actions 实际日志和 `docs/GAMBLING_CHINESE_PROBE_LATEST.json` 必须证明 `parser_ok` 才能继续 DEV D1 导入及回读验收。**不要把触发成功当成实际通过。**
+- 本阶段优先处理 V2EX 隐私与解析；豆瓣后置，既有每6小时采集任务频率和生产数据库不变。
+
