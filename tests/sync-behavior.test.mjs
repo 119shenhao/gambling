@@ -7,14 +7,37 @@ test('gambling one-time sync fingerprints canonical title and body',()=>{
  assert.equal(fingerprint(' Test ', 'Hello  world'),fingerprint('test','hello world'));
  assert.notEqual(fingerprint('test','first'),fingerprint('test','second'));
 });
-test('production language requires verified current version',()=>{
- const draft={status:'published',source_lang:'en',source_lang_mode:'auto',
-  content_version:2,verified_version:1,verified_language:'en',
+test('production language is verified DEV data, never reidentified or downgraded',()=>{
+ const draft={id:'post-zh',status:'published',source_lang:'zh-CN',source_lang_mode:'auto',
+  content_version:2,verified_version:1,verified_language:'zh-CN',
   verified_method:'tinyld-heavy',verified_score:0.9};
- assert.deepEqual(resolveSyncLanguage(draft),{label:'und',mode:'legacy',method:null,score:null});
+ assert.throws(()=>resolveSyncLanguage(draft),/source_language_proof_missing_or_stale.*post-zh/);
+ assert.throws(()=>resolveSyncLanguage({...draft,verified_version:null,verified_language:null,
+  verified_method:null}),/source_language_proof_missing_or_stale/);
+ assert.throws(()=>resolveSyncLanguage({...draft,verified_version:2,verified_language:'en'}),
+  /source_language_proof_conflict.*post-zh/);
  const current={...draft,verified_version:2};
- assert.deepEqual(resolveSyncLanguage(current),{label:'en',mode:'auto',method:'tinyld-heavy',score:0.9});
- assert.equal(resolveSyncLanguage({...draft,source_lang_mode:'manual'}).mode,'manual');
+ assert.deepEqual(resolveSyncLanguage(current),{label:'zh-CN',mode:'auto',method:'tinyld-heavy',score:0.9});
+ for(const code of ['en','ja','fr','zh-TW','es']){
+  assert.equal(resolveSyncLanguage({...current,source_lang:code,verified_language:code}).label,code);
+ }
+ assert.deepEqual(resolveSyncLanguage({id:'author',status:'published',source_lang:'en',
+  source_lang_mode:'manual',content_version:1}),
+  {label:'en',mode:'manual',method:null,score:null});
+ assert.throws(()=>resolveSyncLanguage({...current,source_lang_mode:'manual',verified_language:'fr'}),
+  /source_language_proof_conflict/);
+ assert.deepEqual(resolveSyncLanguage({id:'unknown',status:'published',source_lang:'und',
+  source_lang_mode:'legacy',content_version:1}),
+  {label:'und',mode:'legacy',method:null,score:null});
+ assert.throws(()=>resolveSyncLanguage({...current,source_lang:'und'}),/source_language_proof_conflict/);
+ assert.throws(()=>resolveSyncLanguage({...current,source_lang_mode:'legacy'}),
+  /source_language_proof_missing/);
+ // Refuse to generate any SQL if even one published reply has stale evidence.
+ const topic={...current,id:'topic-1',title:'Chinese source',body:'这是中文原文',
+  symptom_duration_days:null,created_at:1};
+ assert.throws(()=>buildInserts(topic,[{...draft,id:'reply-1',status:'published',
+   kind:'regular',parent_comment_id:null,progress_seq:null,body:'原文回复',created_at:2}],[],
+   fingerprint(topic.title,topic.body)),/source_language_proof_missing_or_stale.*reply-1/);
 });
 test('source comments preserve parent before nested children',()=>{
  const source=[
