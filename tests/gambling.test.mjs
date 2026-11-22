@@ -346,7 +346,7 @@ test('Gambling DEV-only language proof repair uses the production collector dete
  assert.match(repair,/conflicting_current_language_proof/);
  assert.match(repair,/GAMBLING_PREVIEW_LANGUAGE_REPAIR_CONFIRM/);
  assert.match(repair,/wrangler\.preview-migrations\.jsonc/);
- assert.match(repair,/binding\)!=='PREVIEW_DB'/);
+ assert.match(repair,/\.binding!=='PREVIEW_DB'/);
  assert.doesNotMatch(repair,/PRODUCTION_DB|SPINE_|spine-community/);
  assert.match(source,/tinyld\/heavy/);
  assert.doesNotMatch(sync,/detectSourceLanguageEvidence|tinyld\/heavy|AzureTranslator/);
