@@ -9,7 +9,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
-from gambling_mse import parse_topic_pages, source_id
+from gambling_mse import parse_topic_pages, source_id, discover
 from bs4 import BeautifulSoup
 from collections import Counter
 
@@ -62,6 +62,17 @@ def fetch(url):
         raise ValueError("network_error") from None
 
 def main():
+    # An enabled source must discover new candidates without explicit URLs.
+    listing = "https://forums.moneysavingexpert.com/categories/debt-free-diaries"
+    try:
+        found = discover(listing, fetch(listing), maximum=60)
+        print(json.dumps({"event":"listing_discovery","site":"moneysavingexpert",
+            "listing":listing,"candidate_count":len(found),
+            "candidate_ids":list(found)[:10],"database_writes":False},
+            sort_keys=True),flush=True)
+    except (ValueError, TypeError, KeyError) as error:
+        print(json.dumps({"event":"listing_discovery","status":"error",
+            "reason":str(error)[:120],"database_writes":False},sort_keys=True),flush=True)
     for url in SAMPLES:
         identifier = source_id(url)
         before = REQUEST_COUNT
