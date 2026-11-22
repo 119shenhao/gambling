@@ -60,12 +60,12 @@
         "https://www.v2ex.com/tag/%E8%B5%8C%E5%8D%9A"
       ],
       "adapter": "gambling_forums",
-      "approved": false,
+      "approved": true,
       "parser_verified": false,
-      "reuse_allowed": false,
-      "permission_evidence": "",
+      "reuse_allowed": true,
+      "permission_evidence": "User explicitly confirmed on 2026-11-22 in project conversation that complete V2EX gambling-related threads and their replies can be republished in Gambling Community; technical full-parser and DEV D1 verification is still pending. Statement recorded as user confirmation, not independently reviewed written agreement.",
       "parser_sample": "https://www.v2ex.com/t/1121755",
-      "note": "Disabled candidate. Curated URLs are only discovery inputs, never evidence of appropriate source permissions or full collection. 1121755 has a debt/market speculation title but explicit 戒赌 progression in supplements and 251 public replies over 3 pages; 1018492 requires semantic/full reply validation. Read-only GitHub Runner + DEV D1 E2E and user authorization remain required. No production changes.",
+      "note": "User confirmed reuse eligibility, but parser_verified remains false until live 251/251 reply parsing and DEV D1 stored/public verification pass. Raw contact details are redacted on import. Curated candidates /t/1121755 and /t/1018492 undergo full body/reply and relevance checks. Source is still DISABLED for collect until all gates true.",
       "seed_topics": [
         "https://www.v2ex.com/t/1121755",
         "https://www.v2ex.com/t/1018492"
