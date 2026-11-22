@@ -34,6 +34,8 @@ class ParserTests(unittest.TestCase):
             source_id(self.site, "https://evil.example/forum/recovery-diaries/trying-to-stop/")
         with self.assertRaises(ValueError):
             source_id(self.site, self.url + "?page=2")
+        with self.assertRaisesRegex(ValueError, "not_topic_url"):
+            source_id(self.site, "https://community.gamcare.org.uk/forum/new-members-intros-forum/paged/2/")
 
     def test_realistic_discovery_filters_duplicates(self):
         page = ('<a class="wpforo-topic-title" href="#">not selected</a>'
