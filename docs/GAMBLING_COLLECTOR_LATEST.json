@@ -1,215 +1,55 @@
 {
-  "collector_job_result": "success",
+  "collector_job_result": "failure",
   "events": [
     {
-      "configured_sources": 5,
+      "configured_sources": 6,
       "event": "readiness",
       "importable_sources": 3,
       "preview": true
     },
     {
-      "candidates": 22,
-      "eligible": 22,
-      "event": "plan",
-      "excluded": 0,
-      "import_allowed": true,
-      "site": "gamcare"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "struggling-with-online-gambling-2"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "say-hello-to-our-online-peer-supporters"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "have-your-say-two-new-surveys-to-shape-our-chatroom-forum"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "want-to-do-something-read-this-130738"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "chatrooms-3"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "help-29"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "hello-everyone-5"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "cheese-chasers-1951-starring-mel-blanc"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "homeward-bound-the-incredible-journey-1993-starring-michael-j-fox"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "festive-support-3"
-    },
-    {
-      "event": "imported",
-      "replies": 4,
-      "site": "gamcare",
-      "source_id": "recovery-diaries-to-the-person-in-the-mirror",
-      "topic_id": "7780a085-d169-43f7-bc97-89590a013bcc"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "forum-language-changes-2"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "new-gamcare-volunteering-opportunity-online-peer-supporters"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "want-to-do-something-read-this-132213"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "charlys-life"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "welcome-to-the-recovery-diaries"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "dear-oh-dear-oh-dear-diary-number-53"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "day-one-of-what-i-hope-is-a-new-and-normal-life"
-    },
-    {
-      "event": "imported",
-      "replies": 1,
-      "site": "gamcare",
-      "source_id": "tommys-honour-2016-starring-jack-lowden",
-      "topic_id": "74956015-0694-42ba-a3a7-a850f21b064b"
-    },
-    {
-      "duplicates": 0,
-      "event": "site_summary",
-      "new_comments": 5,
-      "new_topics": 2,
-      "site": "gamcare",
-      "target": 2
-    },
-    {
-      "event": "source_not_enabled",
-      "reason": "source_not_enabled_or_parser_not_verified",
-      "site": "gamblingtherapy"
-    },
-    {
-      "candidates": 0,
+      "candidates": 2,
       "eligible": 0,
       "event": "plan",
-      "excluded": 0,
-      "import_allowed": true,
-      "site": "moneysavingexpert"
+      "excluded": 2,
+      "import_allowed": false,
+      "site": "psychforums"
+    },
+    {
+      "event": "parser_probe_failed",
+      "reason": "network_error_or_timeout",
+      "site": "psychforums",
+      "source_id": "224453"
+    },
+    {
+      "event": "parser_probe_failed",
+      "reason": "network_error_or_timeout",
+      "site": "psychforums",
+      "source_id": "224726"
     },
     {
       "duplicates": 0,
-      "event": "site_summary",
-      "new_comments": 0,
-      "new_topics": 0,
-      "site": "moneysavingexpert",
-      "target": 2
-    },
-    {
-      "candidates": 1,
-      "eligible": 1,
-      "event": "plan",
-      "excluded": 0,
-      "import_allowed": true,
-      "site": "v2ex"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "v2ex",
-      "source_id": "1018492"
-    },
-    {
-      "duplicates": 0,
-      "event": "site_summary",
-      "new_comments": 0,
-      "new_topics": 0,
-      "site": "v2ex",
-      "target": 2
-    },
-    {
-      "event": "source_not_enabled",
-      "reason": "source_not_enabled_or_parser_not_verified",
-      "site": "douban"
-    },
-    {
-      "duplicates": 0,
-      "errors": 0,
+      "errors": 2,
       "event": "run_summary",
-      "new_comments": 5,
-      "new_topics": 2,
+      "new_comments": 0,
+      "new_topics": 0,
       "ready_for_unattended_collect": true,
-      "rejected": 18
+      "rejected": 0
     }
   ],
   "has_run_summary": true,
   "production_database_writes": false,
   "report_type": "gambling_dev_collector_sanitized",
-  "run_id": 45025631325,
+  "run_id": 45030785249,
   "run_summary": {
     "duplicates": 0,
-    "errors": 0,
+    "errors": 2,
     "event": "run_summary",
-    "new_comments": 5,
-    "new_topics": 2,
+    "new_comments": 0,
+    "new_topics": 0,
     "ready_for_unattended_collect": true,
-    "rejected": 18
+    "rejected": 0
   },
-  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45025631325",
-  "trigger_commit": "ad26ec2d86e2b426af184d9b7681b981e1e42ce6"
+  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45030785249",
+  "trigger_commit": "a5705c775af2b4f2ab997ee1af0fab030dee02ec"
 }
