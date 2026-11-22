@@ -240,8 +240,11 @@ def discover_source(source, excluded, cap=60):
     # Curated public discussion URLs are a *discovery fallback*, never evidence
     # that a thread is parseable or already collected. Each goes through exactly
     # the same source-ID exclusions, full parser, privacy and readback checks.
-    # Only use this path for MSE because its own website search returns HTTP 403.
-    if source["id"] == "moneysavingexpert":
+    # MSE cannot use onsite search; V2EX has gambling-related debt titles
+    # that omit the literal word 'gambling' even when the original body
+    # documents an explicit recovery attempt. Only vetted URL candidates
+    # enter here, and the strict full-body filter still applies later.
+    if source["id"] in ("moneysavingexpert", "v2ex"):
         for url in source.get("seed_topics", [])[:80]:
             try:
                 identifier = source_id(source["id"], url)
