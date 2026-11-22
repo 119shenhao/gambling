@@ -207,6 +207,19 @@ def available(source):
 
 def discover_source(source, excluded, cap=60):
     found = {}
+    # Curated public discussion URLs are a *discovery fallback*, never evidence
+    # that a thread is parseable or already collected. Each goes through exactly
+    # the same source-ID exclusions, full parser, privacy and readback checks.
+    # Only use this path for MSE because its own website search returns HTTP 403.
+    if source["id"] == "moneysavingexpert":
+        for url in source.get("seed_topics", [])[:80]:
+            try:
+                identifier = source_id(source["id"], url)
+                if identifier not in excluded and identifier not in found:
+                    found[identifier] = url
+            except ValueError:
+                emit("invalid_seed_skipped", site=source["id"])
+        emit("source_seed_discovery", site=source["id"], candidates=len(found))
     for listing in source.get("listings", [])[:5]:
         try:
             candidates = discover(source["id"], listing, http(listing), excluded, cap)
