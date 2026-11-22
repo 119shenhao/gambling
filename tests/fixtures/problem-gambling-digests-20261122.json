@@ -1,0 +1,102 @@
+{
+  "description": "Independent editorial digests for an isolated technical pipeline test; not original Reddit content.",
+  "site": "reddit_digest",
+  "cases": [
+    {
+      "source_id": "1jf6n1r-digest-20261122",
+      "url": "https://www.reddit.com/r/problemgambling/comments/1jf6n1r/distraught_relapse_after_1000_days_clean/",
+      "original_title": "Distraught. Relapse after 1000 days clean.",
+      "topic": {
+        "title": "[QA DIGEST] Relapse after a long gambling-free period — linked discussion",
+        "body": "TECHNICAL QA DIGEST, NOT A FIRST-PERSON FORUM SUBMISSION. This short editorial summary is derived from themes discussed in a real public Reddit thread; the original post and replies are not copied here. Original discussion: https://www.reddit.com/r/problemgambling/comments/1jf6n1r/distraught_relapse_after_1000_days_clean/\n\nA participant described returning to gambling after roughly a thousand days away from betting. What began with small sports wagers intensified into repeated attempts to recover losses, affecting finances, sleep, and relationships. The original discussion includes questions about the trigger, the author's follow-up about betting escalation, and advice to seek support and reduce access to gambling. The reply entries below are clearly labeled editorial summaries for testing hierarchy, not words written by Reddit participants.",
+        "source_lang": "en",
+        "comments": [
+          {
+            "body": "[QA SUMMARY OF REAL REPLY] A reader asked what caused the first return to gambling after such a long break.",
+            "source_lang": "en",
+            "replies": [
+              {
+                "body": "[QA SUMMARY OF REAL NESTED REPLY] The original poster explained that confidence in sports knowledge led to increasingly frequent bets and eventually faster online gambling.",
+                "source_lang": "en",
+                "replies": []
+              }
+            ]
+          },
+          {
+            "body": "[QA SUMMARY OF REAL REPLY] Another participant encouraged seeking support through trusted people or a recovery group.",
+            "source_lang": "en",
+            "replies": [
+              {
+                "body": "[QA SUMMARY OF REAL NESTED REPLY] The poster acknowledged the support and discussed taking recovery steps again.",
+                "source_lang": "en",
+                "replies": []
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "source_id": "1tnqgq2-digest-20261122",
+      "url": "https://www.reddit.com/r/problemgambling/comments/1tnqgq2/whats_usually_happening_right_before_you_relapse/",
+      "original_title": "What’s usually happening right before you relapse?",
+      "topic": {
+        "title": "[QA DIGEST] What happens before a gambling relapse? — linked discussion",
+        "body": "TECHNICAL QA DIGEST, NOT A FIRST-PERSON FORUM SUBMISSION. This is an independently written overview of a real Reddit discussion, not a reproduction of any original post or comment. Original discussion: https://www.reddit.com/r/problemgambling/comments/1tnqgq2/whats_usually_happening_right_before_you_relapse/\n\nThe discussion asks people about circumstances just before a relapse. Participants discuss boredom, stress, isolation, comparing themselves with others, and rationalizing a small first bet. One detailed exchange examines how casually checking sports odds can evolve into fixation before any money is deposited. The nested replies below paraphrase the observed exchange structure for a QA hierarchy check; none is represented as the Reddit author's exact wording.",
+        "source_lang": "en",
+        "comments": [
+          {
+            "body": "[QA SUMMARY OF REAL REPLY] A participant identified quiet evenings and looking at sports odds as the beginning of an escalating mental fixation.",
+            "source_lang": "en",
+            "replies": [
+              {
+                "body": "[QA SUMMARY OF REAL NESTED REPLY] The original poster asked whether the dangerous moment began before the first actual wager.",
+                "source_lang": "en",
+                "replies": [
+                  {
+                    "body": "[QA SUMMARY OF REAL THIRD-LEVEL REPLY] The participant agreed that redefining the urge as simple curiosity could hide the risk of returning to gambling.",
+                    "source_lang": "en",
+                    "replies": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "body": "[QA SUMMARY OF REAL REPLY] Other participants described boredom or emotional stress as triggers, rather than seeking money alone.",
+            "source_lang": "en",
+            "replies": []
+          }
+        ]
+      }
+    },
+    {
+      "source_id": "1nigsl9-digest-20261122",
+      "url": "https://www.reddit.com/r/problemgambling/comments/1nigsl9",
+      "original_title": "6 months clean",
+      "topic": {
+        "title": "[QA DIGEST] Six months away from gambling — linked recovery discussion",
+        "body": "TECHNICAL QA DIGEST, NOT A FIRST-PERSON FORUM SUBMISSION. This short independent synopsis points to a real Reddit recovery milestone post; original wording and comments are not copied. Original discussion: https://www.reddit.com/r/problemgambling/comments/1nigsl9\n\nThe post reflects on a six-month gambling-free milestone and the importance of support from others. The discussion emphasizes long-term recovery, the quality of everyday life, and treating recovery as a continuing commitment. A reader offered congratulations, and the poster replied by describing a broader long-term goal. The entries below are editorial summaries of that response relationship for the QA test, not actual comments copied from Reddit.",
+        "source_lang": "en",
+        "comments": [
+          {
+            "body": "[QA SUMMARY OF REAL REPLY] A reader congratulated the writer on reaching six months away from gambling and expressed hope to achieve the same.",
+            "source_lang": "en",
+            "replies": [
+              {
+                "body": "[QA SUMMARY OF REAL NESTED REPLY] The original poster thanked the reader and described taking recovery day by day, aiming to spend more years in recovery than in active gambling.",
+                "source_lang": "en",
+                "replies": []
+              }
+            ]
+          },
+          {
+            "body": "[QA TECHNICAL NOTE — NOT A REDDIT REPLY] This clearly marked extra fixture response tests that an independent top-level item coexists with a nested branch.",
+            "source_lang": "en",
+            "replies": []
+          }
+        ]
+      }
+    }
+  ]
+}
