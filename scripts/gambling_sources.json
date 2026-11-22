@@ -51,6 +51,35 @@
         "https://forums.moneysavingexpert.com/discussion/6035505/gambling-debt"
       ],
       "parser_sample_replies": 500
+    },
+    {
+      "id": "v2ex",
+      "name": "V2EX — Chinese gambling recovery discussions",
+      "host": "www.v2ex.com",
+      "listings": [
+        "https://www.v2ex.com/tag/%E8%B5%8C%E5%8D%9A"
+      ],
+      "adapter": "gambling_forums",
+      "approved": false,
+      "parser_verified": false,
+      "reuse_allowed": false,
+      "permission_evidence": "",
+      "parser_sample": "https://www.v2ex.com/t/1121755",
+      "note": "Candidate only. 251 public replies across 3 pages; needs GitHub Runner parse/readback and applicable content reuse approval. Strict standalone parser and tests added on dev; do not collect automatically."
+    },
+    {
+      "id": "douban",
+      "name": "豆瓣 — 戒赌小分队",
+      "host": "www.douban.com",
+      "listings": [
+        "https://www.douban.com/group/586083/"
+      ],
+      "adapter": "gambling_forums",
+      "approved": false,
+      "parser_verified": false,
+      "reuse_allowed": false,
+      "permission_evidence": "",
+      "note": "Candidate only. Public access may require human login; probe only. No bypass and no importer until exact full thread structure and permission verified."
     }
   ]
 }
