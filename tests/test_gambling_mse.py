@@ -29,8 +29,8 @@ def sample(page=1, total_pages=3, last_count=4):
     )
     return (f'<html><head><link rel="canonical" href="{url}"></head><body>'
             f'<h1>Gambling recovery diary</h1>{first}'
-            f'<div class="NumberedPager"><a href="{BASE}/p2">2</a>'
-            f'<a href="{BASE}/p{total_pages}">Last</a></div>'
+            (f'<div class="NumberedPager"><a href="{BASE}/p2">2</a>'
+             f'<a href="{BASE}/p{total_pages}">Last</a></div>' if total_pages > 1 else '')
             f'<ul class="MessageList DataList Comments">{comments}</ul></body></html>')
 
 
