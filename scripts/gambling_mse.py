@@ -1,7 +1,7 @@
 """Strict MoneySavingExpert Vanilla forum parser; public HTML only.
 
-Read-only until this site's independent republishing permission is confirmed.
-The returned payload retains only public post text; never writes to a database.
+May be used only after source permission and parser verification gates pass.
+The returned payload retains public text and media references; no media is downloaded.
 """
 import re
 from urllib.parse import urljoin, urlsplit
@@ -60,8 +60,33 @@ def _text(node):
     clone = BeautifulSoup(str(node), "html.parser")
     for skipped in clone.select(EXCLUDED + ", script, style, noscript, button, svg"):
         skipped.decompose()
-    if clone.select_one("img, video, iframe, audio, .attachment, [data-attachment]"):
-        raise ValueError("uncollected_media")
+    # Vanilla renders emojis as images and user-embedded screenshots on its CDN.
+    # Preserve the emoji's alt text and the full https image URL rather than
+    # dropping the reply or silently discarding content. No media is downloaded.
+    for media in clone.select("img, video, iframe, audio, .attachment, [data-attachment]"):
+        if media.parent is None:
+            continue  # an enclosing media wrapper has already been replaced
+        kind = media.name
+        is_emoji = kind == "img" and "emoji" in media.get("class", [])
+        alt = (media.get("alt") or "").strip()
+        caption = (media.get("title") or "").strip()
+        if is_emoji and alt:
+            representation = alt[:80]
+        else:
+            uri = (media.get("src") or media.get("data-src") or
+                   media.get("href") or
+                   (media.find("a", href=True) or {}).get("href") or "")
+            absolute = urlsplit(urljoin("https://" + HOST + "/", uri))
+            if not uri or absolute.scheme != "https" or not absolute.hostname or absolute.username or absolute.password:
+                raise ValueError("unsupported_media_url")
+            url = absolute.geturl()
+            if len(url) > 1500:
+                raise ValueError("media_url_too_long")
+            label = {"img": "Image", "video": "Video", "audio": "Audio",
+                     "iframe": "Embedded content"}.get(kind, "Attachment")
+            description = (alt or caption)[:100]
+            representation = f"[{label}{': ' + description if description else ''}: {url}]"
+        media.replace_with(NavigableString(" " + representation + " "))
     parts = []
     def visit(n):
         if isinstance(n, NavigableString):
