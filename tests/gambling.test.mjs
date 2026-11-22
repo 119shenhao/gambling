@@ -266,3 +266,14 @@ test('approved mobile casino-felt theme keeps reading preferences and four prima
  assert.match(css,/\.feed-heading::after/);
  assert.match(app,/function readingSettingsCard\(/);
 });
+
+test('compose action is visually distinct without affecting the other mobile tabs',()=>{
+ const css=read('public/styles.css'),js=read('public/app.js');
+ assert.match(css,/Final approved 2026-11-22: understated compose button only/);
+ assert.match(css,/\.sidebar \.primary-nav \.nav-compose \{/);
+ assert.match(css,/background:linear-gradient\(160deg,#12392b 0%,#082b20 100%\)/);
+ assert.match(css,/border:2px solid #d3b06b/);
+ assert.match(css,/font-weight:750/);
+ assert.match(css,/\.sidebar \.primary-nav \.nav-compose::before \{display:none;\}/);
+ assert.match(js,/data-action="compose"/);
+});
