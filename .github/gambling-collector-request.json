@@ -1,5 +1,5 @@
 {
-  "request_id": "gambling_20261122_collect_two_per_gamcare_board",
+  "request_id": "gambling_20261122_verify_gamcare_board_quota_with_older_pages",
   "mode": "collect",
   "sites": [
     "all"

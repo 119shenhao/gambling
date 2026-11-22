@@ -24,7 +24,7 @@ SAFE_EVENTS = {
 SAFE_TEXT = {"site", "board", "source_id", "topic_id", "event"}
 SAFE_NUM = {"importable_sources", "configured_sources", "candidates", "excluded",
             "eligible", "replies", "new_topics", "new_comments", "duplicates",
-            "rejected", "errors", "target", "pages", "source_total", "captured",
+            "rejected", "errors", "target", "page", "pages", "source_total", "captured",
             "stored", "public", "pending_review", "limit"}
 SAFE_BOOL = {"preview", "capped", "import_allowed", "ready_for_unattended_collect"}
 REASON_CODES = ("http_403", "http_404", "http_429", "network_error_or_timeout",

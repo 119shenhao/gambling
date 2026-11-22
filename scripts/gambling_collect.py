@@ -10,7 +10,7 @@ import re
 import sys
 import time
 from collections import Counter
-from itertools import zip_longest
+from itertools import chain, zip_longest
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode, urlsplit
@@ -482,7 +482,26 @@ def collect_one(site, source, identifier, url, export_dir):
 
 
 
-def collect_candidates(site, source, eligible, limit, export_dir, listings=()):
+
+def older_board_candidates(site, listings, boards, limit, seen):
+    for page in (2, 3):
+        for listing in listings:
+            path = urlsplit(listing).path.rstrip("/")
+            if boards[path]["new_topics"] >= limit:
+                continue
+            board = path.rsplit("/", 1)[-1]
+            page_url = f"{listing.rstrip('/')}/paged/{page}/"
+            try:
+                found = discover(site, page_url, fetch_source(page_url), seen)
+            except ValueError as error:
+                emit("listing_unavailable", site=site, board=board, page=page, reason=str(error))
+                continue
+            emit("listing_checked", site=site, board=board, page=page, candidates=len(found))
+            seen.update(found)
+            yield from found.items()
+
+
+def collect_candidates(site, source, eligible, limit, export_dir, listings=(), excluded=()):
     # The site's original IDs still deduplicate topics across boards. Only the
     # successful import count is scoped to each configured automatic listing.
     boards = {urlsplit(url).path.rstrip("/"): Counter() for url in listings}
@@ -490,7 +509,8 @@ def collect_candidates(site, source, eligible, limit, export_dir, listings=()):
         boards[""] = Counter()
     total = Counter()
     target = limit * len(boards)
-    for identifier, url in eligible.items():
+    older = older_board_candidates(site, listings, boards, limit, {*excluded, *eligible}) if listings else ()
+    for identifier, url in chain(eligible.items(), older):
         if total["new_topics"] >= target:
             break
         board = urlsplit(url).path.rstrip("/").rpartition("/")[0] if listings else ""
@@ -595,7 +615,7 @@ def main():
                 emit("source_not_enabled", site=site, reason="reuse_or_parser_verification_required")
                 continue
             counts, target = collect_candidates(
-                site, source, eligible, req["limit"], args.export_dir, listings)
+                site, source, eligible, req["limit"], args.export_dir, listings, excluded)
             total_topics += counts["new_topics"]
             total_comments += counts["new_comments"]
             total_duplicates += counts["duplicates"]

@@ -74,6 +74,26 @@ class ParserTests(unittest.TestCase):
             counts, target = collect.collect_candidates("gamcare", {}, candidates, 2, None)
         self.assertEqual((target, counts["new_topics"], attempt.call_count), (2, 2, 2))
 
+    def test_gamcare_checks_older_pages_only_for_boards_below_quota(self):
+        root = "https://community.gamcare.org.uk/forum/"
+        family = root + "family-friends/"
+        introductions = root + "new-members-intros-forum/"
+        existing = {"family-one": family + "family-one/", "family-two": family + "family-two/"}
+        older_page = (
+            '<a href="/forum/new-members-intros-forum/already-collected/">Collected</a>'
+            '<a href="/forum/new-members-intros-forum/intro-one/">First intro</a>'
+            '<a href="/forum/new-members-intros-forum/intro-two/">Second intro</a>'
+            '<a href="/forum/family-friends/not-this-board/">Wrong board</a>'
+        )
+        with patch.object(collect, "fetch_source", return_value=older_page) as fetch, \
+                patch.object(collect, "collect_one", return_value=(1, 1, 0)) as attempt:
+            counts, target = collect.collect_candidates(
+                "gamcare", {}, existing, 2, None, (family, introductions), {"already-collected"})
+        fetch.assert_called_once_with(introductions + "paged/2/")
+        self.assertEqual((target, counts["new_topics"]), (4, 4))
+        self.assertEqual([call.args[2] for call in attempt.call_args_list],
+                         ["family-one", "family-two", "intro-one", "intro-two"])
+
     def test_psychforums_discovery_retries_one_timeout(self):
         listing = "https://www.psychforums.com/gambling-addiction-forum-f204/"
         source = {"id": "psychforums", "listings": [listing]}
