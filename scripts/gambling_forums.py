@@ -8,6 +8,8 @@ from urllib.parse import urljoin, urlsplit
 
 from bs4 import BeautifulSoup, NavigableString
 
+import gambling_story_sources as stories
+
 ORIGINS = {
     "gamcare": ("community.gamcare.org.uk", "/forum/"),
     "gamblingtherapy": ("gamblingtherapy.org", "/forum/topic/"),
@@ -30,6 +32,8 @@ CONTENT_SELECTOR = (
 
 def source_id(site, url):
     """Use the forum's canonical topic slug, never a generated random ID."""
+    if site in stories.ARTICLE_SOURCES:
+        return stories.source_id(site, url)
     if site == "psychforums":
         from gambling_psychforums import source_id as psychforums_source_id
         return psychforums_source_id(url)
@@ -58,6 +62,8 @@ def source_id(site, url):
 
 def discover(site, listing_url, html, excluded=(), maximum=60):
     """Return stable ID->canonical URL pairs without loading full thread bodies."""
+    if site in stories.ARTICLE_SOURCES:
+        return stories.discover(site, listing_url, html, excluded, maximum)
     if site == "psychforums":
         from gambling_psychforums import discover as psychforums_discover
         return psychforums_discover(listing_url, html, excluded, maximum)
@@ -143,6 +149,8 @@ def parse_topic(site, expected_id, page_url, html):
     The forum displays chronological flat replies. Mentions/quotes are *not*
     evidence of a parent reply; never invent a nested relationship.
     """
+    if site in stories.ARTICLE_SOURCES:
+        return stories.parse_story(site, expected_id, page_url, html)
     if source_id(site, page_url) != expected_id:
         raise ValueError("source_id_mismatch")
     page = BeautifulSoup(html, "html.parser")
