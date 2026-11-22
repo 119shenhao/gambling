@@ -229,8 +229,8 @@ test('sync candidate rows preserve language proof and idempotent Anonymous autho
  assert.match(fp,/^[a-f0-9]{64}$/);
  assert.deepEqual(resolveSyncLanguage({status:'published',source_lang:'en',source_lang_mode:'manual',content_version:1}),
    {label:'en',mode:'manual',method:null,score:null});
- assert.equal(resolveSyncLanguage({status:'published',source_lang:'en',source_lang_mode:'auto',
-   content_version:2,verified_version:1,verified_method:'tinyld-heavy',verified_language:'en'}).label,'und');
+ assert.throws(()=>resolveSyncLanguage({id:'stale',status:'published',source_lang:'en',source_lang_mode:'auto',
+   content_version:2,verified_version:1,verified_method:'tinyld-heavy',verified_language:'en'}),/source_language_proof_missing_or_stale/);
  const nested=sortComments([
    {id:'child',parent_comment_id:'parent',status:'published',kind:'regular'},
    {id:'parent',parent_comment_id:null,status:'published',kind:'regular'},
@@ -332,5 +332,6 @@ test('long-thread importer persists language evidence before production sync',()
  assert.match(source,/SELECT 'comment',id,content_version,source_lang,'tinyld-heavy',NULL FROM comments/);
  assert.equal((source.match(/source_lang_mode='auto' AND source_lang<>'und'/g)||[]).length,2);
  assert.match(sync,/verifiedMethods\.has\(row\.verified_method\)/);
- assert.match(sync,/return \{label:'und',mode:'legacy',method:null,score:null\}/);
+ assert.match(sync,/source_language_proof_missing_or_stale/);
+ assert.match(sync,/source_language_proof_conflict/);
 });
