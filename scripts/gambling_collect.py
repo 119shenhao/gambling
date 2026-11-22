@@ -17,6 +17,7 @@ from urllib.parse import urlencode, urlsplit
 from urllib.request import Request, urlopen
 
 from gambling_forums import discover, parse_topic, parse_topic_pages, source_id
+from gambling_story_sources import ARTICLE_SOURCES
 
 PREVIEW = "https://dev-gambling-community.119shenhao.workers.dev"
 SITE_RE = re.compile(r"^[a-z0-9][a-z0-9_-]{1,31}$")
@@ -107,7 +108,7 @@ def flatten(comments, depth=1):
     return out
 
 
-def validate(draft):
+def validate(draft, *, allow_no_replies=False):
     if not isinstance(draft, dict) or set(draft) - {"title", "body", "source_lang", "comments"}:
         raise ValueError("invalid_topic_fields")
     if not all(isinstance(draft.get(k), str) and draft[k].strip()
@@ -116,7 +117,7 @@ def validate(draft):
     if len(draft["title"]) > 200 or len(draft["body"]) > 30_000:
         raise ValueError("topic_length_exceeded")
     replies = flatten(draft.get("comments", []))
-    if not 1 <= len(replies) <= 500:
+    if len(replies) > 500 or (not replies and not allow_no_replies):
         raise ValueError("reply_count_invalid")
     serialized = json.dumps({"site": "placeholder", "source_id": "placeholder",
                              "lease_token": "x" * 90, "topic": draft},
@@ -258,7 +259,7 @@ def discover_source(source, excluded, cap=60):
     # that omit the literal word 'gambling' even when the original body
     # documents an explicit recovery attempt. Only vetted URL candidates
     # enter here, and the strict full-body filter still applies later.
-    if source["id"] in ("moneysavingexpert", "v2ex"):
+    if source["id"] in ("moneysavingexpert", "v2ex") or source["id"] in ARTICLE_SOURCES:
         for url in source.get("seed_topics", [])[:80]:
             try:
                 identifier = source_id(source["id"], url)
@@ -294,7 +295,7 @@ def discover_source(source, excluded, cap=60):
                     found.setdefault(identifier, url)
                     if len(found) >= cap:
                         return found
-    if source["id"] in ("gamcare", "psychforums") and not listing_available and listing_error:
+    if (source["id"] in ("gamcare", "psychforums") or source["id"] in ARTICLE_SOURCES) and not listing_available and not found and listing_error:
         raise listing_error
     return dict(list(found.items())[:cap])
 
@@ -424,13 +425,15 @@ def collect_one(site, source, identifier, url, export_dir):
             metadata = {"source_total": len(flatten(draft.get("comments", []))),
                         "capped": False, "pages": 1}
         try:
-            n = validate(draft)
+            n = validate(draft, allow_no_replies=site in ARTICLE_SOURCES)
         except ValueError as error:
             raise RejectedCandidate(str(error)) from None
-        submitted = True
         whole_bytes = len(json.dumps({**payload, "topic": draft},
                         ensure_ascii=False).encode())
         long_mode = n > 49 or whole_bytes > MAX_BYTES or metadata["pages"] > 1
+        if long_mode and n == 0:
+            raise RejectedCandidate("standalone_article_payload_too_large")
+        submitted = True
         if long_mode:
             receipt = complete_staged(site, identifier, token, draft,
                                       metadata["source_total"], n)
@@ -535,7 +538,7 @@ def main():
                             draft = parse_topic(site, identifier, url, fetch_source(url))
                             meta = {"source_total": len(flatten(draft.get("comments", []))),
                                     "capped": False, "pages": 1}
-                        count = validate(draft)
+                        count = validate(draft, allow_no_replies=site in ARTICLE_SOURCES)
                         emit("parser_probe_pagination", site=site, source_id=identifier,
                              pages=meta["pages"], source_total=meta["source_total"],
                              captured=count, capped=meta["capped"])
