@@ -184,6 +184,11 @@ test('collector HTTP surfaces remain isolated to Gambling Preview and preserve p
  assert.match(index,/await importRoute\(req,env,path\)/);
  assert.match(index,/await collectRoute\(req,env,path\)/);
  assert.match(read('scripts/preview-migrate.mjs'),/migrations\/preview-only\/0001_collector_queue[.]sql/);
+ assert.match(read('scripts/preview-migrate.mjs'),/migrations\/preview-only\/0002_collector_long[.]sql/);
+ assert.match(read('migrations/preview-only/0002_collector_long.sql'),/ordinal BETWEEN 0 AND 499/);
+ assert.match(read('src/collect-long.ts'),/MAX_REPLIES=500/);
+ assert.match(read('src/collect.ts'),/collectLongRoute/);
+ assert.match(read('src/index.ts'),/collect\/long\/finish/);
  assert.match(read('migrations/preview-only/0001_collector_queue.sql'),/CREATE TABLE IF NOT EXISTS collector_candidates/);
 });
 
