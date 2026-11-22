@@ -238,3 +238,16 @@ CI 额外校验 UI 纹理、骰子、暖色阅读主题，并断言生产 `IDENT
 - 正式站在线检查 [#45027269679](https://github.com/119shenhao/gambling/actions/runs/45027269679) **success**：正式 Worker `GET /api/health` 返回版本 `0.5.1-language-proof-atomic.20261122`、数据库 ready，正式 `GET /api/topics/5aae46c6-56d8-468d-8d24-76bc689f09d2` 返回原文 `zh-CN`；SSO 和 Azure 设置检查正常。相应可复查报告 `docs/GAMBLING_PROD_LANGUAGE_LIVE_LATEST.json`。
 - 剩余142条历史 `und` 已通过受保护只读检查 [#45026992693](https://github.com/119shenhao/identity-center/actions/runs/45026992693) 全量确认：DEV 原始 `source_lang` 也是 `und` 的回复142条，**不是同步把已识别的语言降级**；DEV 来源缺失、DEV已识别而验证缺失、生产内容不一致、生产验证冲突均为0。长度分布：≤8字符19、9–30字符58、>30字符65。由于没有经过可靠语言判定，严格保留这142条 `und`；不可一键设为中文或英文。若以后独立改善原文识别器，应在DEV逐条确认证据后走明确批准的历史元数据更新，不能在同步时猜测。
 - 受保护执行器 [`identity-center`](https://github.com/119shenhao/identity-center/blob/main/docs/GAMBLING_CONTENT_SYNC_EXECUTOR.md) 和 ChatGPT 每12小时自动同步任务均使用固定 SHA `09df153ce9fdc57b435adf92b2aceeea393f3678`，不新建 GitHub cron、不重复同步已有回执的帖子。
+
+
+## 2026-11-22 戒赌论坛原文语言同步问题最终结项（优先于本文件上方旧状态）
+
+**本节是最新真实执行结果；上文“固定旧 SHA”“生产未验收”“历史 und 尚未修复”等均为当时快照，不再代表现状。只涉及戒赌论坛，不涉及 spine-community。**
+
+- **根因已修复：** 长帖原文语言标记和内容版本对应的验证记录在 DEV 一并保存；正常采集、导入、回复和待审核内容也写入识别凭据。生产同步不调用语言识别器，只核对 DEV `source_lang`、`source_lang_mode`、内容版本和 `content_language_verifications`。不一致或缺失时明确失败，**不会悄悄把已识别出的 `zh-CN`、`en` 等降为 `und`**。
+- **受保护同步执行器已升级：** `119shenhao/identity-center/main/.github/workflows/gambling-content-sync-protected.yml` 和请求文件固定已核对的代码提交 `09df153ce9fdc57b435adf92b2aceeea393f3678`。ChatGPT 自动任务“戒赌论坛同步生产帖子”仍启用，**每 12 小时一次**，不新建 GitHub Actions schedule，不需要手动 Run。
+- **新版本实际同步完成：** [Identity Center Actions #45026829285](https://github.com/119shenhao/identity-center/actions/runs/45026829285) 日志显示 preflight `examined=2,new=2,comments=5`；正式 `new=2,existing=0,comments=5,marked=2`，后续 `examined=0`，恢复点及全部步骤通过；这两篇来自用户刚触发的 [DEV 采集 #45025631325](https://github.com/119shenhao/gambling/actions/runs/45025631325)。用户亲自检查开发/生产站，确认帖子和回复一致。
+- **真实生产部署已验收：** [Gambling production live #45027269679](https://github.com/119shenhao/gambling/actions/runs/45027269679) 为 success，真实 HTTP 返回生产 Worker 版本 `0.5.1-language-proof-atomic.20261122`，生产 D1 ready，V2EX `5aae46c6-56d8-468d-8d24-76bc689f09d2` 原文语言 `zh-CN`，同时检查 Google 统一登录跳转及 Azure 翻译配置。回执 `docs/GAMBLING_PROD_LANGUAGE_LIVE_LATEST.json`。注意这验证的是生产实际部署/接口，不是所有用户设备浏览器的无缓存渲染。
+- **历史错误已修正：** [生产元数据修复 #45024860737](https://github.com/119shenhao/identity-center/actions/runs/45024860737) 核实生产恢复点后，在 DEV 补齐并回读 863 条语言凭据，生产修复 6 篇主帖、857 条回复（总 863）并核验；不重导正文、作者、评论树、同步回执。
+- **剩余 142 条 `und` 已核实归因并安全结案：** [只读复查 #45026992693](https://github.com/119shenhao/identity-center/actions/runs/45026992693) 明确 `prod_und_topics=0`、`prod_und_comments=142`、`dev_source_still_und=142`，DEV 原文未识别，并非同步时丢失语言或验证记录；`dev_source_missing=0`、`dev_source_nonund_unverified=0`。其中正文长度 ≤8 字符19条、9～30字符58条、>30字符65条。没有可信的语言证据，按用户规则保留 `und`，不凭猜测统一改为英文或中文；未来如有可靠人工确认，可按单条人工审核流程处理，此不构成当前同步缺陷或未完成部署。
+- **本次任务结果：** 代码修复、受保护固定版本升级、实库历史修复、新版生产同步真实演练、生产线上部署检查均已闭环；自动同步保留原计划。不可将历史 142 条真实 `und` 重新描述成生产同步错误，亦不可绕过语言证据检查。
