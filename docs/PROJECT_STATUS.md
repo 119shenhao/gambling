@@ -256,3 +256,9 @@
 - 已确认合计 **7 篇主帖、39 条回复**真正导入 DEV 并回读核验（1+2+2+2 篇；7+4+7+21 回复），不包含历史 [QA DIGEST] 摘要测试数据。没有写生产库。
 - 旧 JS CI 在 GamCare 开启后仍假设所有来源 `approved=false`，导致 [#44993908750](https://github.com/119shenhao/gambling/actions/runs/44993908750) 失败；已修改为只允许已确认的 GamCare 标志为 true，其余来源必须继续 false。后续检查最新 CI 结果确认修复完成。
 - 独立 ChatGPT 每6小时采集任务与每12小时生产同步任务保持隔离；本轮没有触发生产同步，新的真实 DEV 帖子尚不能声称已发布正式站。
+
+### 2026-11-22 最终自动采集复测（覆盖本节上一版统计）
+- [恢复默认模式正式采集 #44994042299](https://github.com/119shenhao/gambling/actions/runs/44994042299) 已完成成功：GamCare 又新增 **2 篇真实主帖、10 条真实回复**（`i-have-joined-up` 3 条、`scared-2` 7 条），5 个缺失回复或涉及需保护信息的候选正常拒绝、`errors=0`、`duplicates=0`；Gambling Therapy 来源未启用，正式采集没有再发起访问其403的请求。
+- [该提交整体 CI #44994042376](https://github.com/119shenhao/gambling/actions/runs/44994042376) PASS，独立 Python 解析与编排单测 17/17 通过。上方已有7篇39回复是之前的真实里程碑，本次新增后 **累积9篇真实 GamCare 主帖、49条真实回帖**，不包括此前QA测试数据；9篇均经当轮回读或历史只读审计通过。
+- `.github/gambling-collector-request.json` 已恢复为常规 `mode=collect, sites=["all"], candidates={}, limit=2`。ChatGPT 每6小时戒赌论坛独立定时任务继续开启；不使用 Spine 的定时器/脚本/密钥。此轮操作限定 DEV D1，不直接操作正式数据库或生产发布。生产同步属于另一个独立的既有定时任务。
+- 用户的 GamCare 完整帖子和回复再发布许可为用户对话内声明，`scripts/gambling_sources.json` 如实记录；没有将此声明扩展到其它站点，也没有将它说成独立审验的书面许可证。系统导入账户为 Anonymous，`collect_sources` 保留来源站点与原始稳定 ID。
