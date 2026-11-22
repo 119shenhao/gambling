@@ -10,9 +10,11 @@
       ],
       "adapter": "gambling_forums",
       "approved": false,
-      "parser_verified": false,
+      "parser_verified": true,
       "reuse_allowed": false,
-      "permission_evidence": ""
+      "permission_evidence": "",
+      "parser_sample": "https://community.gamcare.org.uk/forum/new-members-intros-forum/i-need-to-stop-before-i-loose-everything/",
+      "parser_sample_replies": 7
     },
     {
       "id": "gamblingtherapy",
