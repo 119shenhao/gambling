@@ -133,7 +133,7 @@ export async function collectLongRoute(req:Request,env:Env,path:string):Promise<
  }
  if(existing.received!==existing.target_count)fail(409,'long_incomplete_batch');
  const stat=await one(db,'SELECT COUNT(*) count, MIN(ordinal) first,MAX(ordinal) last FROM collector_long_replies WHERE site=? AND source_id=?',site,sourceId);
- if(stat?.count!==existing.target_count||stat.first!==0||stat.last!==existing.target_count-1)fail(409,'long_stage_gap');
+ if(!stat||stat.count!==existing.target_count||stat.first!==0||stat.last!==existing.target_count-1)fail(409,'long_stage_gap');
  // Each insert into public tables below is a single atomic D1 batch, including
  // its source completion receipt; an error rolls everything back.
  await db.batch([
