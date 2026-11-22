@@ -256,16 +256,19 @@ test('approved mobile casino-felt theme keeps reading preferences and four prima
  assert.match(css,/--frame:\s*#c7a765/);
  assert.match(css,/grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
  assert.match(css,/\[data-reading-theme="warm"\] \.topic-card/);
- assert.match(html,/<img src="\/dynamic-dice-option3\.svg" alt="" width="31" height="31"/);
- const dice=read('public/dynamic-dice-option3.svg');
- assert.match(dice,/viewBox="0 0 80 80"/);
- assert.match(dice,/Exact artwork cut from the user's approved 3rd dice-icon concept/);
+ assert.match(html,/<img src="\/dynamic-dice-option3-complete\.svg" alt="" width="31" height="31"/);
+ const dice=read('public/dynamic-dice-option3-complete.svg');
+ assert.match(dice,/viewBox="0 0 128 128"/);
+ assert.match(dice,/transparent safety margin and a continuous gold rim/);
  const embedded=dice.match(/data:image\/png;base64,([^"]+)/)?.[1];
  assert.ok(embedded,'approved original artwork must be embedded');
  const png=Buffer.from(embedded,'base64');
  assert.equal(png.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
- assert.equal(png.readUInt32BE(16),80);
- assert.equal(png.readUInt32BE(20),80);
+ assert.equal(png.readUInt32BE(16),128);
+ assert.equal(png.readUInt32BE(20),128);
+ // A byte-for-byte checksum guards against reintroducing the earlier cropped rim.
+ const crypto=await import('node:crypto');
+ assert.equal(crypto.createHash('sha256').update(png).digest('hex'),'1984f8b12032bd157c5e48f420130afbaada50511614ca4cf81f32515d5574c3');
  assert.doesNotMatch(html,/M16 3C12 9 5 12/);
  assert.match(app,/class="primary-nav"/);
  assert.match(app,/class="nav-link nav-compose"/);
@@ -290,12 +293,12 @@ test('compose action is visually distinct without affecting the other mobile tab
 
 test('approved dynamic die logo preserves a compact brand frame and all navigation',()=>{
  const css=read('public/styles.css'),html=read('public/index.html');
- const svg=read('public/dynamic-dice-option3.svg');
+ const svg=read('public/dynamic-dice-option3-complete.svg');
  assert.match(css,/\.brand-icon \{border:0; background:transparent; box-shadow:none;\}/);
  assert.match(css,/:root:not\(\[data-reading-theme="warm"\]\) \.brand-icon,/);
  assert.match(css,/:root\[data-reading-theme="warm"\] \.brand-icon \{border:0;/);
  assert.match(css,/\.brand-icon img \{display:block; width:100%; height:100%; object-fit:contain;/);
- assert.match(html,/<span class="brand-icon" aria-hidden="true"><img src="\/dynamic-dice-option3\.svg"/);
+ assert.match(html,/<span class="brand-icon" aria-hidden="true"><img src="\/dynamic-dice-option3-complete\.svg"/);
  assert.match(svg,/data:image\/png;base64,/);
  assert.doesNotMatch(svg,/<ellipse|<animate|<script/);
 });
