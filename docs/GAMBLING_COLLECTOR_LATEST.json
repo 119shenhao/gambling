@@ -1,5 +1,5 @@
 {
-  "collector_job_result": "success",
+  "collector_job_result": "failure",
   "events": [
     {
       "configured_sources": 6,
@@ -8,16 +8,18 @@
       "preview": true
     },
     {
-      "candidates": 0,
-      "eligible": 0,
-      "event": "plan",
-      "excluded": 0,
-      "import_allowed": false,
+      "event": "listing_unavailable",
+      "reason": "network_error_or_timeout",
+      "site": "psychforums"
+    },
+    {
+      "event": "site_error",
+      "reason": "network_error_or_timeout",
       "site": "psychforums"
     },
     {
       "duplicates": 0,
-      "errors": 0,
+      "errors": 1,
       "event": "run_summary",
       "new_comments": 0,
       "new_topics": 0,
@@ -28,16 +30,16 @@
   "has_run_summary": true,
   "production_database_writes": false,
   "report_type": "gambling_dev_collector_sanitized",
-  "run_id": 45031599497,
+  "run_id": 45031861301,
   "run_summary": {
     "duplicates": 0,
-    "errors": 0,
+    "errors": 1,
     "event": "run_summary",
     "new_comments": 0,
     "new_topics": 0,
     "ready_for_unattended_collect": true,
     "rejected": 0
   },
-  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45031599497",
-  "trigger_commit": "e019b36b1d9a1e1c46584b8fd805abebd9b72832"
+  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45031861301",
+  "trigger_commit": "d1e8395a95f2a05b5caf98b312f1fcd6b4951dae"
 }
