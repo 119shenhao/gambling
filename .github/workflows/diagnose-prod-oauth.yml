@@ -21,7 +21,7 @@ jobs:
             if(loc){try{const u=new URL(loc);target=u.origin+u.pathname;}catch{target='invalid-location';}}
             console.log(JSON.stringify({name,status:r.status,content_type:r.headers.get('content-type'),redirect_target:target,has_set_cookie:!!r.headers.get('set-cookie')}));
           };
-          for(let i=1;i<=3;i++){
+          for(let i=1;i<=1;i++){
             try{
               const first=await get('https://gambling.nbn369.com/api/auth/identity?return_to=%2F');
               safe('forum-authorize-'+i,first);
@@ -31,6 +31,8 @@ jobs:
               if(u.origin!=='https://idcenter.nbn369.com')throw Error('unexpected issuer origin');
               const second=await get(link);
               safe('center-handoff-'+i,second);
+              const neutral=new URL(link);neutral.searchParams.delete('provider_hint');neutral.searchParams.delete('prompt');
+              const neutralResp=await get(neutral);safe('center-chooser-'+i,neutralResp);
               if(second.status!==302){const ct=second.headers.get('content-type')||'';if(ct.includes('json')){try{const body=await second.json();console.log(JSON.stringify({name:'center-error-'+i,keys:Object.keys(body).slice(0,8),error:String(body.error||'').slice(0,90),code:String(body.code||'').slice(0,90)}));}catch{}}}
             }catch(e){console.log(JSON.stringify({attempt:i,error:e.name||'request_failed'}));}
           }
