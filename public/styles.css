@@ -343,3 +343,250 @@ dialog .dialog-close:hover {
     margin-top: 0;
   }
 }
+
+
+/* Mobile visual baseline approved 2026-11-22: restrained casino lounge.
+   Inspired by the selected screenshot; casino accents never compete with text.
+   No layout or behavior changes to the multilingual forum, login or actions. */
+:root {
+  --ink: #f5ecd8;
+  --muted: #dbcdb3;
+  --accent: #d9b46d;
+  --accent-hover: #f3d08b;
+  --on-accent: #25180c;
+  --gold-fill: linear-gradient(180deg,#f1d99d,#c9a263);
+  --selected: #24503c;
+  --border: #647353;
+  --frame: #b69a5c;
+  --paper: #103927;
+  --field: #0d3024;
+  --bg: #350714;
+  --topbar: #470b19;
+  --nav-surface: #410b18;
+  --nav-active: #184b36;
+  --nav-border: #7d5a38;
+  --radius: 16px;
+  --diamond-pattern: repeating-linear-gradient(55deg,#c2837108 0 1px,transparent 1px 39px),
+                     repeating-linear-gradient(-55deg,#c2837108 0 1px,transparent 1px 39px);
+}
+:root:not([data-reading-theme="warm"]) body {
+  background: radial-gradient(ellipse 95% 440px at 50% 8%,#5a1324 0%,transparent 90%),var(--diamond-pattern),var(--bg);
+}
+:root:not([data-reading-theme="warm"]) .topbar {
+  background: linear-gradient(180deg,#560b1e,#410713);
+  border-bottom: 1px solid var(--frame);
+  box-shadow: none;
+}
+:root:not([data-reading-theme="warm"]) .brand {color:#f6e6bc;}
+:root:not([data-reading-theme="warm"]) .brand-icon {
+  background:#3f0a17;
+  border:1.5px solid var(--accent);
+  color:#e9be67;
+  box-shadow:none;
+}
+:root:not([data-reading-theme="warm"]) .topic-card,
+:root:not([data-reading-theme="warm"]) .panel {
+  background:linear-gradient(145deg,#103b2b,#0b3023);
+  border:1px solid #ab9052;
+  box-shadow:0 3px 14px #10020838;
+}
+:root:not([data-reading-theme="warm"]) .topic-card:focus-within,
+:root:not([data-reading-theme="warm"]) .topic-card:hover {border-color:#e0bf7b;}
+:root:not([data-reading-theme="warm"]) .topic-card h3 a {color:#f5ead3;}
+:root:not([data-reading-theme="warm"]) .topic-card .summary {color:#e3d6bf;}
+:root:not([data-reading-theme="warm"]) .topic-card .avatar {
+  background:#766b3f;
+  border:1px solid #cdb476;
+  color:#fff3d3;
+}
+:root:not([data-reading-theme="warm"]) .topic-card .card-footer {
+  border-top:1px solid #8b7b55;
+}
+:root:not([data-reading-theme="warm"]) .topic-card .text-action {
+  color:#ecddb7;
+}
+:root:not([data-reading-theme="warm"]) .topic-card .text-action.active {color:#f9d28d;}
+:root:not([data-reading-theme="warm"]) .feed-heading select {
+  background:#4e0b1a;
+  color:#f4e9cf;
+  border:1px solid #b6985c;
+  border-radius:12px;
+}
+:root:not([data-reading-theme="warm"]) .sidebar .primary-nav {
+  border-color:#79543f;
+  background:#430c1a;
+}
+:root:not([data-reading-theme="warm"]) .sidebar .primary-nav .nav-link.active,
+:root:not([data-reading-theme="warm"]) .sidebar .primary-nav .nav-compose {
+  background:linear-gradient(160deg,#1b553d,#0c3d2c);
+  border:1px solid #be9f5b;
+  color:#f7edcd;
+  box-shadow:0 2px 8px #10040a24;
+}
+:root:not([data-reading-theme="warm"]) .sidebar .primary-nav .nav-link:not(.active):not(.nav-compose) {
+  color:#e9d9b7;
+}
+:root:not([data-reading-theme="warm"]) .sidebar .primary-nav .nav-link:not(.active):not(.nav-compose):hover {
+  color:#fff1cb;
+  background:#531624;
+}
+:root:not([data-reading-theme="warm"]) .sidebar .primary-nav .nav-compose:hover {
+  background:linear-gradient(160deg,#246b4c,#14503a);
+}
+
+/* The 390px reference screenshot is a mobile composition, not a desktop
+   redesign. Put the four original actions on one accessible fixed-width row. */
+@media (max-width:700px) {
+  :root:not([data-reading-theme="warm"]) .topbar {
+    position:relative;
+    z-index:20;
+  }
+  .header-inner {
+    padding:12px 14px;
+    gap:7px;
+  }
+  .brand {
+    font-family:Georgia,"Noto Serif CJK SC","Songti SC",serif;
+    font-size:19px;
+    font-weight:700;
+    gap:9px;
+    min-width:0;
+  }
+  .brand-icon {width:35px;height:35px;border-radius:9px;}
+  .brand-icon svg {width:25px;height:25px;}
+  .header-actions {gap:5px;min-width:0;}
+  .header-actions select {
+    max-width:100px;
+    width:auto;
+    min-width:68px;
+    padding:7px 2px;
+    background:transparent;
+    border-color:transparent;
+    font-size:12px;
+    color:var(--ink);
+  }
+  #account-actions .button {
+    min-height:38px;
+    border-radius:10px;
+    padding:6px 10px;
+    font-size:13px;
+  }
+  :root:not([data-reading-theme="warm"]) #account-actions .button {
+    background:linear-gradient(160deg,#1b553d,#0b3829);
+    border-color:#b89b5e;
+  }
+  .page-shell {padding:0 14px;margin-bottom:32px;}
+  .sidebar {padding:12px 0 20px;overflow:visible;}
+  .sidebar .primary-nav {
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    width:100%;
+    min-width:0;
+    gap:5px;
+    padding:6px;
+    border-radius:15px;
+  }
+  .sidebar .primary-nav .nav-link {
+    min-height:72px;
+    min-width:0;
+    width:100%;
+    border-radius:12px;
+    padding:10px 2px;
+    gap:6px;
+    font-size:12px;
+    line-height:1.3;
+    font-weight:550;
+    overflow-wrap:anywhere;
+  }
+  .sidebar .primary-nav .nav-link .icon,
+  .sidebar .primary-nav .nav-link .icon svg {width:23px;height:23px;}
+  .sidebar .nav-compose {margin:0;}
+  .feed-heading {
+    position:relative;
+    border:0;
+    margin:26px 0 16px;
+    padding:0;
+    min-height:44px;
+  }
+  .feed-heading::before {
+    content:"♠";
+    position:absolute;
+    top:-24px;
+    left:0;
+    right:0;
+    text-align:center;
+    font-size:14px;
+    color:var(--accent);
+    letter-spacing:1px;
+    opacity:.9;
+    pointer-events:none;
+  }
+  .feed-heading .feed-title {
+    font-family:Georgia,"Noto Serif CJK SC","Songti SC",serif;
+    font-weight:700;
+    font-size:24px;
+    color:var(--ink);
+  }
+  .feed-heading select {
+    min-height:38px;
+    max-width:132px;
+    font-size:13px;
+    padding:6px 9px;
+  }
+  .topic-card {
+    border-radius:17px;
+    padding:17px 18px 15px;
+    margin-bottom:14px;
+  }
+  .topic-meta {
+    gap:6px;
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.5;
+  }
+  .topic-meta .avatar {width:27px;height:27px;font-size:12px;}
+  .topic-card h3 {
+    font-size:var(--reading-title-size);
+    line-height:1.38;
+    letter-spacing:0;
+    font-weight:600;
+    margin:10px 0 12px;
+  }
+  .topic-card .summary {
+    line-height:1.75;
+    margin-bottom:12px;
+    overflow-wrap:break-word;
+  }
+  .topic-card .card-footer {
+    gap:10px 12px;
+    margin-top:15px;
+    padding-top:12px;
+    flex-wrap:wrap;
+  }
+  .topic-card .card-footer .text-action {
+    display:inline-flex;
+    align-items:center;
+    min-height:36px;
+    gap:4px;
+    font-size:12px;
+  }
+  .topic-card .card-footer .text-action .icon,
+  .topic-card .card-footer .text-action svg {width:18px;height:18px;}
+  #main > article.panel {border-radius:17px;padding:19px;}
+  .prose,.comment .prose {line-height:1.9;}
+  .article-title {line-height:1.4;}
+}
+@media (max-width:370px) {
+  .header-inner {grid-template-columns:minmax(0,1fr) auto;}
+  .brand {font-size:16px;}
+  .header-actions {grid-column:2;grid-row:1;justify-self:end;}
+  .header-actions select {max-width:80px;font-size:11px;}
+  #account-actions .button {padding:6px 8px;}
+  .preview-badge {grid-column:1/-1;grid-row:2;}
+  .sidebar .primary-nav .nav-link {font-size:11px;min-height:67px;}
+  .topic-card {padding:15px;}
+}
+
+/* The optional warm reading theme stays free of burgundy card overrides. */
+:root[data-reading-theme="warm"] .topic-card,
+:root[data-reading-theme="warm"] .panel {background:var(--paper);}
