@@ -104,5 +104,46 @@ class ParserTests(unittest.TestCase):
             self.assertTrue(collect.readback("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee", draft, 2))
 
 
+    def test_atomic_claim_complete_with_mock_preview_and_readback(self):
+        lease = "a" * 64
+        calls = []
+        def fake_api(path, body=None):
+            calls.append((path, body))
+            if path.endswith("/claim"):
+                return {"results": [{"result": "granted", "lease_token": lease}]}
+            if path.endswith("/complete"):
+                self.assertEqual(body["source_id"], "trying-to-stop")
+                self.assertEqual(body["lease_token"], lease)
+                self.assertEqual(len(body["topic"]["comments"]), 2)
+                return {"status": "completed", "topic_id":
+                        "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+                        "imported": {"topics": 1, "comments": 2}}
+            raise AssertionError("unexpected API path " + path)
+        with patch.object(collect, "api", side_effect=fake_api), \
+                patch.object(collect, "http", return_value=fixture().encode()), \
+                patch.object(collect, "readback", return_value=True) as verify:
+            self.assertEqual(collect.collect_one(
+                self.site, {}, "trying-to-stop", self.url, None), (1, 2, 0))
+            verify.assert_called_once()
+        self.assertEqual([p for p, _ in calls], [
+            "/api/collect/claim", "/api/collect/complete"])
+
+    def test_unverified_parsing_releases_claim_without_writing(self):
+        calls = []
+        def fake_api(path, body=None):
+            calls.append(path)
+            if path.endswith("/claim"):
+                return {"results": [{"result": "granted",
+                                     "lease_token": "b" * 64}]}
+            if path.endswith("/release"):
+                return {"status": "released"}
+            raise AssertionError("unexpected API path: " + path)
+        with patch.object(collect, "api", side_effect=fake_api), \
+                patch.object(collect, "http", return_value=b"<html>incomplete</html>"):
+            with self.assertRaisesRegex(ValueError, "title_missing"):
+                collect.collect_one(self.site, {}, "trying-to-stop", self.url, None)
+        self.assertEqual(calls, ["/api/collect/claim", "/api/collect/release"])
+
+
 if __name__ == "__main__":
     unittest.main()
