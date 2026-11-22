@@ -38,6 +38,23 @@ def fetch(url):
             payload = resp.read(2_000_001)
         if len(payload) > 2_000_000:
             raise ValueError("html_too_large")
+        # Diagnose media in every visited page, not only the first page.
+        doc = BeautifulSoup(payload, "html.parser")
+        detail = Counter()
+        for body in doc.select("li.ItemComment .Message, .ItemDiscussion .Message"):
+            clone = BeautifulSoup(str(body), "html.parser")
+            for skipped in clone.select("blockquote, .Quote, .Signature, .UserSignature, .User-Signature, .PostSignature"):
+                skipped.decompose()
+            for el in clone.select("img, video, iframe, audio, .attachment, [data-attachment]"):
+                detail[(el.name,tuple(sorted(el.get("class",[]))[:4]),
+                    urlsplit(el.get("src","")).hostname or "relative",
+                    bool(el.get("alt")),bool(el.get("title")))]+=1
+        if detail:
+            print(json.dumps({"event":"page_media","path":urlsplit(url).path,
+                "types":[{"tag":t,"classes":list(cls),"src_host":host,"has_alt":alt,
+                           "has_title":title,"count":count}
+                          for (t,cls,host,alt,title),count in detail.most_common(15)]},
+                sort_keys=True),flush=True)
         return payload
     except HTTPError as exc:
         raise ValueError("http_" + str(exc.code)) from None
