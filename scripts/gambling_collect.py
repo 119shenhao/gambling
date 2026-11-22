@@ -481,6 +481,40 @@ def collect_one(site, source, identifier, url, export_dir):
                 emit("release_failed", site=site, source_id=identifier)
 
 
+
+def collect_candidates(site, source, eligible, limit, export_dir, listings=()):
+    # The site's original IDs still deduplicate topics across boards. Only the
+    # successful import count is scoped to each configured automatic listing.
+    boards = {urlsplit(url).path.rstrip("/"): Counter() for url in listings}
+    if not boards:
+        boards[""] = Counter()
+    total = Counter()
+    target = limit * len(boards)
+    for identifier, url in eligible.items():
+        if total["new_topics"] >= target:
+            break
+        board = urlsplit(url).path.rstrip("/").rpartition("/")[0] if listings else ""
+        counts = boards[board]
+        if counts["new_topics"] >= limit:
+            continue
+        try:
+            n_topics, n_comments, n_dupes = collect_one(site, source, identifier, url, export_dir)
+            outcome = Counter(new_topics=n_topics, new_comments=n_comments, duplicates=n_dupes)
+        except RejectedCandidate:
+            outcome = Counter(rejected=1)
+        except ValueError:
+            outcome = Counter(errors=1)
+        counts.update(outcome)
+        total.update(outcome)
+    if listings:
+        for board, counts in boards.items():
+            emit("board_summary", site=site, board=board.rsplit("/", 1)[-1],
+                 new_topics=counts["new_topics"], new_comments=counts["new_comments"],
+                 duplicates=counts["duplicates"], rejected=counts["rejected"],
+                 errors=counts["errors"], target=limit)
+    return total, target
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("request", type=Path)
@@ -512,6 +546,8 @@ def main():
             explicit = req["candidates"].get(site, [])
             if not isinstance(explicit, list):
                 raise ValueError("invalid_candidate_list")
+            listings = (source.get("listings", [])[:5] if source.get("limit_per_listing") is True
+                        and req["mode"] == "collect" and not explicit and not args.export_dir else [])
             if explicit:
                 candidates = {}
                 for value in explicit:
@@ -525,7 +561,7 @@ def main():
                     else:
                         raise ValueError("candidate_requires_url_or_export")
             else:
-                candidates = discover_source(source, excluded)
+                candidates = discover_source(source, excluded, cap=60 * max(1, len(listings)))
             eligible = {identifier: url for identifier, url in candidates.items() if identifier not in excluded}
             emit("plan", site=site, candidates=len(candidates), excluded=len(candidates)-len(eligible),
                  eligible=len(eligible), import_allowed=available(source))
@@ -558,24 +594,16 @@ def main():
             if not available(source):
                 emit("source_not_enabled", site=site, reason="reuse_or_parser_verification_required")
                 continue
-            imported = comments = duplicates = 0
-            for identifier, url in eligible.items():
-                if imported >= req["limit"]:
-                    break
-                try:
-                    n_topics, n_comments, n_dupes = collect_one(site, source, identifier, url, args.export_dir)
-                    imported += n_topics
-                    comments += n_comments
-                    duplicates += n_dupes
-                except RejectedCandidate:
-                    rejected += 1
-                except ValueError:
-                    errors += 1
-            total_topics += imported
-            total_comments += comments
-            total_duplicates += duplicates
-            emit("site_summary", site=site, new_topics=imported,
-                 new_comments=comments, duplicates=duplicates, target=req["limit"])
+            counts, target = collect_candidates(
+                site, source, eligible, req["limit"], args.export_dir, listings)
+            total_topics += counts["new_topics"]
+            total_comments += counts["new_comments"]
+            total_duplicates += counts["duplicates"]
+            rejected += counts["rejected"]
+            errors += counts["errors"]
+            emit("site_summary", site=site, new_topics=counts["new_topics"],
+                 new_comments=counts["new_comments"], duplicates=counts["duplicates"],
+                 target=target)
         except (ValueError, KeyError, TypeError) as error:
             errors += 1
             emit("site_error", site=site, reason=str(error))

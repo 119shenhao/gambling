@@ -19,9 +19,9 @@ SAFE_EVENTS = {
     "run_summary", "completed_audit_ok", "readback_pending_review_verified",
     "candidate_rejected", "candidate_failed", "source_not_enabled",
     "site_error", "claim_skipped", "source_reply_cap",
-    "listing_checked", "listing_unavailable",
+    "listing_checked", "listing_unavailable", "board_summary",
 }
-SAFE_TEXT = {"site", "source_id", "topic_id", "event"}
+SAFE_TEXT = {"site", "board", "source_id", "topic_id", "event"}
 SAFE_NUM = {"importable_sources", "configured_sources", "candidates", "excluded",
             "eligible", "replies", "new_topics", "new_comments", "duplicates",
             "rejected", "errors", "target", "pages", "source_total", "captured",
@@ -52,7 +52,7 @@ def public_event(raw):
             continue
         pattern = (SITE_PATTERN if key == "site" else
                    TOPIC_PATTERN if key == "topic_id" else
-                   SOURCE_PATTERN if key == "source_id" else None)
+                   SOURCE_PATTERN if key in ("source_id", "board") else None)
         if pattern and pattern.fullmatch(value):
             event[key] = value
     for key in SAFE_NUM:

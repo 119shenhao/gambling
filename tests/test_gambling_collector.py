@@ -45,6 +45,35 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(request.call_count, 3)
         self.assertEqual(list(discovered), ["family-one", "debt", "diary"])
 
+    def test_gamcare_quota_is_two_successful_imports_per_board(self):
+        boards = ("family-friends", "overcoming-problem-gambling",
+                  "new-members-intros-forum", "recovery-diaries")
+        listings = [f"https://community.gamcare.org.uk/forum/{board}/" for board in boards]
+        candidates = {f"{board}-{n}": f"{listing}{board}-{n}/"
+                      for n in range(4) for board, listing in zip(boards, listings)}
+
+        def sample(_site, _source, identifier, _url, _export):
+            if identifier == "family-friends-0":
+                raise collect.RejectedCandidate("incomplete")
+            if identifier == "recovery-diaries-0":
+                return 0, 0, 1
+            return 1, 3, 0
+
+        with patch.object(collect, "collect_one", side_effect=sample) as attempt, \
+                patch.object(collect, "emit") as emit:
+            counts, target = collect.collect_candidates(
+                "gamcare", {}, candidates, 2, None, listings)
+        self.assertEqual((target, counts["new_topics"], counts["new_comments"]), (8, 8, 24))
+        self.assertEqual((counts["rejected"], counts["duplicates"], attempt.call_count), (1, 1, 10))
+        self.assertEqual(
+            {call.kwargs["board"]: call.kwargs["new_topics"] for call in emit.call_args_list},
+            dict.fromkeys(boards, 2),
+        )
+
+        with patch.object(collect, "collect_one", return_value=(1, 1, 0)) as attempt:
+            counts, target = collect.collect_candidates("gamcare", {}, candidates, 2, None)
+        self.assertEqual((target, counts["new_topics"], attempt.call_count), (2, 2, 2))
+
     def test_psychforums_discovery_retries_one_timeout(self):
         listing = "https://www.psychforums.com/gambling-addiction-forum-f204/"
         source = {"id": "psychforums", "listings": [listing]}

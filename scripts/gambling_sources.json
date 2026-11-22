@@ -2,6 +2,7 @@
   "sources": [
     {
       "id": "gamcare",
+      "limit_per_listing": true,
       "name": "GamCare Community Forum",
       "host": "community.gamcare.org.uk",
       "listings": [
