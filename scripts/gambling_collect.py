@@ -280,6 +280,16 @@ def main():
             emit("plan", site=site, candidates=len(candidates), excluded=len(candidates)-len(eligible),
                  eligible=len(eligible), import_allowed=available(source))
             if req["mode"] == "inspect":
+                for identifier, url in list(eligible.items())[:2]:
+                    try:
+                        draft = parse_topic(site, identifier, url, http(url))
+                        count = validate(draft)
+                        emit("parser_probe_ok", site=site, source_id=identifier,
+                             replies=count, source_url=url)
+                    except ValueError as error:
+                        emit("parser_probe_failed", site=site, source_id=identifier,
+                             reason=str(error), source_url=url)
+                    time.sleep(1)
                 continue
             if not available(source):
                 emit("source_not_enabled", site=site, reason="reuse_or_parser_verification_required")
