@@ -1,5 +1,5 @@
 {
-  "collector_job_result": "failure",
+  "collector_job_result": "success",
   "events": [
     {
       "configured_sources": 6,
@@ -8,18 +8,61 @@
       "preview": true
     },
     {
-      "event": "listing_unavailable",
-      "reason": "network_error_or_timeout",
-      "site": "psychforums"
+      "candidates": 3,
+      "eligible": 3,
+      "event": "plan",
+      "excluded": 0,
+      "import_allowed": true,
+      "site": "gamcare"
     },
     {
-      "event": "site_error",
-      "reason": "network_error_or_timeout",
-      "site": "psychforums"
+      "capped": false,
+      "captured": 3,
+      "event": "parser_probe_pagination",
+      "pages": 1,
+      "site": "gamcare",
+      "source_id": "husband-gambling-again-2",
+      "source_total": 3
+    },
+    {
+      "event": "parser_probe_ok",
+      "replies": 3,
+      "site": "gamcare",
+      "source_id": "husband-gambling-again-2"
+    },
+    {
+      "capped": false,
+      "captured": 9,
+      "event": "parser_probe_pagination",
+      "pages": 1,
+      "site": "gamcare",
+      "source_id": "how-do-i-survive-this",
+      "source_total": 9
+    },
+    {
+      "event": "parser_probe_ok",
+      "replies": 9,
+      "site": "gamcare",
+      "source_id": "how-do-i-survive-this"
+    },
+    {
+      "capped": false,
+      "captured": 9,
+      "event": "parser_probe_pagination",
+      "pages": 1,
+      "site": "gamcare",
+      "source_id": "lost-everything-4",
+      "source_total": 9
+    },
+    {
+      "event": "parser_probe_ok",
+      "replies": 9,
+      "site": "gamcare",
+      "source_id": "lost-everything-4"
     },
     {
       "duplicates": 0,
-      "errors": 1,
+      "errors": 0,
       "event": "run_summary",
       "new_comments": 0,
       "new_topics": 0,
@@ -30,16 +73,16 @@
   "has_run_summary": true,
   "production_database_writes": false,
   "report_type": "gambling_dev_collector_sanitized",
-  "run_id": 45031861301,
+  "run_id": 45033174072,
   "run_summary": {
     "duplicates": 0,
-    "errors": 1,
+    "errors": 0,
     "event": "run_summary",
     "new_comments": 0,
     "new_topics": 0,
     "ready_for_unattended_collect": true,
     "rejected": 0
   },
-  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45031861301",
-  "trigger_commit": "d1e8395a95f2a05b5caf98b312f1fcd6b4951dae"
+  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45033174072",
+  "trigger_commit": "73242e2759157f6c85411f658428b888c5c40b4a"
 }
