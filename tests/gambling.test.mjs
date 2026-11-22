@@ -208,8 +208,13 @@ test('safe production sync is offline by default and uses only gambling D1',()=>
  assert.ok(gamcare && gamcare.approved===true && gamcare.reuse_allowed===true &&
    gamcare.parser_verified===true && typeof gamcare.permission_evidence==='string' &&
    gamcare.permission_evidence.length>30);
- assert.ok(collectorSources.filter(s=>s.id!=='gamcare').every(s=>
-   s.approved===false && s.reuse_allowed===false));
+ // A newly authorized data source is allowed only when its evidence is
+ // recorded and the independent full parser verification gate is also true.
+ assert.ok(collectorSources.every(s=>
+   !(s.approved===true && s.reuse_allowed===true && s.parser_verified===true) ||
+   (typeof s.permission_evidence==='string' && s.permission_evidence.length>30)));
+ assert.ok(collectorSources.filter(s=>s.id==='gamblingtherapy').every(s=>
+   s.approved===false && s.reuse_allowed===false && s.parser_verified===false));
  assert.ok(collectorSources.every(s=>s.adapter==='gambling_forums'));
  assert.ok(!collectorSources.some(s=>s.id==='spine'));
   assert.ok(['inspect','collect'].includes(JSON.parse(read('.github/gambling-collector-request.json')).mode));
