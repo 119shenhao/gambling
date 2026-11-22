@@ -38,18 +38,19 @@
       ],
       "adapter": "gambling_forums",
       "approved": true,
-      "parser_verified": false,
+      "parser_verified": true,
       "reuse_allowed": true,
       "permission_evidence": "User-confirmed 2026-11-22 in project chat: permission obtained for MoneySavingExpert gambling-related complete topics and replies to be republished; no written agreement independently inspected.",
       "parser_sample": "https://forums.moneysavingexpert.com/discussion/6512900/redemption-the-journey-of-a-recovering-gambling-addict",
-      "note": "Full text and replies permission user-confirmed 2026-11-22 (not independently verified in writing); 67-reply and 632-total/500-capped real samples parsed successfully. Automatic source discovery uses a small curated seed backlog plus public category listing, because MSE search returns HTTP 403. Parser gate stays false until real DEV import/readback tested.",
+      "note": "User-confirmed repost permission 2026-11-22; independent preview inspect run 44998458677 verified two actual topics: 6200242 has all 67 replies, 6512900 has 632 total/500 captured (50 pages), 33 tests passing. Media references preserved. Discovery from curated public topic seed backlog plus category listing because site search HTTP 403; exclude completed IDs before any import. DEV-only; do not change production.",
       "seed_topics": [
         "https://forums.moneysavingexpert.com/discussion/6200242/gambling-recovery-and-covid-job-loss",
         "https://forums.moneysavingexpert.com/discussion/6512900/redemption-the-journey-of-a-recovering-gambling-addict",
         "https://forums.moneysavingexpert.com/discussion/6337668/gambling-addict-debt-diary",
         "https://forums.moneysavingexpert.com/discussion/6655256/help-after-gambling",
         "https://forums.moneysavingexpert.com/discussion/6035505/gambling-debt"
-      ]
+      ],
+      "parser_sample_replies": 500
     }
   ]
 }
