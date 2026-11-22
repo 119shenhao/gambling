@@ -126,6 +126,16 @@ class MSEParserTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "not_problem_gambling"):
             mse.parse_topic_pages("6512900", BASE, html, Mock())
 
+    def test_seed_backlog_survives_forbidden_forum_search_and_exclusions(self):
+        from unittest.mock import patch
+        source={"id":"moneysavingexpert", "listings":[
+                "https://forums.moneysavingexpert.com/categories/debt-free-diaries"],
+                "seed_topics":[BASE]}
+        with patch.object(collect,"http",return_value=b"<html></html>"), \
+             patch.object(collect.time,"sleep",return_value=None):
+            self.assertEqual(collect.discover_source(source,{}),{"6512900":BASE})
+            self.assertEqual(collect.discover_source(source,{"6512900":"completed"}),{})
+
     def test_unapproved_source_never_collectible(self):
         obj={"approved":False, "parser_verified":True,"reuse_allowed":True,
              "permission_evidence":"not granted"}
