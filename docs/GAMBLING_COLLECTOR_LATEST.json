@@ -1,0 +1,65 @@
+{
+  "collector_job_result": "success",
+  "events": [
+    {
+      "configured_sources": 5,
+      "event": "readiness",
+      "importable_sources": 3,
+      "preview": true
+    },
+    {
+      "candidates": 1,
+      "eligible": 0,
+      "event": "plan",
+      "excluded": 1,
+      "import_allowed": true,
+      "site": "v2ex"
+    },
+    {
+      "capped": false,
+      "captured": 251,
+      "event": "parser_probe_pagination",
+      "pages": 3,
+      "site": "v2ex",
+      "source_id": "1121755",
+      "source_total": 251
+    },
+    {
+      "event": "parser_probe_ok",
+      "replies": 251,
+      "site": "v2ex",
+      "source_id": "1121755"
+    },
+    {
+      "event": "completed_audit_ok",
+      "replies": 251,
+      "site": "v2ex",
+      "source_id": "1121755",
+      "topic_id": "5aae46c6-56d8-468d-8d24-76bc689f09d2"
+    },
+    {
+      "duplicates": 0,
+      "errors": 0,
+      "event": "run_summary",
+      "new_comments": 0,
+      "new_topics": 0,
+      "ready_for_unattended_collect": true,
+      "rejected": 0
+    }
+  ],
+  "has_run_summary": true,
+  "production_database_writes": false,
+  "report_type": "gambling_dev_collector_sanitized",
+  "run_id": 45003490694,
+  "run_summary": {
+    "duplicates": 0,
+    "errors": 0,
+    "event": "run_summary",
+    "new_comments": 0,
+    "new_topics": 0,
+    "ready_for_unattended_collect": true,
+    "rejected": 0
+  },
+  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45003490694",
+  "trigger_commit": "1a3270c24e7ca12d75a9a5da01603ce312564d3c"
+}
