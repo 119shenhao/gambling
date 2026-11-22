@@ -37,6 +37,13 @@ jobs:
               const h=await healthResp.json();
               if(!healthResp.ok||h.environment!=='production'||h.status!=='ok'||h.databaseReady!==true)
                 throw Error('production D1 or Worker not ready');
+              if(h.version!=='0.5.1-language-proof-atomic.20261122')
+                throw Error('production Worker has not deployed the atomic language-proof release');
+              const original=await get(origin+'/api/topics/5aae46c6-56d8-468d-8d24-76bc689f09d2');
+              if(!original.ok)throw Error('production original-language V2EX topic not available');
+              const originalData=await original.json();
+              if(originalData?.topic?.source_lang!=='zh-CN')
+                throw Error('V2EX original source language not zh-CN in production');
               const meResp=await get(origin+'/api/me');
               const me=await meResp.json();
               if(!meResp.ok||me.identityConfigured!==true||me.user!==null)
@@ -65,7 +72,7 @@ jobs:
               if(legacy.status!==410)throw Error('legacy Google OAuth is not disabled');
               const callback=await get(origin+'/api/auth/identity/callback');
               if(callback.status!==401)throw Error('unbound OAuth callback is not rejected');
-              console.log('PASS: Gambling PROD Worker+D1; isolated confidential SSO configured; Google chooser 302+302; PKCE, state, nonce, callback, cookie, legacy 410, unbound callback 401; Azure translation enabled.');
+              console.log('PASS: Gambling PROD Worker deployed 0.5.1 atomic language-proof release; live V2EX original zh-CN; D1 ready, Google chooser SSO and Azure translation configured.');
               passed=true;
               break;
             }catch(e){
