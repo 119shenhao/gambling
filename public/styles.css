@@ -632,3 +632,24 @@ dialog .dialog-close:hover {
 /* The optional warm reading theme stays free of burgundy card overrides. */
 :root[data-reading-theme="warm"] .topic-card,
 :root[data-reading-theme="warm"] .panel {background:var(--paper);}
+
+
+/* Final approved 2026-11-22: understated compose button only.
+   A deeper felt-green button, bolder label and slightly firmer gold outline.
+   No marquee, bright glow, decorative badge or changes to other navigation. */
+@media (max-width:700px) {
+  :root:not([data-reading-theme="warm"]) .sidebar .primary-nav .nav-compose {
+    background:linear-gradient(160deg,#12392b 0%,#082b20 100%);
+    border:2px solid #d3b06b;
+    border-radius:12px;
+    color:#f7eed5;
+    font-weight:750;
+    box-shadow:inset 0 1px 0 #f4dfa52e,0 2px 5px #0b090622;
+    text-shadow:none;
+  }
+  :root:not([data-reading-theme="warm"]) .sidebar .primary-nav .nav-compose:hover,
+  :root:not([data-reading-theme="warm"]) .sidebar .primary-nav .nav-compose:active {
+    background:linear-gradient(160deg,#164233 0%,#0a3226 100%);
+  }
+  .sidebar .primary-nav .nav-compose::before {display:none;}
+}
