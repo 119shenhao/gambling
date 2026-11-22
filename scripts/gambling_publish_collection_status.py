@@ -19,6 +19,7 @@ SAFE_EVENTS = {
     "run_summary", "completed_audit_ok", "readback_pending_review_verified",
     "candidate_rejected", "candidate_failed", "source_not_enabled",
     "site_error", "claim_skipped", "source_reply_cap",
+    "listing_checked", "listing_unavailable",
 }
 SAFE_TEXT = {"site", "source_id", "topic_id", "event"}
 SAFE_NUM = {"importable_sources", "configured_sources", "candidates", "excluded",
