@@ -67,6 +67,14 @@ def probe(site, role, url):
     print(json.dumps(record, sort_keys=True), flush=True)
 
 if __name__ == "__main__":
+    from pathlib import Path
+
+    request = json.loads(Path(".github/gambling-source-probe-request.json").read_text())
+    if request.get("mode") == "story_source_probe":
+        from gambling_story_probe import probe as probe_stories
+
+        probe_stories()
+        raise SystemExit(0)
     selected = TARGETS
     if os.environ.get("MSE_ONLY") == "1":
         selected = [item for item in TARGETS if item[0] == "moneysavingexpert"]
