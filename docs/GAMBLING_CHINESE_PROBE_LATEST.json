@@ -1,18 +1,20 @@
 {
   "developer_db_writes": false,
   "douban": {
-    "html_bytes": 61656,
-    "public_topic_links": 45,
-    "status": "ok"
+    "reason": "http_403",
+    "status": "unavailable"
   },
   "probe_job_result": "success",
   "report_type": "gambling_dev_chinese_sources_read_only_probe",
-  "run_id": 45002707666,
-  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45002707666",
+  "run_id": 45003064070,
+  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45003064070",
   "source_enabled_by_this_run": false,
-  "trigger_commit": "f147cbf5fbab985fee1cd22fd529905cb4d4ad29",
+  "trigger_commit": "b37efa00e831a8ea963381fbc6671c471b234c49",
   "v2ex": {
-    "reason": "v2ex_private_identifier",
-    "status": "parser_rejected"
+    "capped": false,
+    "captured": 251,
+    "pages": 3,
+    "source_total": 251,
+    "status": "parser_ok"
   }
 }
