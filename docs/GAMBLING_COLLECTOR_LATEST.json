@@ -8,58 +8,154 @@
       "preview": true
     },
     {
-      "candidates": 1,
+      "candidates": 24,
+      "eligible": 24,
+      "event": "plan",
+      "excluded": 0,
+      "import_allowed": true,
+      "site": "gamcare"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "struggling-with-online-gambling-2"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "say-hello-to-our-online-peer-supporters"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "have-your-say-two-new-surveys-to-shape-our-chatroom-forum"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "want-to-do-something-read-this-130738"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "chatrooms-3"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "help-29"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "hello-everyone-5"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "homeward-bound-the-incredible-journey-1993-starring-michael-j-fox"
+    },
+    {
+      "event": "imported",
+      "replies": 2,
+      "site": "gamcare",
+      "source_id": "its-a-wonderful-life-1946-starring-james-stewart",
+      "topic_id": "29ddbdf3-e1bf-49df-8520-e249072b48e1"
+    },
+    {
+      "event": "imported",
+      "replies": 8,
+      "site": "gamcare",
+      "source_id": "back-again-27",
+      "topic_id": "195a28c5-1948-4358-92bb-ce273060bc48"
+    },
+    {
+      "duplicates": 0,
+      "event": "site_summary",
+      "new_comments": 10,
+      "new_topics": 2,
+      "site": "gamcare",
+      "target": 2
+    },
+    {
+      "event": "source_not_enabled",
+      "reason": "source_not_enabled_or_parser_not_verified",
+      "site": "gamblingtherapy"
+    },
+    {
+      "candidates": 0,
       "eligible": 0,
       "event": "plan",
-      "excluded": 1,
+      "excluded": 0,
+      "import_allowed": true,
+      "site": "moneysavingexpert"
+    },
+    {
+      "duplicates": 0,
+      "event": "site_summary",
+      "new_comments": 0,
+      "new_topics": 0,
+      "site": "moneysavingexpert",
+      "target": 2
+    },
+    {
+      "candidates": 1,
+      "eligible": 1,
+      "event": "plan",
+      "excluded": 0,
       "import_allowed": true,
       "site": "v2ex"
     },
     {
-      "capped": false,
-      "captured": 251,
-      "event": "parser_probe_pagination",
-      "pages": 3,
+      "event": "candidate_rejected",
+      "reason": "other_error",
       "site": "v2ex",
-      "source_id": "1121755",
-      "source_total": 251
+      "source_id": "1018492"
     },
     {
-      "event": "parser_probe_ok",
-      "replies": 251,
+      "duplicates": 0,
+      "event": "site_summary",
+      "new_comments": 0,
+      "new_topics": 0,
       "site": "v2ex",
-      "source_id": "1121755"
+      "target": 2
     },
     {
-      "event": "completed_audit_ok",
-      "replies": 251,
-      "site": "v2ex",
-      "source_id": "1121755",
-      "topic_id": "5aae46c6-56d8-468d-8d24-76bc689f09d2"
+      "event": "source_not_enabled",
+      "reason": "source_not_enabled_or_parser_not_verified",
+      "site": "douban"
     },
     {
       "duplicates": 0,
       "errors": 0,
       "event": "run_summary",
-      "new_comments": 0,
-      "new_topics": 0,
+      "new_comments": 10,
+      "new_topics": 2,
       "ready_for_unattended_collect": true,
-      "rejected": 0
+      "rejected": 9
     }
   ],
   "has_run_summary": true,
   "production_database_writes": false,
   "report_type": "gambling_dev_collector_sanitized",
-  "run_id": 45003490694,
+  "run_id": 45003588964,
   "run_summary": {
     "duplicates": 0,
     "errors": 0,
     "event": "run_summary",
-    "new_comments": 0,
-    "new_topics": 0,
+    "new_comments": 10,
+    "new_topics": 2,
     "ready_for_unattended_collect": true,
-    "rejected": 0
+    "rejected": 9
   },
-  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45003490694",
-  "trigger_commit": "1a3270c24e7ca12d75a9a5da01603ce312564d3c"
+  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45003588964",
+  "trigger_commit": "2d0533f1e2b54e5b5f22f9e4fab11a6e09b36f01"
 }
