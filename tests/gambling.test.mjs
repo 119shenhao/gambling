@@ -321,3 +321,16 @@ test('casino lobby background uses the authentic solid diamond tile and vignette
  assert.match(css,/background-repeat: no-repeat, no-repeat, no-repeat, repeat;/);
  assert.doesNotMatch(css,/animation:\s*.*diamond/i);
 });
+
+test('long-thread importer persists language evidence before production sync',()=>{
+ const source=read('src/collect-long.ts');
+ const sync=read('scripts/sync-preview-to-production.mjs');
+ // Both the topic and every published, independently classified comment are
+ // verified atomically with the finished long-thread import. No source hint is
+ // promoted to a manual/verified original-language assertion.
+ assert.match(source,/SELECT 'topic',id,content_version,source_lang,'tinyld-heavy',NULL FROM topics/);
+ assert.match(source,/SELECT 'comment',id,content_version,source_lang,'tinyld-heavy',NULL FROM comments/);
+ assert.equal((source.match(/source_lang_mode='auto' AND source_lang<>'und'/g)||[]).length,2);
+ assert.match(sync,/verifiedMethods\.has\(row\.verified_method\)/);
+ assert.match(sync,/return \{label:'und',mode:'legacy',method:null,score:null\}/);
+});
