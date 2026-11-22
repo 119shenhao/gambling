@@ -356,3 +356,19 @@ test('Gambling DEV-only language proof repair uses the production collector dete
  const syntax=spawnSync(process.execPath,['--check','scripts/repair-preview-language-proofs.mjs'],{encoding:'utf8'});
  assert.equal(syntax.status,0,syntax.stderr);
 });
+
+test('DEV language recognition and evidence are atomic even before moderation approval',()=>{
+ const state=read('src/language-state.ts');
+ const normal=read('src/collect.ts');
+ const direct=read('src/import.ts');
+ const long=read('src/collect-long.ts');
+ const authored=read('src/content.ts');
+ assert.match(state,/WHERE id=\? AND content_version=\? AND status<>'deleted'/);
+ assert.match(normal,/source_lang_mode==='auto'\)writes\.push\(verificationWrite/);
+ assert.match(normal,/c\.source_lang_mode==='auto'\)writes\.push\(verificationWrite/);
+ assert.match(direct,/language\.mode==='auto'\)writes\.push\(verificationWrite/);
+ assert.match(long,/status<>'deleted' AND source_lang_mode='auto'/);
+ assert.match(authored,/language\.mode==='auto'&&language\.label!=='und'/);
+ assert.doesNotMatch(normal,/source_lang_mode==='auto'&&status==='published'/);
+ assert.doesNotMatch(direct,/language\.mode==='auto'&&status==='published'/);
+});
