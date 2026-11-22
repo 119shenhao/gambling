@@ -10,9 +10,7 @@ for(const args of [['node_modules/typescript/bin/tsc','--noEmit'],['--test','tes
 // The optional remote migration script is gated by WORKERS_CI and the exact dev branch.
 const remote=spawnSync(process.execPath,['scripts/preview-migrate.mjs'],{stdio:'inherit'});
 if(remote.status!==0)throw Error('Isolated Preview D1 preparation failed');
-// Guarded one-time PROD Azure D1 activation. In non-main builds this skips.
-const prodTranslation=spawnSync(process.execPath,['scripts/enable-prod-translation-once.mjs'],{stdio:'inherit'});
-if(prodTranslation.status!==0)throw Error('Production translation activation failed; refusing deployment');
+// PROD Azure one-time activation verified; ordinary builds never reapply D1 quotas.
 // One-time Gambling PROD OAuth bootstrap request completed; ordinary builds never create or rotate Secrets.
 
 // Verified DEV Owner role bootstrap completed. No D1 grants during ordinary builds.
