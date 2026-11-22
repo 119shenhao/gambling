@@ -1,6 +1,6 @@
 {
-  "request_id": "inspect-paged-readback-20261122-1430",
-  "mode": "inspect",
+  "request_id": "gamcare-first-full-import-20261122-14341",
+  "mode": "collect",
   "sites": [
     "gamcare"
   ],
@@ -9,5 +9,5 @@
       "https://community.gamcare.org.uk/forum/new-members-intros-forum/i-need-to-stop-before-i-loose-everything/"
     ]
   },
-  "limit": 2
+  "limit": 1
 }
