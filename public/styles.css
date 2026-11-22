@@ -561,7 +561,7 @@ dialog .dialog-close:hover {
     left:0;
     right:0;
     height:1px;
-    background:linear-gradient(90deg,transparent,#b58b54 22%,#cfa762 45%,#cfa762 55%,#b58b54 78%,transparent);
+    background:linear-gradient(90deg,transparent,#b58b54 22%,#cfa762 calc(50% - 21px),transparent calc(50% - 21px),transparent calc(50% + 21px),#cfa762 calc(50% + 21px),#b58b54 78%,transparent);
     pointer-events:none;
   }
   .feed-heading::after {
@@ -570,7 +570,7 @@ dialog .dialog-close:hover {
     left:50%;
     top:-30px;
     transform:translateX(-50%);
-    background:var(--bg);
+    background:transparent;
     color:var(--accent);
     padding:0 13px;
     font-size:17px;
