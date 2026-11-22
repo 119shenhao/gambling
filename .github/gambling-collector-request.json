@@ -1,6 +1,6 @@
 {
-  "request_id": "gambling_20261122_v2ex_251_live_import_v1",
-  "mode": "collect",
+  "request_id": "gambling_20261122_v2ex_251_readback_audit_v2",
+  "mode": "inspect",
   "sites": [
     "v2ex"
   ],
