@@ -4,6 +4,7 @@ No forum body or user names are logged, persisted, or imported. Network calls
 stay within public HTML pages; rights gate for republication remains disabled.
 """
 import json
+import os
 import time
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
@@ -63,16 +64,35 @@ def fetch(url):
 
 def main():
     # An enabled source must discover new candidates without explicit URLs.
-    listing = "https://forums.moneysavingexpert.com/categories/debt-free-diaries"
-    try:
-        found = discover(listing, fetch(listing), maximum=60)
-        print(json.dumps({"event":"listing_discovery","site":"moneysavingexpert",
-            "listing":listing,"candidate_count":len(found),
-            "candidate_ids":list(found)[:10],"database_writes":False},
-            sort_keys=True),flush=True)
-    except (ValueError, TypeError, KeyError) as error:
-        print(json.dumps({"event":"listing_discovery","status":"error",
-            "reason":str(error)[:120],"database_writes":False},sort_keys=True),flush=True)
+    listings = [
+        "https://forums.moneysavingexpert.com/categories/debt-free-diaries",
+        "https://forums.moneysavingexpert.com/categories/debt-free-diaries/p2",
+        "https://forums.moneysavingexpert.com/categories/debt-free-diaries/p3",
+        "https://forums.moneysavingexpert.com/search?search=gambling",
+        "https://forums.moneysavingexpert.com/search?query=gambling&scope=site&source=community",
+        "https://forums.moneysavingexpert.com/search?adv=1&search=gambling&discussion_discussion=1&comment_comment=0",
+    ]
+    for listing in listings:
+        try:
+            html = fetch(listing)
+            doc = BeautifulSoup(html, "html.parser")
+            candidates = discover(listing, html, maximum=60)
+            links = set()
+            for a in doc.select("a[href*='/discussion/']"):
+                from urllib.parse import urljoin
+                link = urljoin(listing, a.get("href","")).split("?")[0]
+                if link.startswith("https://forums.moneysavingexpert.com/discussion/"):
+                    links.add(link)
+            print(json.dumps({"event":"listing_discovery","site":"moneysavingexpert",
+                "listing":listing,"candidate_count":len(candidates),
+                "candidate_ids":list(candidates)[:12],
+                "all_discussion_links":len(links),"html_bytes":len(html),
+                "database_writes":False},sort_keys=True),flush=True)
+        except (ValueError, TypeError, KeyError) as error:
+            print(json.dumps({"event":"listing_discovery","listing":listing,"status":"error",
+                "reason":str(error)[:120],"database_writes":False},sort_keys=True),flush=True)
+    if os.environ.get("MSE_FULL") != "1":
+        return
     for url in SAMPLES:
         identifier = source_id(url)
         before = REQUEST_COUNT
