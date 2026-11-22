@@ -1,9 +1,13 @@
 {
-  "request_id": "gamcare-ongoing-collect-20261122-151400",
-  "mode": "collect",
+  "request_id": "inspect-long-gamcare-pagination-20261122-1501",
+  "mode": "inspect",
   "sites": [
-    "all"
+    "gamcare"
   ],
-  "candidates": {},
+  "candidates": {
+    "gamcare": [
+      "https://community.gamcare.org.uk/forum/recovery-diaries/to-gamble-is-to-lose-more-than-money/"
+    ]
+  },
   "limit": 2
 }
