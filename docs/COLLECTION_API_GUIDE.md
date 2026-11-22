@@ -78,7 +78,7 @@ curl -sS -X POST 'https://dev-gambling-community.119shenhao.workers.dev/api/coll
 
 导入前确保标题、正文、全部一级评论、全部楼中楼以及父子关系准确。评论树使用嵌套 `replies`，**不要展平**。服务器自动生成评论 ID。
 
-限制：标题 1–200 字符；主帖正文 1–30000 字符；每条评论 1–12000 字符；评论加楼中楼总计最多 49 条；嵌套最多 8 层。内容不完整或超过限制时，跳过并释放认领，**不得默默截断后标为完整**。
+限制：标题 1–200 字符；主帖正文 1–30000 字符；每条评论 1–12000 字符；旧版单请求接口 `/api/collect/complete` 最多 49 条；长帖可通过 DEV 专属 `/api/collect/long/*` 分批采集并保存最多 **500 条**（包括楼中楼），第 501 条及以后跳过；嵌套最多 8 层。内容不完整或超过限制时，跳过并释放认领，**不得默默截断后标为完整**。
 
 ### 2.4 完成导入
 
@@ -200,3 +200,15 @@ GitHub 请求文件 `.github/gambling-collector-request.json` 的格式为：
 - [最新恢复自动采集默认命令](https://github.com/119shenhao/gambling/actions/runs/44994042299)：2 篇、10 回复、错误0、17项解析器测试通过、Actions 成功。
 - 原站正文及评论内容保留，服务端原文语言为自动检测结果；评论提示 `en` 不应强制覆盖服务端 `und`。每篇仍按原站稳定 source_id 去重并由系统账户显示 Anonymous；不会因检测语言不一致重复提交。
 - 当前 GitHub 请求默认保持 `mode=collect`、`sites=["all"]`、`candidates={}`、`limit=2`，仅向戒赌独立 DEV D1 写入。开发→生产独立同步不属于本接口指南中的采集动作。
+
+## 7. 长帖分批导入（开发环境；2026-11-22）
+
+自动采集器对外站分页帖子先逐页抓取并校验原站回复总数，然后保留 `min(原站回复总数,500)` 条，按时间/原帖结构顺序发送。**501条或更多时保留前500条**，并记录 `capped=true` 与 `source_total`，不得误标成“外站全部回复已导入”。
+
+在既有 `exclusions → claim` 后，使用同一 `site/source_id/lease_token` 调用：
+1. `POST /api/collect/long/start`：`{site,source_id,lease_token,title,body,source_lang,source_total,target_count}`，其中 `target_count=min(source_total,500)`，仅生成DEV暂存元数据；
+2. `POST /api/collect/long/append`：`{site,source_id,lease_token,offset,comments:[{body,source_lang,parent_index:null},...]}`，每批最多20条，程序默认每批10条。offset从0连续增长，parent_index为0起始的回复绝对序号，必须指向更早已出现的回复；
+3. `POST /api/collect/long/finish`：`{site,source_id,lease_token}`，只有所有 `target_count` 条暂存齐全，才原子写入正式帖子、全部回复及来源完成回执。返回 `stored_comments/source_total/capped/topic_id`；
+4. 上传失败且确认来源未完成时可 `POST /api/collect/long/abort` 释放此次暂存；若finish响应不明，必须先查完成状态，不能盲目释放或重复写入。
+
+所有接口仅允许已启用 `IMPORT_ENABLED/COLLECT_ENABLED` 的赌博社区DEV Preview Worker（专用 D1），生产站无法执行写入。普通49条以内且无分页、单包符合150KB的帖子仍走原子 `/api/collect/complete`。已发布主帖不可因后续新回复自动补采（已有一次性同步/去重约定）。外站评论结构若无法确认父子关系，不能根据@提及捏造楼中楼。
