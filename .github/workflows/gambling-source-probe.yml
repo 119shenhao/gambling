@@ -27,3 +27,5 @@ jobs:
         run: MSE_ONLY=1 python scripts/gambling_source_probe.py
       - name: Probe MSE actual paginated replies in memory (no import)
         run: python scripts/gambling_mse_live_probe.py
+      - name: Diagnose MSE moderation versus public preview readback (read-only)
+        run: python scripts/gambling_mse_visibility_diagnose.py
