@@ -41,7 +41,7 @@ async function api(path,options={}){const r=await fetch(path,{credentials:'same-
 const send=(path,body,method='POST')=>api(path,{method,body:JSON.stringify(body)});
 const publicReads=()=>publicContentReader(state.health,state.user,api,fetch,locale);
 function toast(message){clearTimeout(toastTimer);$('#toast').textContent=message;$('#toast').hidden=false;toastTimer=setTimeout(()=>$('#toast').hidden=true,4500);}
-function modal(html){const content=$('#modal-content');content.innerHTML=html;content.scrollTop=0;if(!$('#modal').open)$('#modal').showModal();}
+function modal(html){const content=$('#modal-content');content.innerHTML=html;content.scrollTop=0;const dialog=$('#modal');if(!dialog.open)dialog.showModal();dialog.focus({preventScroll:true});}
 function closeModal(){$('#modal').close();}
 function showReadingSettings(){
  const radioGroup=(name,title,entries,current)=>`<fieldset class="reading-options"><legend>${esc(title)}</legend>${entries.map(([value,label])=>`<label class="reading-choice"><input type="radio" name="${name}" value="${value}" ${value===current?'checked':''}><span>${esc(label)}</span></label>`).join('')}</fieldset>`;
