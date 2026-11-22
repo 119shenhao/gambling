@@ -1,13 +1,9 @@
 {
-  "request_id": "inspect-real-more-than-500-gamcare-20261122-1600",
-  "mode": "inspect",
+  "request_id": "gamcare-500-cap-active-auto-20261122-1610",
+  "mode": "collect",
   "sites": [
-    "gamcare"
+    "all"
   ],
-  "candidates": {
-    "gamcare": [
-      "https://community.gamcare.org.uk/forum/recovery-diaries/charlys-life/"
-    ]
-  },
-  "limit": 1
+  "candidates": {},
+  "limit": 2
 }
