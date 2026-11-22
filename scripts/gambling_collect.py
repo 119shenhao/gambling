@@ -376,7 +376,7 @@ def collect_one(site, source, identifier, url, export_dir):
         else:
             source_html = http(url)
             try:
-                if site in ("gamcare", "moneysavingexpert"):
+                if site in ("gamcare", "moneysavingexpert", "v2ex"):
                     draft, metadata = parse_topic_pages(site, identifier, url, source_html, http)
                 else:
                     draft = parse_topic(site, identifier, url, source_html)
@@ -493,7 +493,7 @@ def main():
                 inspection = candidates if explicit else eligible
                 for identifier, url in list(inspection.items())[:10]:
                     try:
-                        if site in ("gamcare", "moneysavingexpert"):
+                        if site in ("gamcare", "moneysavingexpert", "v2ex"):
                             draft, meta = parse_topic_pages(site, identifier, url, http(url), http)
                         else:
                             draft = parse_topic(site, identifier, url, http(url))
