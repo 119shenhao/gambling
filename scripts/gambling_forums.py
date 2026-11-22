@@ -168,7 +168,7 @@ def parse_topic(site, expected_id, page_url, html):
 
 
 MAX_CAPTURED_REPLIES = 500
-MAX_FORUM_PAGES = 40
+MAX_FORUM_PAGES = MAX_CAPTURED_REPLIES + 1  # allow a page with no replies plus 500 reply pages
 
 
 def _post_nodes(page):
