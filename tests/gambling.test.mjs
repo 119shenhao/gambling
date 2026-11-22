@@ -256,7 +256,10 @@ test('approved mobile casino-felt theme keeps reading preferences and four prima
  assert.match(css,/--frame:\s*#c7a765/);
  assert.match(css,/grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
  assert.match(css,/\[data-reading-theme="warm"\] \.topic-card/);
- assert.match(html,/M16 3C12 9 5 12/); // approved spade, not previous chat bubble
+ assert.match(html,/<g transform="rotate\(-10 16 16\)">/);
+ assert.match(html,/<rect x="5\.5" y="5\.5" width="21" height="21" rx="4"/);
+ assert.equal((html.match(/<circle cx="(?:11|16|21)" cy="(?:11|16|21)" r="2"\/>/g)||[]).length,5); // gold five-pip die replaces header spade
+ assert.doesNotMatch(html,/M16 3C12 9 5 12/);
  assert.match(app,/class="primary-nav"/);
  assert.match(app,/class="nav-link nav-compose"/);
  assert.match(app,/class="admin-nav"/);
