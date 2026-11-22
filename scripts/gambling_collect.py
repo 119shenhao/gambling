@@ -12,7 +12,7 @@ import time
 from collections import Counter
 from pathlib import Path
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlsplit
 from urllib.request import Request, urlopen
 
 from gambling_forums import discover, parse_topic, parse_topic_pages, source_id
@@ -51,6 +51,18 @@ def http(url, payload=None):
         raise ValueError("http_" + str(e.code)) from None
     except (URLError, TimeoutError, OSError):
         raise ValueError("network_error_or_timeout") from None
+
+
+def fetch_source(url):
+    """Retry one transient read of a public PsychForums page."""
+    try:
+        return http(url)
+    except ValueError as error:
+        if (urlsplit(url).hostname != "www.psychforums.com"
+                or str(error) != "network_error_or_timeout"):
+            raise
+        time.sleep(2)
+        return http(url)
 
 
 def api(path, payload=None):
@@ -254,16 +266,22 @@ def discover_source(source, excluded, cap=60):
             except ValueError:
                 emit("invalid_seed_skipped", site=source["id"])
         emit("source_seed_discovery", site=source["id"], candidates=len(found))
+    listing_available = False
+    listing_error = None
     for listing in source.get("listings", [])[:5]:
         try:
-            candidates = discover(source["id"], listing, http(listing), excluded, cap)
+            candidates = discover(source["id"], listing, fetch_source(listing), excluded, cap)
             found.update({k: v for k, v in candidates.items() if k not in found})
+            listing_available = True
             emit("listing_checked", site=source["id"], candidates=len(candidates))
         except ValueError as error:
+            listing_error = error
             emit("listing_unavailable", site=source["id"], reason=str(error))
         if len(found) >= cap:
             break
         time.sleep(1)
+    if source["id"] == "psychforums" and not listing_available and listing_error:
+        raise listing_error
     return dict(list(found.items())[:cap])
 
 
@@ -378,10 +396,10 @@ def collect_one(site, source, identifier, url, export_dir):
                 raise ValueError("export_missing_or_too_large")
             draft = json.loads(file.read_text(encoding="utf-8"))
         else:
-            source_html = http(url)
+            source_html = fetch_source(url)
             try:
                 if site in PAGINATED_SITES:
-                    draft, metadata = parse_topic_pages(site, identifier, url, source_html, http)
+                    draft, metadata = parse_topic_pages(site, identifier, url, source_html, fetch_source)
                 else:
                     draft = parse_topic(site, identifier, url, source_html)
                     metadata = {"source_total": len(flatten(draft.get("comments", []))),
@@ -498,9 +516,9 @@ def main():
                 for identifier, url in list(inspection.items())[:10]:
                     try:
                         if site in PAGINATED_SITES:
-                            draft, meta = parse_topic_pages(site, identifier, url, http(url), http)
+                            draft, meta = parse_topic_pages(site, identifier, url, fetch_source(url), fetch_source)
                         else:
-                            draft = parse_topic(site, identifier, url, http(url))
+                            draft = parse_topic(site, identifier, url, fetch_source(url))
                             meta = {"source_total": len(flatten(draft.get("comments", []))),
                                     "capped": False, "pages": 1}
                         count = validate(draft)
