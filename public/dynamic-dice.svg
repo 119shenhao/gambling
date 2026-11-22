@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" focusable="false" aria-hidden="true">
+  <defs>
+    <linearGradient id="dice-gold-top" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff6d4"/><stop offset="0.55" stop-color="#ffdd8e"/><stop offset="1" stop-color="#e5a847"/>
+    </linearGradient>
+    <linearGradient id="dice-gold-left" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffe6a3"/><stop offset="0.63" stop-color="#e9aa54"/><stop offset="1" stop-color="#af631b"/>
+    </linearGradient>
+    <linearGradient id="dice-gold-right" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f5b85a"/><stop offset="0.62" stop-color="#d08122"/><stop offset="1" stop-color="#a34e14"/>
+    </linearGradient>
+    <linearGradient id="dice-orbit-gold" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#bb7026"/><stop offset="0.3" stop-color="#ffcb5c"/><stop offset="0.64" stop-color="#fff1a8"/><stop offset="1" stop-color="#d38826"/>
+    </linearGradient>
+  </defs>
+  <!-- Behind the die: the far half of the orbit. -->
+  <path d="M5.9 29.6C4 22 15 12.1 30 10.7c10.5-1 16.3 4.6 11.8 13.9" fill="none" stroke="#a95d20" stroke-width="4.3" stroke-linecap="round"/>
+  <path d="M6.7 29.9C5.7 21.6 17.1 12.3 30.5 11.8c9.4-.4 14.9 4.2 10.3 12.5" fill="none" stroke="url(#dice-orbit-gold)" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Three shaded faces with clear pips, legible at mobile header sizes. -->
+  <path d="M9.2 18.6 23.3 11l15.5 8.1-14.7 8.2Z" fill="url(#dice-gold-top)" stroke="#ffe9af" stroke-width=".8" stroke-linejoin="round"/>
+  <path d="M9.2 18.6 24.1 27.3v13.2L9.2 31.9Z" fill="url(#dice-gold-left)" stroke="#f5c570" stroke-width=".65" stroke-linejoin="round"/>
+  <path d="M24.1 27.3 38.8 19.1v12.8l-14.7 8.6Z" fill="url(#dice-gold-right)" stroke="#efaa45" stroke-width=".65" stroke-linejoin="round"/>
+  <g fill="#5a1b12">
+    <ellipse cx="22.9" cy="16.7" rx="2.05" ry="1.35" transform="rotate(6 22.9 16.7)"/>
+    <ellipse cx="15.4" cy="20.2" rx="2.1" ry="1.35" transform="rotate(-10 15.4 20.2)"/>
+    <ellipse cx="30.7" cy="21" rx="2.1" ry="1.35" transform="rotate(-10 30.7 21)"/>
+    <ellipse cx="23" cy="23.9" rx="1.7" ry="1.05" transform="rotate(7 23 23.9)"/>
+    <ellipse cx="14.5" cy="26.1" rx="1.65" ry="2.1" transform="rotate(-24 14.5 26.1)"/>
+    <ellipse cx="19.3" cy="33.5" rx="1.4" ry="2.05" transform="rotate(-24 19.3 33.5)"/>
+    <ellipse cx="33.2" cy="26.3" rx="1.65" ry="1.95" transform="rotate(25 33.2 26.3)"/>
+    <ellipse cx="28.4" cy="34.2" rx="1.55" ry="1.9" transform="rotate(26 28.4 34.2)"/>
+  </g>
+  <!-- Foreground sweep completes the static dynamic-ring appearance. -->
+  <path d="M4.1 29.6c3 10.7 20 12.2 31.7 3.3 5.7-4.3 8.4-8.1 8.7-11.2" fill="none" stroke="#8a491d" stroke-width="5.6" stroke-linecap="round"/>
+  <path d="M4.1 29.2c3 9.7 20 11.2 31.7 2.4 5.7-4.1 8.4-7.7 8.7-10.7" fill="none" stroke="url(#dice-orbit-gold)" stroke-width="3.9" stroke-linecap="round"/>
+  <path d="M7.2 32.6c7.5 6.8 22.6 4.5 32-5.6" fill="none" stroke="#fff1ac" stroke-opacity=".75" stroke-width=".8" stroke-linecap="round"/>
+</svg>
