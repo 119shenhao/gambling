@@ -205,3 +205,11 @@
 为避免覆盖先前 Cloudflare Secret，保持 `keep_vars:true`，不读取、不重新写入 `TRANSLATOR_KEY`。生产 `TRANSLATION_ENABLED=true` 由 `main/wrangler.jsonc` 提供；正式 D1 设置通过只在 Cloudflare `WORKERS_CI=1` 且 `WORKERS_CI_BRANCH=main` 可运行的一次性脚本设置。脚本核对 Worker、正式与预览 D1 UUID、F0 在31天内的既有验证标记、生产 Worker 已存在的 Secret 名称以及翻译迁移；使用一条原子 SQL 写入 `translation_active_provider=azure`、`translation_azure_daily_limit=200000`、`translation_azure_monthly_limit=1800000`、`translation_enabled=true` 和一次性回执。成功后二次构建发现回执则**只读跳过**，以免重新开启管理员日后手动暂停的翻译。部署和线上 health 成功才可视为实际生效，单纯提交 Git 不代表远端启用成功。部署验收后应移除一次性构建调用。
 
 **共享 Azure F0 额度警告**：官方 F0 免费层每月 2,000,000 字符。生产戒赌论坛的 1,800,000 是**本站上限**，不是跨论坛预留额度；颈椎腰椎论坛及两套开发环境使用相同的 Azure F0 资源而各有自己的 D1 计数。几套限额加起来可能超过 F0 账户额度；超出后 Azure 可能停止翻译，需要在 Azure 门户核对资源层总用量。不能将这些站点本地限额误称为 Azure 层总控。
+
+### 2026-11-22 生产 Azure 开关与配额真实发布验收（已通过）
+
+- 按用户授权，通过 [PR #5](https://github.com/119shenhao/gambling/pull/5) 将生产默认额度改为**每日200,000 / 每月1,800,000字符**，生产专用硬上限1,800,000；DEV 原额度与硬上限不变。
+- [PR CI #45005880894](https://github.com/119shenhao/gambling/actions/runs/45005880894) 全部通过；正式 main 合并提交 `d13796786055cb3b810dba459ef652f1416ea241` 后 [生产 CI #45005940624](https://github.com/119shenhao/gambling/actions/runs/45005940624) 成功。
+- [生产线上只读自动验收 #45005940608](https://github.com/119shenhao/gambling/actions/runs/45005940608) **success**：`https://gambling.nbn369.com/api/health` 的 `environment=production`、D1 Ready、`translationConfigured=true`，同时正式 Google SSO 跳转保持正确。受控生产构建在部署前检查已有 Azure Worker Secret、生产/开发 UUID 隔离、翻译迁移和 F0 验证标记；对生产 D1 的配额、开关及回执做原子写入和二次回读。**没有轮换或暴露 Secret，也没有动 Spine 或 DEV D1。**
+- 线上成功后已从 `scripts/prepare-build.mjs` 删除一次性初始化调用；普通 Cloudflare 构建不再重写翻译 D1 配额或重新打开管理员手动暂停的翻译。保留一次性脚本作为不自动执行的审计记录。
+- 验收范围是生产配置、数据库开关及线上 readiness；本轮未用真实用户帖主动触发 Azure 新翻译、未取得 Azure Portal 的资源级用量，因此不把该在线检查冒充跨站配额总控或真实支付/用量对账。用户可在生产管理页面查看额度并按需要暂停。
