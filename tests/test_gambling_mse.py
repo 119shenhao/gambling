@@ -119,6 +119,13 @@ class MSEParserTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"unsupported_media_url"):
             mse.parse_topic_pages("6512900",BASE,html,Mock())
 
+    def test_ordinary_debt_diary_not_importable(self):
+        html = sample(total_pages=1,last_count=1).replace(
+            "Gambling recovery diary", "Getting debt free").replace(
+            "I am quitting gambling.", "I want to clear my credit card.")
+        with self.assertRaisesRegex(ValueError, "not_problem_gambling"):
+            mse.parse_topic_pages("6512900", BASE, html, Mock())
+
     def test_unapproved_source_never_collectible(self):
         obj={"approved":False, "parser_verified":True,"reuse_allowed":True,
              "permission_evidence":"not granted"}
