@@ -1,0 +1,10 @@
+{
+  "run_id": 45027269679,
+  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45027269679",
+  "deployment_check": "success",
+  "expected_worker_version": "0.5.1-language-proof-atomic.20261122",
+  "production_v2ex_original_language_expected": "zh-CN",
+  "source_commit": "3b1081f5434313d7cf7da809d19a4dfbe3a49f7a",
+  "checked_at": "2026-11-22T13:23:58.519Z",
+  "verified": true
+}
