@@ -1,310 +1,477 @@
 {
-  "collector_job_result": "success",
+  "collector_job_result": "failure",
   "events": [
     {
-      "configured_sources": 6,
+      "configured_sources": 10,
       "event": "readiness",
       "importable_sources": 3,
       "preview": true
     },
     {
-      "candidates": 20,
+      "candidates": 48,
       "event": "listing_checked",
-      "site": "gamcare"
+      "site": "tacklinggamblingstigma"
     },
     {
-      "candidates": 20,
-      "event": "listing_checked",
-      "site": "gamcare"
-    },
-    {
-      "candidates": 7,
-      "event": "listing_checked",
-      "site": "gamcare"
-    },
-    {
-      "candidates": 13,
-      "event": "listing_checked",
-      "site": "gamcare"
-    },
-    {
-      "candidates": 60,
-      "eligible": 60,
+      "candidates": 48,
+      "eligible": 48,
       "event": "plan",
       "excluded": 0,
-      "import_allowed": true,
-      "site": "gamcare"
+      "import_allowed": false,
+      "site": "tacklinggamblingstigma"
     },
     {
-      "event": "candidate_rejected",
+      "capped": false,
+      "captured": 0,
+      "event": "parser_probe_pagination",
+      "pages": 1,
+      "site": "tacklinggamblingstigma",
+      "source_id": "ben",
+      "source_total": 0
+    },
+    {
+      "event": "parser_probe_ok",
+      "replies": 0,
+      "site": "tacklinggamblingstigma",
+      "source_id": "ben"
+    },
+    {
+      "capped": false,
+      "captured": 0,
+      "event": "parser_probe_pagination",
+      "pages": 1,
+      "site": "tacklinggamblingstigma",
+      "source_id": "rachel",
+      "source_total": 0
+    },
+    {
+      "event": "parser_probe_ok",
+      "replies": 0,
+      "site": "tacklinggamblingstigma",
+      "source_id": "rachel"
+    },
+    {
+      "capped": false,
+      "captured": 0,
+      "event": "parser_probe_pagination",
+      "pages": 1,
+      "site": "tacklinggamblingstigma",
+      "source_id": "julie",
+      "source_total": 0
+    },
+    {
+      "event": "parser_probe_ok",
+      "replies": 0,
+      "site": "tacklinggamblingstigma",
+      "source_id": "julie"
+    },
+    {
+      "capped": false,
+      "captured": 0,
+      "event": "parser_probe_pagination",
+      "pages": 1,
+      "site": "tacklinggamblingstigma",
+      "source_id": "adrian",
+      "source_total": 0
+    },
+    {
+      "event": "parser_probe_ok",
+      "replies": 0,
+      "site": "tacklinggamblingstigma",
+      "source_id": "adrian"
+    },
+    {
+      "capped": false,
+      "captured": 0,
+      "event": "parser_probe_pagination",
+      "pages": 1,
+      "site": "tacklinggamblingstigma",
+      "source_id": "andy",
+      "source_total": 0
+    },
+    {
+      "event": "parser_probe_ok",
+      "replies": 0,
+      "site": "tacklinggamblingstigma",
+      "source_id": "andy"
+    },
+    {
+      "event": "parser_probe_failed",
       "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "worried-about-someones-gambling-youre-not-alone-and-there-is-help-for-you-too"
+      "site": "tacklinggamblingstigma",
+      "source_id": "angie"
     },
     {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "struggling-with-online-gambling-3"
+      "capped": false,
+      "captured": 0,
+      "event": "parser_probe_pagination",
+      "pages": 1,
+      "site": "tacklinggamblingstigma",
+      "source_id": "beth",
+      "source_total": 0
     },
     {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "struggling-with-online-gambling-2"
+      "event": "parser_probe_ok",
+      "replies": 0,
+      "site": "tacklinggamblingstigma",
+      "source_id": "beth"
     },
     {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "festive-support-3"
+      "capped": false,
+      "captured": 0,
+      "event": "parser_probe_pagination",
+      "pages": 1,
+      "site": "tacklinggamblingstigma",
+      "source_id": "charlie",
+      "source_total": 0
     },
     {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "have-your-say-two-new-surveys-to-shape-our-chatroom-forum-4"
+      "event": "parser_probe_ok",
+      "replies": 0,
+      "site": "tacklinggamblingstigma",
+      "source_id": "charlie"
     },
     {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "have-your-say-two-new-surveys-to-shape-our-chatroom-forum-3"
+      "capped": false,
+      "captured": 0,
+      "event": "parser_probe_pagination",
+      "pages": 1,
+      "site": "tacklinggamblingstigma",
+      "source_id": "charlotte",
+      "source_total": 0
     },
     {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "say-hello-to-our-online-peer-supporters"
+      "event": "parser_probe_ok",
+      "replies": 0,
+      "site": "tacklinggamblingstigma",
+      "source_id": "charlotte"
     },
     {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "forum-language-changes-2"
+      "capped": false,
+      "captured": 0,
+      "event": "parser_probe_pagination",
+      "pages": 1,
+      "site": "tacklinggamblingstigma",
+      "source_id": "chloe",
+      "source_total": 0
     },
     {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "we-need-your-feedback-2"
+      "event": "parser_probe_ok",
+      "replies": 0,
+      "site": "tacklinggamblingstigma",
+      "source_id": "chloe"
     },
     {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "we-need-your-feedback"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "have-your-say-two-new-surveys-to-shape-our-chatroom-forum"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "new-gamcare-volunteering-opportunity-online-peer-supporters"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "festive-support-2"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "festive-support"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "want-to-do-something-read-this-130738"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "want-to-do-something-read-this-132213"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "chatrooms-2"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "empowerme-feedback-2"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "chatrooms-3"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "charlys-life"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "new-gamcare-volunteering-opportunity-online-peer-supporters-3"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "chatrooms-4"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "help-29"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "welcome-to-the-recovery-diaries"
-    },
-    {
-      "event": "imported",
-      "replies": 4,
-      "site": "gamcare",
-      "source_id": "new-here-worried-mum",
-      "topic_id": "00078b79-3107-422b-87b2-800056b7c252"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "favourite-posts"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "hello-everyone-5"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "cheese-chasers-1951-starring-mel-blanc"
-    },
-    {
-      "event": "imported",
-      "replies": 9,
-      "site": "gamcare",
-      "source_id": "where-to-go-from-here",
-      "topic_id": "222ead6e-24b5-48b2-afc9-1fb7ed2fd032"
-    },
-    {
-      "duplicates": 0,
-      "event": "site_summary",
-      "new_comments": 13,
-      "new_topics": 2,
-      "site": "gamcare",
-      "target": 2
-    },
-    {
-      "event": "source_not_enabled",
-      "reason": "source_not_enabled_or_parser_not_verified",
-      "site": "gamblingtherapy"
-    },
-    {
-      "candidates": 0,
+      "candidates": 4,
       "event": "listing_checked",
-      "site": "moneysavingexpert"
+      "site": "agr"
     },
     {
-      "candidates": 0,
-      "eligible": 0,
+      "candidates": 8,
+      "eligible": 8,
       "event": "plan",
       "excluded": 0,
-      "import_allowed": true,
-      "site": "moneysavingexpert"
+      "import_allowed": false,
+      "site": "agr"
     },
     {
-      "duplicates": 0,
-      "event": "site_summary",
-      "new_comments": 0,
-      "new_topics": 0,
-      "site": "moneysavingexpert",
-      "target": 2
+      "capped": false,
+      "captured": 0,
+      "event": "parser_probe_pagination",
+      "pages": 1,
+      "site": "agr",
+      "source_id": "sunenna",
+      "source_total": 0
     },
     {
-      "candidates": 0,
+      "event": "parser_probe_ok",
+      "replies": 0,
+      "site": "agr",
+      "source_id": "sunenna"
+    },
+    {
+      "capped": false,
+      "captured": 0,
+      "event": "parser_probe_pagination",
+      "pages": 1,
+      "site": "agr",
+      "source_id": "john",
+      "source_total": 0
+    },
+    {
+      "event": "parser_probe_ok",
+      "replies": 0,
+      "site": "agr",
+      "source_id": "john"
+    },
+    {
+      "capped": false,
+      "captured": 0,
+      "event": "parser_probe_pagination",
+      "pages": 1,
+      "site": "agr",
+      "source_id": "jacob",
+      "source_total": 0
+    },
+    {
+      "event": "parser_probe_ok",
+      "replies": 0,
+      "site": "agr",
+      "source_id": "jacob"
+    },
+    {
+      "capped": false,
+      "captured": 0,
+      "event": "parser_probe_pagination",
+      "pages": 1,
+      "site": "agr",
+      "source_id": "ed",
+      "source_total": 0
+    },
+    {
+      "event": "parser_probe_ok",
+      "replies": 0,
+      "site": "agr",
+      "source_id": "ed"
+    },
+    {
+      "event": "parser_probe_failed",
+      "reason": "other_error",
+      "site": "agr",
+      "source_id": "jesse"
+    },
+    {
+      "capped": false,
+      "captured": 0,
+      "event": "parser_probe_pagination",
+      "pages": 1,
+      "site": "agr",
+      "source_id": "quentin-beresford",
+      "source_total": 0
+    },
+    {
+      "event": "parser_probe_ok",
+      "replies": 0,
+      "site": "agr",
+      "source_id": "quentin-beresford"
+    },
+    {
+      "event": "parser_probe_failed",
+      "reason": "other_error",
+      "site": "agr",
+      "source_id": "max"
+    },
+    {
+      "capped": false,
+      "captured": 0,
+      "event": "parser_probe_pagination",
+      "pages": 1,
+      "site": "agr",
+      "source_id": "mark-kempster",
+      "source_total": 0
+    },
+    {
+      "event": "parser_probe_ok",
+      "replies": 0,
+      "site": "agr",
+      "source_id": "mark-kempster"
+    },
+    {
+      "candidates": 16,
       "event": "listing_checked",
-      "site": "v2ex"
+      "site": "gamblingwithlives"
+    },
+    {
+      "candidates": 16,
+      "eligible": 16,
+      "event": "plan",
+      "excluded": 0,
+      "import_allowed": false,
+      "site": "gamblingwithlives"
+    },
+    {
+      "capped": false,
+      "captured": 0,
+      "event": "parser_probe_pagination",
+      "pages": 1,
+      "site": "gamblingwithlives",
+      "source_id": "jack-ritchie",
+      "source_total": 0
+    },
+    {
+      "event": "parser_probe_ok",
+      "replies": 0,
+      "site": "gamblingwithlives",
+      "source_id": "jack-ritchie"
+    },
+    {
+      "capped": false,
+      "captured": 0,
+      "event": "parser_probe_pagination",
+      "pages": 1,
+      "site": "gamblingwithlives",
+      "source_id": "ellen-mulvey",
+      "source_total": 0
+    },
+    {
+      "event": "parser_probe_ok",
+      "replies": 0,
+      "site": "gamblingwithlives",
+      "source_id": "ellen-mulvey"
+    },
+    {
+      "capped": false,
+      "captured": 0,
+      "event": "parser_probe_pagination",
+      "pages": 1,
+      "site": "gamblingwithlives",
+      "source_id": "ollie-long",
+      "source_total": 0
+    },
+    {
+      "event": "parser_probe_ok",
+      "replies": 0,
+      "site": "gamblingwithlives",
+      "source_id": "ollie-long"
+    },
+    {
+      "capped": false,
+      "captured": 0,
+      "event": "parser_probe_pagination",
+      "pages": 1,
+      "site": "gamblingwithlives",
+      "source_id": "arthur-soames",
+      "source_total": 0
+    },
+    {
+      "event": "parser_probe_ok",
+      "replies": 0,
+      "site": "gamblingwithlives",
+      "source_id": "arthur-soames"
+    },
+    {
+      "event": "parser_probe_failed",
+      "reason": "other_error",
+      "site": "gamblingwithlives",
+      "source_id": "paul-wills"
+    },
+    {
+      "capped": false,
+      "captured": 0,
+      "event": "parser_probe_pagination",
+      "pages": 1,
+      "site": "gamblingwithlives",
+      "source_id": "lee-adams",
+      "source_total": 0
+    },
+    {
+      "event": "parser_probe_ok",
+      "replies": 0,
+      "site": "gamblingwithlives",
+      "source_id": "lee-adams"
+    },
+    {
+      "capped": false,
+      "captured": 0,
+      "event": "parser_probe_pagination",
+      "pages": 1,
+      "site": "gamblingwithlives",
+      "source_id": "del-miles",
+      "source_total": 0
+    },
+    {
+      "event": "parser_probe_ok",
+      "replies": 0,
+      "site": "gamblingwithlives",
+      "source_id": "del-miles"
+    },
+    {
+      "capped": false,
+      "captured": 0,
+      "event": "parser_probe_pagination",
+      "pages": 1,
+      "site": "gamblingwithlives",
+      "source_id": "daniel-roger",
+      "source_total": 0
+    },
+    {
+      "event": "parser_probe_ok",
+      "replies": 0,
+      "site": "gamblingwithlives",
+      "source_id": "daniel-roger"
+    },
+    {
+      "event": "parser_probe_failed",
+      "reason": "other_error",
+      "site": "gamblingwithlives",
+      "source_id": "kimberly-wadsworth"
+    },
+    {
+      "capped": false,
+      "captured": 0,
+      "event": "parser_probe_pagination",
+      "pages": 1,
+      "site": "gamblingwithlives",
+      "source_id": "daniel-clinkscales",
+      "source_total": 0
+    },
+    {
+      "event": "parser_probe_ok",
+      "replies": 0,
+      "site": "gamblingwithlives",
+      "source_id": "daniel-clinkscales"
+    },
+    {
+      "candidates": 1,
+      "event": "listing_checked",
+      "site": "australiadss"
     },
     {
       "candidates": 1,
       "eligible": 1,
       "event": "plan",
       "excluded": 0,
-      "import_allowed": true,
-      "site": "v2ex"
+      "import_allowed": false,
+      "site": "australiadss"
     },
     {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "v2ex",
-      "source_id": "1018492"
+      "capped": false,
+      "captured": 0,
+      "event": "parser_probe_pagination",
+      "pages": 1,
+      "site": "australiadss",
+      "source_id": "matthews-story",
+      "source_total": 0
+    },
+    {
+      "event": "parser_probe_ok",
+      "replies": 0,
+      "site": "australiadss",
+      "source_id": "matthews-story"
     },
     {
       "duplicates": 0,
-      "event": "site_summary",
+      "errors": 5,
+      "event": "run_summary",
       "new_comments": 0,
       "new_topics": 0,
-      "site": "v2ex",
-      "target": 2
-    },
-    {
-      "event": "source_not_enabled",
-      "reason": "source_not_enabled_or_parser_not_verified",
-      "site": "psychforums"
-    },
-    {
-      "event": "source_not_enabled",
-      "reason": "source_not_enabled_or_parser_not_verified",
-      "site": "douban"
-    },
-    {
-      "duplicates": 0,
-      "errors": 0,
-      "event": "run_summary",
-      "new_comments": 13,
-      "new_topics": 2,
       "ready_for_unattended_collect": true,
-      "rejected": 28
+      "rejected": 0
     }
   ],
   "has_run_summary": true,
   "production_database_writes": false,
   "report_type": "gambling_dev_collector_sanitized",
-  "run_id": 45033418551,
+  "run_id": 45034456974,
   "run_summary": {
     "duplicates": 0,
-    "errors": 0,
+    "errors": 5,
     "event": "run_summary",
-    "new_comments": 13,
-    "new_topics": 2,
+    "new_comments": 0,
+    "new_topics": 0,
     "ready_for_unattended_collect": true,
-    "rejected": 28
+    "rejected": 0
   },
-  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45033418551",
-  "trigger_commit": "2e56edca4e50755070c481075b3e07cc89f5e1eb"
+  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45034456974",
+  "trigger_commit": "0b426880fde472bcf4665d1ee1ea4fc5b50e5545"
 }
