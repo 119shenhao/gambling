@@ -99,7 +99,7 @@ export async function collectRoute(req:Request,env:Env,path:string):Promise<Resp
  // Preview-only environment gating happens BEFORE touching either database.
  allowPreviewRequest(req,env);
  if(path.startsWith('/api/collect/long/'))return collectLongRoute(req,env,path);
- if(!['/api/collect/exclusions','/api/collect/claim','/api/collect/complete','/api/collect/release','/api/collect/queue'].includes(path))fail(404,'not_found');
+ if(!['/api/collect/exclusions','/api/collect/claim','/api/collect/complete','/api/collect/release','/api/collect/queue','/api/collect/verification'].includes(path))fail(404,'not_found');
  const db=env.IMPORT_DB!;
  if(path==='/api/collect/queue'){
   if(req.method==='GET'){
@@ -188,6 +188,25 @@ export async function collectRoute(req:Request,env:Env,path:string):Promise<Resp
    return json({status:'marked',count:items.length});
   }
   fail(400,'invalid_queue_action');
+ }
+ // PREVIEW ONLY: aggregate moderation counts for completed sources. No
+ // unpublished comment bodies, hashes or author data are returned.
+ if(path==='/api/collect/verification'){
+  if(req.method!=='GET')fail(405,'method_not_allowed');
+  const url=new URL(req.url);
+  const site=validSite(url.searchParams.get('site'));
+  const sourceId=validSource(url.searchParams.get('source_id'),site);
+  await rate(db,'collect:verification',120);
+  const receipt=await one(db,`SELECT state,topic_id,completed_duplicate
+    FROM collect_sources WHERE site=? AND source_id=?`,site,sourceId);
+  if(!receipt||receipt.state!=='completed'||!receipt.topic_id)
+   fail(404,'completed_source_not_found');
+  const statuses=await all(db,`SELECT status,COUNT(*) total FROM comments
+    WHERE topic_id=? GROUP BY status ORDER BY status`,receipt.topic_id);
+  return json({site,source_id:sourceId,status:'completed',topic_id:receipt.topic_id,
+    duplicate:Boolean(receipt.completed_duplicate),
+    total:statuses.reduce((sum:number,row:Row)=>sum+Number(row.total),0),
+    status_counts:Object.fromEntries(statuses.map((row:Row)=>[row.status,Number(row.total)]))});
  }
  if(path==='/api/collect/exclusions'){
   if(req.method!=='GET')fail(405,'method_not_allowed');
