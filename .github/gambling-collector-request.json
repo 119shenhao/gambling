@@ -1,13 +1,9 @@
 {
-  "request_id": "mse_67_pending_review_audit_20261122_v2",
-  "mode": "inspect",
+  "request_id": "gambling_20261122_mse_pending_verified_resume_all_v1",
+  "mode": "collect",
   "sites": [
-    "moneysavingexpert"
+    "all"
   ],
-  "candidates": {
-    "moneysavingexpert": [
-      "https://forums.moneysavingexpert.com/discussion/6200242/gambling-recovery-and-covid-job-loss"
-    ]
-  },
+  "candidates": {},
   "limit": 2
 }
