@@ -112,12 +112,13 @@ export async function readItems(db:D1Database,items:Item[],locale:string) {
   ) SELECT * FROM public_rows`,JSON.stringify(items),locale,SUMMARY_TRANSLATION_ENGINE,locale);
 }
 
-// DEV and PROD use separate D1 budgets but share one Azure F0 account.
-// Hard-limit each of these environments to 25k/month; this is not combined
-// Azure usage metering. Check Spine DEV/PROD and any other Azure consumers
-// before raising either cap; never claim the site limits prevent billing.
+// PROD and DEV have isolated D1 limits but share one Azure F0 account.
+// Production's user-approved 1.8m cap does not reserve shared quota in Azure.
 export const AZURE_F0_MONTHLY_CHARS=2000000;
-export const AZURE_SITE_MAX_MONTHLY=25000;
+export const AZURE_SITE_MAX_MONTHLY=25000; // DEV cap unchanged
+export const AZURE_PROD_MAX_MONTHLY=1800000;
+export const azureSiteMaxMonthly=(env:Env)=>env.APP_ENV==='production'
+  ?AZURE_PROD_MAX_MONTHLY:AZURE_SITE_MAX_MONTHLY;
 export const AZURE_DEFAULT_DAILY=5000;
 export const AZURE_DEFAULT_MONTHLY=25000;
 export const TRANSLATION_PROVIDER_CATALOG=[
@@ -135,10 +136,11 @@ export async function translationProviderSettings(env:Env) {
   const rows=await all(env.DB,`SELECT key,value FROM settings WHERE key IN
     ('translation_active_provider','translation_azure_daily_limit','translation_azure_monthly_limit')`);
   const settings=Object.fromEntries(rows.map(r=>[r.key,r.value])) as Record<string,string>;
+  const max=azureSiteMaxMonthly(env);
   const monthly=limit(settings.translation_azure_monthly_limit??env.TRANSLATION_MONTHLY_LIMIT,
-    AZURE_DEFAULT_MONTHLY,AZURE_SITE_MAX_MONTHLY);
+    AZURE_DEFAULT_MONTHLY,max);
   const daily=limit(settings.translation_azure_daily_limit??env.TRANSLATION_DAILY_LIMIT,
-    AZURE_DEFAULT_DAILY,AZURE_SITE_MAX_MONTHLY);
+    AZURE_DEFAULT_DAILY,max);
   return {
     activeProvider:settings.translation_active_provider||'azure',
     azure:{daily:Math.min(daily,monthly),monthly},
@@ -222,7 +224,7 @@ export async function translationProvidersStatus(env:Env) {
         translationEnabled:budget.translationEnabled
       }:{})
     })),
-    capMonthly:AZURE_SITE_MAX_MONTHLY,
+    capMonthly:azureSiteMaxMonthly(env),
     dayUTC:budget.dayUTC,monthUTC:budget.monthUTC
   };
 }

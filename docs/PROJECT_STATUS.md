@@ -197,3 +197,11 @@
 - 管理员授权对象仍为**此前核实的 Identity Center PROD Owner 对应的唯一论坛账号**，生产 D1 权限回读见 [44895483517](https://github.com/119shenhao/identity-center/actions/runs/44895483517)，独立认证客户端启用见 [44897454960](https://github.com/119shenhao/identity-center/actions/runs/44897454960)，最后部署后的公网在线回归见 [44897775423](https://github.com/119shenhao/gambling/actions/runs/44897775423)。
 - **结论：正式站登录及管理员访问已获用户本人验收通过，本次生产认证和管理员授权任务结项。** 这是用户浏览器测试的反馈，不能冒充后台抓取的浏览器日志或逐条生产 D1 审计；独立的自动化证据仍按前述 Actions 记录。
 - 本次仅更新文档：未重新发布 Worker、未修改身份或论坛 D1、未轮换 Google / `IDENTITY_CLIENT_SECRET` / `TRANSLATOR_KEY`，未改变生产翻译开关、定时任务或开发/生产隔离。后续集成与发布应复用已验证路径，避免重新引入中间选择页、直连 Google 登录或构建覆盖 Secret。
+
+## 2026-11-22 生产 Azure Translator 开启与预算（待线上验收）
+
+用户授权：**仅戒赌论坛生产环境**启用 Azure Translator，日额度 200,000 字符、月额度 1,800,000 字符。DEV 继续保持日 5,000/月 10,000 及月硬上限 25,000。生产月硬上限按授权提高至 1,800,000；原有 D1 日/月/滚动31天预约计数保留，不重置任何历史用量。
+
+为避免覆盖先前 Cloudflare Secret，保持 `keep_vars:true`，不读取、不重新写入 `TRANSLATOR_KEY`。生产 `TRANSLATION_ENABLED=true` 由 `main/wrangler.jsonc` 提供；正式 D1 设置通过只在 Cloudflare `WORKERS_CI=1` 且 `WORKERS_CI_BRANCH=main` 可运行的一次性脚本设置。脚本核对 Worker、正式与预览 D1 UUID、F0 在31天内的既有验证标记、生产 Worker 已存在的 Secret 名称以及翻译迁移；使用一条原子 SQL 写入 `translation_active_provider=azure`、`translation_azure_daily_limit=200000`、`translation_azure_monthly_limit=1800000`、`translation_enabled=true` 和一次性回执。成功后二次构建发现回执则**只读跳过**，以免重新开启管理员日后手动暂停的翻译。部署和线上 health 成功才可视为实际生效，单纯提交 Git 不代表远端启用成功。部署验收后应移除一次性构建调用。
+
+**共享 Azure F0 额度警告**：官方 F0 免费层每月 2,000,000 字符。生产戒赌论坛的 1,800,000 是**本站上限**，不是跨论坛预留额度；颈椎腰椎论坛及两套开发环境使用相同的 Azure F0 资源而各有自己的 D1 计数。几套限额加起来可能超过 F0 账户额度；超出后 Azure 可能停止翻译，需要在 Azure 门户核对资源层总用量。不能将这些站点本地限额误称为 Azure 层总控。

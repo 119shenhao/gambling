@@ -4,7 +4,7 @@ import {contributorRanking,contributorSort} from './contributors';
 import {purge,notify} from './content';
 import {verificationWrite} from './language-state';
 import {proposeHistoricalLanguage} from './historical-language';
-import {AZURE_SITE_MAX_MONTHLY,translationBudgetStatus,translationProvidersStatus,translationConfigured} from './translation';
+import {azureSiteMaxMonthly,translationBudgetStatus,translationProvidersStatus,translationConfigured} from './translation';
 const audit=(env:Env,u:Row,type:string,target:string,action:string,reason:string)=>stmt(env.DB,'INSERT INTO moderation_actions(id,actor_id,target_type,target_id,action,reason) VALUES(?,?,?,?,?,?)',id(),u.id,type,target,action,reason);
 export async function adminRoute(req:Request,env:Env,user:Row|null,path:string):Promise<Response|null>{
   if(!path.startsWith('/api/admin/'))return null;
@@ -138,7 +138,7 @@ export async function adminRoute(req:Request,env:Env,user:Row|null,path:string):
     if(input.provider!=='azure'||input.active_provider!=='azure')fail(400,'translation_provider_not_integrated');
     const daily=input.daily_limit,monthly=input.monthly_limit;
     if(!Number.isSafeInteger(daily)||!Number.isSafeInteger(monthly)||
-      daily<1||monthly<1||daily>monthly||monthly>AZURE_SITE_MAX_MONTHLY)fail(400,'invalid_translation_budget');
+      daily<1||monthly<1||daily>monthly||monthly>azureSiteMaxMonthly(env))fail(400,'invalid_translation_budget');
     await env.DB.batch([
       stmt(env.DB,`INSERT INTO settings(key,value) VALUES('translation_active_provider','azure')
         ON CONFLICT(key) DO UPDATE SET value=excluded.value`),
@@ -199,10 +199,11 @@ export async function adminRoute(req:Request,env:Env,user:Row|null,path:string):
   if(path==='/api/admin/settings'){
     requireRole(u,true);if(!['translation_enabled','analytics_enabled'].includes(b.key)||!['true','false'].includes(b.value))fail(400,'setting_not_available');
     if(b.key==='translation_enabled'&&b.value==='true'){
-      if(env.APP_ENV!=='preview')fail(403,'translation_requires_development_verification');
+      if(env.APP_ENV!=='preview'&&env.APP_ENV!=='production')fail(403,'translation_not_available');
       if(!translationConfigured(env))fail(409,'translation_credentials_not_ready');
       const budget=await translationBudgetStatus(env);
-      if(budget.activeProvider!=='azure'||budget.monthly.limit>AZURE_SITE_MAX_MONTHLY)
+      if(!budget.provider.freeTierVerified)fail(409,'translation_free_tier_not_verified');
+      if(budget.activeProvider!=='azure'||budget.monthly.limit>azureSiteMaxMonthly(env))
         fail(409,'translation_shared_quota_invalid');
     }
     // Existing settings table is environment-specific; audit every traffic toggle.

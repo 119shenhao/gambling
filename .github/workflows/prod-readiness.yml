@@ -38,7 +38,7 @@ jobs:
               const me=await meResp.json();
               if(!meResp.ok||me.identityConfigured!==true||me.user!==null)
                 throw Error('production confidential SSO secret/config not ready');
-              if(h.translationConfigured!==false)throw Error('production translation gate changed unexpectedly');
+              if(h.translationConfigured!==true)throw Error('production Azure translation is not enabled');
               const sign=await get(origin+'/api/auth/identity?return_to=%2F');
               if(sign.status!==302)throw Error('forum OAuth start not redirecting');
               const center=new URL(sign.headers.get('location')||'');
@@ -62,7 +62,7 @@ jobs:
               if(legacy.status!==410)throw Error('legacy Google OAuth is not disabled');
               const callback=await get(origin+'/api/auth/identity/callback');
               if(callback.status!==401)throw Error('unbound OAuth callback is not rejected');
-              console.log('PASS: Gambling PROD Worker+D1; isolated confidential SSO configured; Google chooser 302+302; PKCE, state, nonce, callback, cookie, legacy 410, unbound callback 401; translation remains disabled.');
+              console.log('PASS: Gambling PROD Worker+D1; isolated confidential SSO configured; Google chooser 302+302; PKCE, state, nonce, callback, cookie, legacy 410, unbound callback 401; Azure translation enabled.');
               passed=true;
               break;
             }catch(e){

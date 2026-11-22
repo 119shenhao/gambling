@@ -89,9 +89,11 @@ test('Google login always requests account chooser through Identity Center, neve
   assert.equal(JSON.parse(read('wrangler.jsonc')).vars.IDENTITY_LOGIN_ENABLED,'true');
 });
 
-test('Azure DEV/PROD shared-key budget is protected by a 25k/month environment cap',()=>{
+test('Azure production cap is 1.8m while preview stays isolated at 25k',()=>{
  const c=JSON.parse(read('wrangler.jsonc'));
- assert.equal(c.vars.TRANSLATION_ENABLED,'false');
+ assert.equal(c.vars.TRANSLATION_ENABLED,'true');
+ assert.equal(c.vars.TRANSLATION_DAILY_LIMIT,'200000');
+ assert.equal(c.vars.TRANSLATION_MONTHLY_LIMIT,'1800000');
  assert.equal(c.previews.vars.TRANSLATION_ENABLED,'true');
  assert.equal(c.previews.vars.TRANSLATOR_REGION,'eastus');
  assert.equal(c.previews.vars.TRANSLATOR_F0_VERIFIED_AT,'2026-11-09T06:14:50Z');
@@ -101,11 +103,13 @@ test('Azure DEV/PROD shared-key budget is protected by a 25k/month environment c
  assert.equal(c.previews.vars.TRANSLATION_MONTHLY_LIMIT,'10000');
  const tr=read('src/translation.ts');
  assert.match(tr,/AZURE_SITE_MAX_MONTHLY=25000/);
+ assert.match(tr,/AZURE_PROD_MAX_MONTHLY=1800000/);
+ assert.match(tr,/azureSiteMaxMonthly\(env\)/);
  assert.match(tr,/AZURE_DEFAULT_DAILY=5000/);
  assert.match(tr,/AZURE_DEFAULT_MONTHLY=25000/);
  assert.match(tr,/Math\.min\(Number\(raw\),max\)/);
  const admin=read('src/admin.ts');
- assert.match(admin,/monthly>AZURE_SITE_MAX_MONTHLY/);
+ assert.match(admin,/monthly>azureSiteMaxMonthly\(env\)/);
  assert.match(admin,/translation_credentials_not_ready/);
  assert.match(admin,/env\.APP_ENV!=='preview'/);
  assert.match(read('public/translation-admin.js'),/data-action="toggle-translation"/);
@@ -117,7 +121,7 @@ test('translation provider status exposes database activation state to admin UI'
  assert.match(source,/translationEnabled:budget\.translationEnabled/);
  const ui=read('public/translation-admin.js');
  assert.match(ui,/azure\.translationEnabled/);
- assert.match(read('src/admin.ts'),/translation_requires_development_verification/);
+ assert.match(read('src/admin.ts'),/translation_free_tier_not_verified/);
 });
 
 test('Worker deployment never overwrites Cloudflare-managed secrets or isolates wrong resources',()=>{
