@@ -65,7 +65,11 @@
       "reuse_allowed": false,
       "permission_evidence": "",
       "parser_sample": "https://www.v2ex.com/t/1121755",
-      "note": "Candidate only. 251 public replies across 3 pages; needs GitHub Runner parse/readback and applicable content reuse approval. Strict standalone parser and tests added on dev; do not collect automatically."
+      "note": "Disabled candidate. Curated URLs are only discovery inputs, never evidence of appropriate source permissions or full collection. 1121755 has a debt/market speculation title but explicit 戒赌 progression in supplements and 251 public replies over 3 pages; 1018492 requires semantic/full reply validation. Read-only GitHub Runner + DEV D1 E2E and user authorization remain required. No production changes.",
+      "seed_topics": [
+        "https://www.v2ex.com/t/1121755",
+        "https://www.v2ex.com/t/1018492"
+      ]
     },
     {
       "id": "douban",
