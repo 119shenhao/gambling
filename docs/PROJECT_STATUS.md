@@ -408,3 +408,10 @@
 - 新增 `scripts/repair-preview-language-proofs.mjs`，仅操作 `gambling-community-dev`，通过 `src/source-language.ts` 原始 `tinyld-heavy` 实现独立复核已识别但缺失凭据的 DEV 历史帖和回复；只有重新识别与既有 `source_lang` 一致时才允许 DEV 补写凭据，已有冲突记录不自动覆盖。默认只读，`--apply` 须设置具体开发 D1 ID 确认值，写后读回。不迁移/重导正文或回帖。
 - `tests/sync-behavior.test.mjs`、`tests/gambling.test.mjs` 已加入跨语言、旧凭据、冲突、长帖、预览库限制和禁止二次检测测试；`docs/LANGUAGE_SYNC_RULES.md`、`docs/REQUIREMENTS.md` 已记录最终规范。
 - **代码提交不等于远程生效**：CI 状态、受保护执行器固定代码升级、DEV 旧数据实库审计、PROD 历史 `und` 修复目前均需分别验证/批准。已有 PROD 受保护执行器仍固定审核提交 `94dded5100fd3d3ecc1758f9fba13d82be04c694`，**不会自动切换到本次 DEV 修改**；不得改自动同步任务频率或冒充生产已经修复。
+
+
+### DEV 识别凭据与审核状态隔离（2026-11-22 补充）
+
+- 后续代码检查发现：旧版只有 `status='published'` 才附上语言验证记录。待审核或被阻止的内容即使已在 DEV 独立识别，管理员以后点击发布仍可能缺凭据。现在在 DEV 把“识别及凭据存储”与“公开状态”分离：`src/language-state.ts` 的版本/非删除守卫、`src/collect.ts`、`src/import.ts`、`src/content.ts`、`src/collect-long.ts` 在单一 D1 batch 内保存识别出的语言与对应凭据；不会因此提前公开待审核/屏蔽内容。
+- 最新相关提交：`f55569c9`、`e097f0a6`、`78cc09da`、`7ffca580`、`c10235f0`、`1e9c3ef1`。回归静态断言：`tests/gambling.test.mjs` 的 `58ea894a`。
+- 所有改动仍仅在戒赌论坛 `dev`；实际 GitHub Actions `ci.yml` 的最新结果未获取，不能提前宣称验收通过。既有 Identity Center 受保护生产同步执行器固定旧 SHA，尚未改动，生产 D1 已存在的 `und` 也未修改。
