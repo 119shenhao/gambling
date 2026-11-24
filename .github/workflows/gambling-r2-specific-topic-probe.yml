@@ -1,0 +1,50 @@
+name: Gambling R2 specific DEV topic probe (read-only)
+on:
+  push:
+    branches: [dev]
+    paths:
+      - .github/workflows/gambling-r2-specific-topic-probe.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Probe public CDN JSON and DEV health for one reported topic without writes
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const origin='https://dev-gambling-community.119shenhao.workers.dev';
+          const cdn='https://gambling-data-dev.nbn369.com';
+          const topicId='1fa8a5ba-76d2-4c18-854e-fd35f591c075';
+          const paths=['/feeds/latest/page-1.json','/topics/'+topicId+'/detail.json'];
+          async function fetchPublic(url,requestOrigin){
+            const r=await fetch(url,{method:'GET',headers:{Origin:requestOrigin},signal:AbortSignal.timeout(10000),redirect:'error'});
+            const result={status:r.status,cache:r.headers.get('CF-Cache-Status'),cacheControl:r.headers.get('Cache-Control'),cors:r.headers.get('Access-Control-Allow-Origin'),length:r.headers.get('Content-Length')};
+            if(r.ok){
+              try{const b=await r.json();
+                result.schemaVersion=b.schemaVersion??null;
+                result.versionValid=Number.isSafeInteger(b.contentVersion);
+                result.layout=b.data?.translationLayout??null;
+                result.topicIdMatches=url.includes('/detail.json')?b.data?.topic?.id===topicId:undefined;
+                result.topicCount=Array.isArray(b.data?.topics)?b.data.topics.length:undefined;
+              }catch{result.jsonValid=false;}
+            }
+            return result;
+          }
+          const h=await fetch(origin+'/api/health',{signal:AbortSignal.timeout(10000)});
+          const hb=await h.json().catch(()=>({}));
+          console.log(JSON.stringify({target:'dev-health',http:h.status,dbReady:hb.databaseReady,environment:hb.environment,
+            projection:{enabled:hb.publicContent?.enabled,ready:hb.publicContent?.ready,baseUrl:hb.publicContent?.baseUrl,
+              signedIn:hb.publicContent?.signedIn,purgeConfigured:hb.publicContent?.purgeConfigured,onDemand:hb.publicContent?.onDemand,
+              fallback:hb.publicContent?.fallback}},null,2));
+          for(const path of paths){
+            const a=await fetchPublic(cdn+path,origin);
+            console.log(JSON.stringify({target:path,result:a},null,2));
+          }
+          // No requests to /api/topics; no projection-miss header; no Worker D1 writes.
+          NODE
