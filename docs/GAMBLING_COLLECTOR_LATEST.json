@@ -8,28 +8,28 @@
       "preview": true
     },
     {
+      "candidates": 11,
+      "event": "listing_checked",
+      "site": "gamcare"
+    },
+    {
       "candidates": 13,
       "event": "listing_checked",
       "site": "gamcare"
     },
     {
-      "candidates": 15,
+      "candidates": 6,
       "event": "listing_checked",
       "site": "gamcare"
     },
     {
-      "candidates": 8,
+      "candidates": 11,
       "event": "listing_checked",
       "site": "gamcare"
     },
     {
-      "candidates": 12,
-      "event": "listing_checked",
-      "site": "gamcare"
-    },
-    {
-      "candidates": 48,
-      "eligible": 48,
+      "candidates": 41,
+      "eligible": 41,
       "event": "plan",
       "excluded": 0,
       "import_allowed": true,
@@ -168,11 +168,10 @@
       "source_id": "chatrooms-4"
     },
     {
-      "event": "imported",
-      "replies": 2,
+      "event": "candidate_rejected",
+      "reason": "other_error",
       "site": "gamcare",
-      "source_id": "introduction-struggling-with-gambling-addiction",
-      "topic_id": "880b153e-05ca-4af2-b9a0-cf9eb8ba9f47"
+      "source_id": "help-29"
     },
     {
       "event": "candidate_rejected",
@@ -181,11 +180,10 @@
       "source_id": "welcome-to-the-recovery-diaries"
     },
     {
-      "event": "imported",
-      "replies": 4,
+      "event": "candidate_rejected",
+      "reason": "other_error",
       "site": "gamcare",
-      "source_id": "i-need-help-3",
-      "topic_id": "04784b97-4534-4250-9692-b550c3e8dacd"
+      "source_id": "how-do-i-mend-my-heart"
     },
     {
       "event": "candidate_rejected",
@@ -194,36 +192,10 @@
       "source_id": "favourite-posts"
     },
     {
-      "event": "imported",
-      "replies": 4,
-      "site": "gamcare",
-      "source_id": "1-year-gamble-free-5",
-      "topic_id": "a15e87c2-8db5-4498-9a6a-4f68e183ff89"
-    },
-    {
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamcare",
       "source_id": "day-one-of-what-i-hope-is-a-new-and-normal-life"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "how-do-i-mend-my-heart"
-    },
-    {
-      "event": "imported",
-      "replies": 4,
-      "site": "gamcare",
-      "source_id": "lost-it-again",
-      "topic_id": "711d2d1f-cc1c-40b8-a687-92f5b89571c1"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "dear-oh-dear-oh-dear-diary-number-53"
     },
     {
       "event": "candidate_rejected",
@@ -238,18 +210,17 @@
       "source_id": "podcast-forum"
     },
     {
-      "event": "imported",
-      "replies": 1,
+      "event": "candidate_rejected",
+      "reason": "other_error",
       "site": "gamcare",
-      "source_id": "reset-2025-starring-adam-holley",
-      "topic_id": "d2ab8b0d-1737-4800-b008-e54bda6bd8f3"
+      "source_id": "dear-oh-dear-oh-dear-diary-number-53"
     },
     {
       "event": "imported",
-      "replies": 6,
+      "replies": 3,
       "site": "gamcare",
-      "source_id": "mobile-games-pay-to-win",
-      "topic_id": "dd3aa90c-03cf-424b-b261-14f15f0dbd99"
+      "source_id": "need-help-with-my-husbands-gambling-addiction",
+      "topic_id": "badfb629-0ca9-41c2-bf55-1d17bbbda9ff"
     },
     {
       "event": "candidate_rejected",
@@ -262,6 +233,13 @@
       "reason": "other_error",
       "site": "gamcare",
       "source_id": "cheese-chasers-1951-starring-mel-blanc"
+    },
+    {
+      "event": "imported",
+      "replies": 4,
+      "site": "gamcare",
+      "source_id": "does-my-dad-really-hate-us-now-weve-caught-the-truth",
+      "topic_id": "10e2335e-59df-489b-b9e6-384aa09d9d1c"
     },
     {
       "event": "candidate_rejected",
@@ -277,10 +255,10 @@
     },
     {
       "event": "imported",
-      "replies": 6,
+      "replies": 4,
       "site": "gamcare",
-      "source_id": "my-problem-with-lapsing",
-      "topic_id": "217684e6-714b-4bae-8c6c-c99bf37cf94d"
+      "source_id": "sertraline",
+      "topic_id": "709e36c8-24e9-4749-ba69-4710df590c52"
     },
     {
       "event": "candidate_rejected",
@@ -289,8 +267,73 @@
       "source_id": "april-fools"
     },
     {
-      "board": "recovery-diaries",
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "quote-8"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "humiliating"
+    },
+    {
+      "board": "overcoming-problem-gambling",
+      "candidates": 19,
+      "event": "listing_checked",
+      "page": 2,
+      "site": "gamcare"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "looking-for-advice-6"
+    },
+    {
+      "event": "imported",
+      "replies": 6,
+      "site": "gamcare",
+      "source_id": "back-in-the-loop",
+      "topic_id": "af922e72-7f95-4dca-b272-1f084a69318d"
+    },
+    {
+      "board": "new-members-intros-forum",
       "candidates": 17,
+      "event": "listing_checked",
+      "page": 2,
+      "site": "gamcare"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "hello-everyone-5"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "day-1-50"
+    },
+    {
+      "event": "imported",
+      "replies": 2,
+      "site": "gamcare",
+      "source_id": "hello-everyone-4",
+      "topic_id": "552c4ade-ad47-43b0-8ec5-9f9febabe78b"
+    },
+    {
+      "event": "imported",
+      "replies": 2,
+      "site": "gamcare",
+      "source_id": "had-enough-constant-cycle",
+      "topic_id": "6dbb6efb-28c1-4bf2-94c2-0515537425e0"
+    },
+    {
+      "board": "recovery-diaries",
+      "candidates": 16,
       "event": "listing_checked",
       "page": 2,
       "site": "gamcare"
@@ -309,17 +352,30 @@
     },
     {
       "event": "imported",
-      "replies": 5,
+      "replies": 2,
       "site": "gamcare",
-      "source_id": "day-6-8",
-      "topic_id": "c0627b49-0fe3-41d6-b3c5-18563a575154"
+      "source_id": "somethings-gotta-give-2003-starring-diane-keaton",
+      "topic_id": "ab752412-0a78-4d46-930b-8d636e0de150"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "quotes-6"
+    },
+    {
+      "event": "imported",
+      "replies": 2,
+      "site": "gamcare",
+      "source_id": "big-1998-starring-tom-hanks",
+      "topic_id": "5cf24c10-058b-49de-94bb-028842fc57fd"
     },
     {
       "board": "family-friends",
       "duplicates": 0,
       "errors": 0,
       "event": "board_summary",
-      "new_comments": 10,
+      "new_comments": 7,
       "new_topics": 2,
       "rejected": 8,
       "site": "gamcare",
@@ -332,7 +388,7 @@
       "event": "board_summary",
       "new_comments": 10,
       "new_topics": 2,
-      "rejected": 10,
+      "rejected": 13,
       "site": "gamcare",
       "target": 2
     },
@@ -341,9 +397,9 @@
       "duplicates": 0,
       "errors": 0,
       "event": "board_summary",
-      "new_comments": 6,
+      "new_comments": 4,
       "new_topics": 2,
-      "rejected": 5,
+      "rejected": 8,
       "site": "gamcare",
       "target": 2
     },
@@ -352,16 +408,16 @@
       "duplicates": 0,
       "errors": 0,
       "event": "board_summary",
-      "new_comments": 6,
+      "new_comments": 4,
       "new_topics": 2,
-      "rejected": 13,
+      "rejected": 14,
       "site": "gamcare",
       "target": 2
     },
     {
       "duplicates": 0,
       "event": "site_summary",
-      "new_comments": 32,
+      "new_comments": 25,
       "new_topics": 8,
       "site": "gamcare",
       "target": 8
@@ -430,13 +486,13 @@
       "site": "douban"
     },
     {
-      "candidates": 42,
+      "candidates": 40,
       "event": "listing_checked",
       "site": "tacklinggamblingstigma"
     },
     {
-      "candidates": 42,
-      "eligible": 42,
+      "candidates": 40,
+      "eligible": 40,
       "event": "plan",
       "excluded": 0,
       "import_allowed": true,
@@ -446,15 +502,15 @@
       "event": "imported",
       "replies": 0,
       "site": "tacklinggamblingstigma",
-      "source_id": "beth",
-      "topic_id": "99f6dc47-68a7-442c-876c-04cee840bd60"
+      "source_id": "charlotte",
+      "topic_id": "14c47d10-dac4-4158-8bcc-26350ff41e17"
     },
     {
       "event": "imported",
       "replies": 0,
       "site": "tacklinggamblingstigma",
-      "source_id": "charlie",
-      "topic_id": "6d1bf2b9-2437-4f45-9839-51dac19ab1b6"
+      "source_id": "chloe",
+      "topic_id": "bd3ced09-bb73-41ab-9bc8-84a9ba188987"
     },
     {
       "duplicates": 0,
@@ -498,13 +554,13 @@
       "target": 2
     },
     {
-      "candidates": 10,
+      "candidates": 8,
       "event": "listing_checked",
       "site": "gamblingwithlives"
     },
     {
-      "candidates": 10,
-      "eligible": 10,
+      "candidates": 8,
+      "eligible": 8,
       "event": "plan",
       "excluded": 0,
       "import_allowed": true,
@@ -517,13 +573,6 @@
       "source_id": "paul-wills"
     },
     {
-      "event": "imported",
-      "replies": 0,
-      "site": "gamblingwithlives",
-      "source_id": "daniel-roger",
-      "topic_id": "d446603a-618f-496d-b733-af8903d3173a"
-    },
-    {
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamblingwithlives",
@@ -533,8 +582,27 @@
       "event": "imported",
       "replies": 0,
       "site": "gamblingwithlives",
-      "source_id": "daniel-clinkscales",
-      "topic_id": "a2be50dd-f0f2-455e-a25b-76b19e054ab8"
+      "source_id": "joshua-jones",
+      "topic_id": "81918d8f-36fc-45cf-8fcd-94f2a3f38c71"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamblingwithlives",
+      "source_id": "philip-tomlinson"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamblingwithlives",
+      "source_id": "chris-bruney"
+    },
+    {
+      "event": "imported",
+      "replies": 0,
+      "site": "gamblingwithlives",
+      "source_id": "aaron-armstrong",
+      "topic_id": "1136333b-5b33-4aa3-9c8f-572f9944de2a"
     },
     {
       "duplicates": 0,
@@ -569,25 +637,25 @@
       "duplicates": 0,
       "errors": 0,
       "event": "run_summary",
-      "new_comments": 32,
+      "new_comments": 25,
       "new_topics": 12,
       "ready_for_unattended_collect": true,
-      "rejected": 41
+      "rejected": 50
     }
   ],
   "has_run_summary": true,
   "production_database_writes": false,
   "report_type": "gambling_dev_collector_sanitized",
-  "run_id": 45317194657,
+  "run_id": 45330448409,
   "run_summary": {
     "duplicates": 0,
     "errors": 0,
     "event": "run_summary",
-    "new_comments": 32,
+    "new_comments": 25,
     "new_topics": 12,
     "ready_for_unattended_collect": true,
-    "rejected": 41
+    "rejected": 50
   },
-  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45317194657",
-  "trigger_commit": "83a512a3e83b1168fe9f41a6cff6d8e3717f61f5"
+  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45330448409",
+  "trigger_commit": "a601d18be28d9f7df1dab52bd90141f3f89dfa6f"
 }
