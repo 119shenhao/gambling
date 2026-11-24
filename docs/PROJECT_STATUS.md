@@ -277,3 +277,10 @@ CI 额外校验 UI 纹理、骰子、暖色阅读主题，并断言生产 `IDENT
 - **真实浏览器验证通过**：GitHub Actions headless Chrome 从 DEV 打开该帖子，检查实时 SSR CSP，真正产生 `https://gambling-data-dev.nbn369.com/topics/1fa8a5ba-76d2-4c18-854e-fd35f591c075/detail.json` 请求且 HTTP 200，CSP 拦截报错 0；页面显示 Del Miles。日志 https://github.com/119shenhao/gambling/actions/runs/45311774093 。
 - 验证使用**未登录 Chrome**；已登录用户的 `/api/public-content/viewer` 权限/点赞/收藏核对仍需另行验证。不要把匿名成功当作登录态全部通过。
 - 同步修复到 R2 生产激活草稿 PR #8（尚未合并），保证将来 PROD 启用时允许各自 CDN；不修改 Cloudflare Secret/D1 数据、不启动采集同步；生产发布仍受 Secret 轮换及其余验收门槛限制。
+
+## 2026-11-24 长 TTL 用户方案已进入 R2 生产发布候选（仍为 Draft，不能直接部署）
+
+- 用户确认：既然已经有特定 URL CDN Purge 权限，论坛内容无需全部缓存 60 秒。候选更新为 feed 86400s（1 天）、topic detail/comments 604800s（7 天）、独立译文 2592000s（30 天）；删除、隐藏、失效 Tombstone 为 `no-store`。
+- 更新 Cloudflare R2 `httpMetadata.cacheControl` 与自定义 `cachePolicy`，保持 R2 对象写入后 Purge 成功才确认处理完成的队列流程；代码及静态回归已准备，GitHub CI 待/已独立验收，Cloudflare 生产未启用。
+- 警示：异步重建与 CDN 清理不等于数据库一写就全球零延迟生效。此前生产 Token 曾明文显示；用户已将 DEV Token 改为 Secret，尚未取得生产 Secret 轮换完成的可靠证据。尤其高优先级更新使用按前缀清理，Cloudflare Free 每分钟 5 次请求限速；失败最多重试 8 次后可能进入待干预状态，需要监控、告警和修改/删除后的端到端验证。
+- 现有 R2 JSON 元数据不会因 GitHub 代码发布自动变为长 TTL；避免 D1 超限，不要无界批量重写历史对象。必须用少量指定帖子验证新长 TTL 与 Purge 失效后，才能宣布生产缓存策略生效。
