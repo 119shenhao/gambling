@@ -1,21 +1,9 @@
-name: Gambling preview-to-production content sync
-run-name: Gambling content / ${{ inputs.mode }}
+name: Gambling content sync via protected Gambling D1 executor
 on:
   push:
-    branches: [dev]
-    paths: [.github/gambling-sync-authorization.json]
-  workflow_dispatch:
-    inputs:
-      mode:
-        description: Read-only inspect (default) or approved content publication
-        type: choice
-        options: [inspect, sync]
-        default: inspect
-        required: true
-      confirmation:
-        description: For sync enter gambling-community-prod exactly
-        type: string
-        required: false
+    branches: [main]
+    paths:
+      - .github/gambling-content-sync-request.json
 permissions:
   contents: read
 concurrency:
@@ -23,98 +11,172 @@ concurrency:
   cancel-in-progress: false
 jobs:
   sync:
-    if: github.repository == '119shenhao/gambling' && github.ref == 'refs/heads/dev'
+    if: github.repository == '119shenhao/gambling' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    environment: production
     timeout-minutes: 120
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.GAMBLING_PROD_D1_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ vars.GAMBLING_CLOUDFLARE_ACCOUNT_ID }}
-      GAMBLING_SYNC_PRODUCTION_CONFIRM: 7bba9ada-589f-493b-8fcf-60265fc0efac
+      CLOUDFLARE_ACCOUNT_ID: "289976272520a38732bef34108585e11"
+      GAMBLING_SYNC_PRODUCTION_CONFIRM: "7bba9ada-589f-493b-8fcf-60265fc0efac"
     steps:
-      - name: Checkout dev request file without granting write credentials
+      - name: Checkout the request from the trusted executor repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
-      - name: Require correct mode and independent scoped Cloudflare credentials
+      - name: Parse precise approved request; never accept arbitrary SQL or D1 selectors
+        id: request
         shell: bash
-        env:
-          MODE: ${{ inputs.mode }}
-          CONFIRMATION: ${{ inputs.confirmation }}
         run: |
           set -euo pipefail
-          if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
-            # A push can trigger production publication only through this
-            # dedicated, explicit authorization request; other dev pushes do not.
-            python3 - <<'PY'
-          import json,re
-          data=json.load(open('.github/gambling-sync-authorization.json'))
-          if (data.get('mode')!='sync' or data.get('confirmation')!='gambling-community-prod'
-              or data.get('approval_scope')!='user-authorized-periodic-gambling-content-sync'
-              or data.get('target_d1')!='7bba9ada-589f-493b-8fcf-60265fc0efac'
-              or not re.fullmatch(r'[A-Za-z0-9_-]{8,80}',data.get('request_id',''))):
-              raise SystemExit('Missing narrowly scoped production sync authorization file')
-          print('Approved request file format verified; exact target D1 matches Gambling only.')
+          python3 - <<'PY'
+          import json,re,os
+          r=json.load(open('.github/gambling-content-sync-request.json'))
+          expected={'request_id','mode','source_database_id','destination_database_id','implementation_sha','authorization'}
+          if set(r)!=expected:raise SystemExit('Unexpected request keys; no D1 access')
+          if not re.fullmatch(r'[A-Za-z0-9_-]{12,80}',r['request_id']):raise SystemExit('Invalid request ID')
+          if r['mode'] not in ('inspect','sync'):raise SystemExit('Unrecognized mode')
+          if r['source_database_id']!='a92cf620-2a0b-46e1-a0ff-2e0c94218f37' or r['destination_database_id']!='7bba9ada-589f-493b-8fcf-60265fc0efac':
+              raise SystemExit('Incorrect D1 IDs')
+          if r['implementation_sha']!='89a0aaf09a19220d8237b98931ddae427f8efba7':
+              raise SystemExit('Unreviewed sync source code')
+          if r['authorization']!='owner-approved-recurring-dev-to-prod-content-sync':
+              raise SystemExit('Unauthorized request')
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('mode='+r['mode']+'\n')
+          print('Verified specific Gambling D1 sync request:',r['mode'],r['request_id'])
           PY
-            MODE=sync
-            CONFIRMATION=gambling-community-prod
-          fi
-          [[ -n "$CLOUDFLARE_API_TOKEN" && -n "$CLOUDFLARE_ACCOUNT_ID" ]] || { echo "::error::Gambling-scoped D1 credentials missing"; exit 1; }
-          case "$MODE" in
-            inspect) ;;
-            sync)
-              [[ "$CONFIRMATION" == "gambling-community-prod" ]] || { echo "::error::Explicit production confirmation missing"; exit 1; }
-              ;;
-            *) echo "::error::Invalid mode"; exit 1 ;;
-          esac
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+          [[ -n "$CLOUDFLARE_API_TOKEN" && "$CLOUDFLARE_ACCOUNT_ID" == "289976272520a38732bef34108585e11" ]] || { echo "::error::Protected D1 credentials not ready"; exit 1; }
+      - name: Checkout pinned and tested Gambling source (never checkout unreviewed branch head)
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
-          # Exact Gambling implementation; future dev changes cannot silently obtain production D1 access.
-          ref: d4f4a2e608779f99fc3261f68d3f58efb0991bf6
+          repository: 119shenhao/gambling
+          ref: 89a0aaf09a19220d8237b98931ddae427f8efba7
+          path: forum
           persist-credentials: false
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '22'
           cache: npm
+          cache-dependency-path: forum/package-lock.json
+      - name: Verify immutable source and exact Gambling D1 target IDs
+        working-directory: forum
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import {execFileSync} from 'node:child_process';
+          import {readFileSync} from 'node:fs';
+          const commit=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
+          const a=JSON.parse(readFileSync('wrangler.preview-migrations.jsonc','utf8'));
+          const b=JSON.parse(readFileSync('wrangler.production-sync.jsonc','utf8'));
+          if(commit!=='89a0aaf09a19220d8237b98931ddae427f8efba7'||
+             a.d1_databases?.length!==1||a.d1_databases[0].binding!=='PREVIEW_DB'||
+             a.d1_databases[0].database_id!=='a92cf620-2a0b-46e1-a0ff-2e0c94218f37'||
+             b.d1_databases?.length!==1||b.d1_databases[0].binding!=='PRODUCTION_DB'||
+             b.d1_databases[0].database_id!=='7bba9ada-589f-493b-8fcf-60265fc0efac')
+             throw Error('Protected sync target or code changed; no D1 operations.');
+          console.log('PASS: exact pinned reviewed code and both isolated Gambling D1 IDs.');
+          NODE
       - run: npm ci --no-audit --no-fund
-      - name: Verify tests before D1 operations
-        run: npm run verify
-      - name: Inspect both independent D1 databases without writes
-        run: npm run sync:production -- --limit=100
-      - name: Capture production Time Travel restore point
-        if: github.event_name == 'push' || inputs.mode == 'sync'
+        working-directory: forum
+      - run: npm run verify
+        working-directory: forum
+      - name: Require production Worker R2 and CDN purge readiness before ANY D1 apply
+        if: steps.request.outputs.mode == 'sync'
+        working-directory: forum
         shell: bash
         run: |
           set -euo pipefail
-          ./node_modules/.bin/wrangler d1 time-travel info gambling-community-prod --config wrangler.production-sync.jsonc --json > "$RUNNER_TEMP/gambling-production-bookmark.json"
+          node scripts/sync-production-cdn-acceptance.mjs preflight
+      - name: Always perform a read-only dry-run before any write
+        shell: bash
+        working-directory: forum
+        run: |
+          set -euo pipefail
+          npm run sync:production -- --limit=100 > "$RUNNER_TEMP/gambling-dry-run.txt"
           python3 - <<'PY'
-          import json,os
-          value=json.load(open(os.path.join(os.environ['RUNNER_TEMP'],'gambling-production-bookmark.json'))).get('bookmark')
-          if not isinstance(value,str) or not value: raise SystemExit("No production restore bookmark; refusing writes")
+          import json,os,re
+          data=open(os.path.join(os.environ['RUNNER_TEMP'],'gambling-dry-run.txt')).read()
+          m=re.search(r'(?m)^\{\s*"mode":\s*"dry_run"',data)
+          if not m:raise SystemExit('No valid machine-readable preflight; stopping')
+          s=json.loads(data[m.start():])
+          if not isinstance(s.get('examined'),int) or s['examined']<0 or s['examined']>100 or s.get('marked')!=0:
+              raise SystemExit('Unexpected dry-run summary; stopping')
+          print('Read-only sync plan:',json.dumps(s))
           with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f:
-              f.write('Production D1 Time Travel bookmark recorded (not printed to public logs).\\n\\n')
-          print("Verified production restore bookmark before any writes")
+              f.write('### Gambling D1 read-only preflight\n\n'+json.dumps(s)+'\n\n')
           PY
-      - name: Synchronize only unsynced published topics
-        if: github.event_name == 'push' || inputs.mode == 'sync'
+      - name: Record an immutable production restore point before any apply
+        if: steps.request.outputs.mode == 'sync'
         shell: bash
+        working-directory: forum
+        run: |
+          set -euo pipefail
+          ./node_modules/.bin/wrangler d1 time-travel info gambling-community-prod --config wrangler.production-sync.jsonc --json > "$RUNNER_TEMP/gambling-prod-bookmark.json"
+          python3 - <<'PY'
+          import os,json
+          b=json.load(open(os.path.join(os.environ['RUNNER_TEMP'],'gambling-prod-bookmark.json'))).get('bookmark')
+          if not isinstance(b,str) or not b:raise SystemExit('Missing production restore bookmark: no writes')
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f:
+              f.write('A production Time Travel restore bookmark was verified and retained securely before the first write.\n\n')
+          print('PASS: production Time Travel recovery bookmark verified before writes; not logged')
+          PY
+      - name: Run existing receipt-based sync in idempotent batches
+        if: steps.request.outputs.mode == 'sync'
+        working-directory: forum
+        shell: bash
+        env:
+          GAMBLING_SYNC_CDN_MANIFEST_PATH: ${{ runner.temp }}/gambling-cdn-manifest.ndjson
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import subprocess,json,re,os
-          totals={'new':0,'existing':0,'comments':0,'marked':0}
+          import json,os,re,subprocess,sys
+          total={'new':0,'existing':0,'comments':0,'marked':0}
           for n in range(1,201):
-              result=subprocess.run(['npm','run','sync:production','--','--limit=100','--apply'],capture_output=True,text=True)
-              if result.returncode:
-                  raise SystemExit('Safe sync halted during batch '+str(n)+'; keep existing receipts; '+result.stderr[-600:])
-              start=re.search(r'(?m)^\{\s*"mode":\s*"apply"',result.stdout)
-              if not start: raise SystemExit('Missing sync summary; stop')
-              stat=json.loads(result.stdout[start.start():])
-              if stat['marked']!=stat['examined']: raise SystemExit('Sync receipt mismatch; stop')
-              for key in totals: totals[key]+=stat[key]
-              print('Batch',n,json.dumps(stat),flush=True)
-              if stat['examined']==0: break
-          else: raise SystemExit('Batch limit reached; verify outstanding work')
+              p=subprocess.run(['npm','run','sync:production','--','--limit=100','--apply'],
+                               capture_output=True,text=True)
+              if p.returncode:
+                  print('Batch failed; receipt-based retries preserve already verified work. No automatic rollback.',file=sys.stderr)
+                  print(p.stderr[-600:],file=sys.stderr)
+                  raise SystemExit(p.returncode)
+              m=re.search(r'(?m)^\{\s*"mode":\s*"apply"',p.stdout)
+              if not m:raise SystemExit('Sync summary not parsable; manual investigation required')
+              data=json.loads(p.stdout[m.start():])
+              if data.get('examined')!=data.get('marked'):
+                  raise SystemExit('Source receipt mismatch; stopping')
+              if not isinstance(data['examined'],int) or data['examined']<0 or data['examined']>100:
+                  raise SystemExit('Invalid per-batch count; stop')
+              for key in total:total[key]+=data[key]
+              print('Batch',n,json.dumps(data,ensure_ascii=False),flush=True)
+              if data['examined']==0:break
+          else:raise SystemExit('Max batch limit reached; investigate before retry')
           with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f:
-              f.write('### Gambling content sync completed\\n\\n'+json.dumps(totals)+'\\n\\nFinal examined=0\\n')
-          print('Completed; final examined=0',json.dumps(totals),flush=True)
+              f.write('### Gambling content publication (source receipts validated)\n\n'+json.dumps(total)+'\n\n')
+          print('PASS: content sync batches complete:',json.dumps(total))
           PY
+      - name: Verify no remaining eligible unsynced source threads
+        if: steps.request.outputs.mode == 'sync'
+        working-directory: forum
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run sync:production -- --limit=100 > "$RUNNER_TEMP/gambling-final-inspect.txt"
+          python3 - <<'PY'
+          import json,re,os
+          output=open(os.path.join(os.environ['RUNNER_TEMP'],'gambling-final-inspect.txt')).read()
+          m=re.search(r'(?m)^\{\s*"mode":\s*"dry_run"',output)
+          if not m:raise SystemExit('Post-sync inspection missing')
+          s=json.loads(output[m.start():])
+          if s['examined']!=0:raise SystemExit('Still unsynced source topics; do not report full success')
+          print('PASS: all eligible source threads have receipts; no subsequent incremental replies will be copied')
+          PY
+      - name: Require production R2/CDN purge and content-version acceptance after sync
+        if: steps.request.outputs.mode == 'sync'
+        working-directory: forum
+        shell: bash
+        env:
+          GAMBLING_SYNC_CDN_MANIFEST_PATH: ${{ runner.temp }}/gambling-cdn-manifest.ndjson
+        run: |
+          set -euo pipefail
+          node scripts/sync-production-cdn-acceptance.mjs verify
+          echo '### Gambling production CDN acceptance' >> "$GITHUB_STEP_SUMMARY"
+          echo 'R2 projection and CDN content-version checks: PASS. The Gambling sync job is not successful until this step passes.' >> "$GITHUB_STEP_SUMMARY"
