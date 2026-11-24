@@ -1,0 +1,71 @@
+name: Gambling R2 DEV browser read E2E (read-only)
+on:
+  push:
+    branches: [dev]
+    paths:
+      - src/seo.ts
+      - .github/workflows/gambling-r2-browser-read.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install minimal browser driver (not added to project lockfile)
+        run: npm install --no-save --no-package-lock --ignore-scripts playwright-core@1.56.1
+      - name: Test actual HTML CSP and Chrome network requests against DEV
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import {chromium} from 'playwright-core';
+          const origin='https://dev-gambling-community.119shenhao.workers.dev';
+          const cdn='https://gambling-data-dev.nbn369.com';
+          const topicId='1fa8a5ba-76d2-4c18-854e-fd35f591c075';
+          const target=origin+'/topic/'+topicId;
+          const expectedCdn=cdn+'/topics/'+topicId+'/detail.json';
+          const wait=ms=>new Promise(r=>setTimeout(r,ms));
+          // Deployment may lag GitHub workflow triggers. No writes or fallback requests from the test harness.
+          let csp='';
+          for(let i=0;i<18;i++){
+            const res=await fetch(target,{method:'HEAD',signal:AbortSignal.timeout(15000)});
+            csp=res.headers.get('content-security-policy')||'';
+            if(res.ok&&csp.includes("connect-src 'self' "+cdn+';'))break;
+            if(i===17)throw Error('DEV HTML CSP still blocks CDN after deployment: '+csp);
+            await wait(10000);
+          }
+          if(csp.includes('https://gambling-data.nbn369.com'))throw Error('DEV CSP also allows PROD R2 host');
+          if(!csp.includes("script-src 'self'")||!csp.includes("frame-ancestors 'none'"))
+            throw Error('CSP unexpectedly weakened');
+          console.log('PASS: live DEV HTML CSP allows only the DEV R2 CDN');
+          const browser=await chromium.launch({channel:'chrome',headless:true,args:['--no-sandbox']});
+          try{
+            const context=await browser.newContext({viewport:{width:393,height:852},locale:'en-US'});
+            const page=await context.newPage();
+            const responses=[],requests=[],blocked=[];
+            page.on('request',r=>{if(r.url().includes('gambling-data'))requests.push(r.url());});
+            page.on('response',r=>{if(r.url().includes('gambling-data'))responses.push({url:r.url(),status:r.status()});});
+            page.on('console',m=>{if(m.type()==='error'&&/content security policy|connect-src|gambling-data/i.test(m.text()))blocked.push(m.text().slice(0,300));});
+            const pageResponse=await page.goto(target,{waitUntil:'domcontentloaded',timeout:20000});
+            if(pageResponse?.status()!==200)throw Error('DEV topic document HTTP '+pageResponse?.status());
+            await page.locator('.article-title').waitFor({state:'visible',timeout:20000});
+            await wait(900);
+            const h1=await page.locator('.article-title').textContent();
+            if(h1?.trim()!=='Del Miles')throw Error('Unexpected topic title; viewer not hydrated');
+            const cdnResponse=responses.find(r=>r.url===expectedCdn&&r.status===200);
+            console.log('Chrome CDN request URLs: '+JSON.stringify(requests.map(u=>new URL(u).pathname)));
+            console.log('Chrome CDN responses: '+JSON.stringify(responses.map(x=>({path:new URL(x.url).pathname,status:x.status}))));
+            console.log('Chrome blocked CSP messages: '+blocked.length);
+            if(blocked.length)throw Error('Browser CSP still blocks CDN');
+            if(!cdnResponse)throw Error('Browser did not fetch the expected R2 JSON with HTTP 200');
+            console.log('PASS: actual anonymous Chrome topic display was loaded using R2 CDN JSON');
+            await context.close();
+          }finally{await browser.close();}
+          NODE
