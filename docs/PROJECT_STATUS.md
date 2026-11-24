@@ -513,3 +513,5 @@
 
 - `scripts/gambling_link_cleanup.py` 统一处理标题、主帖、评论和楼中楼；在 `gambling_collect.py` 的常规、分页、导出导入以及新候选 inspect 路径中，清理后再校验、计算请求大小、提交与严格回读。只处理内容字段，后台来源发现和去重不变；原文其余文字及父子结构保留。空内容候选安全拒绝。
 - 新增离线回归覆盖中英文网址、Markdown/HTML 锚文本、裸域名、嵌套回复、仅网址回复、幂等与普通文本保留。CI 实际回执另行核验；未批量修改任何历史 D1 数据或生产同步任务。
+
+- 将离线 Python 采集器回归加入既有 `Gambling community checks` CI，后续每次代码提交自动检查去链接规则；不触发采集、不写 D1。当前统一规则覆盖显式 HTTP(S)/FTP、mailto、www 和常见裸域名，以及 Markdown/HTML 锚点；不声称覆盖任何形式的混淆网址。

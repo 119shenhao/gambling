@@ -7,9 +7,9 @@ _TLD = r"(?:com|org|net|edu|gov|mil|int|info|biz|name|pro|io|app|dev|xyz|online|
 _DOMAIN = r"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+" + _TLD
 _TAIL = r"""[^\s<>"'“”‘’。，、；！？：）】》」』]+"""
 _LINK = re.compile(
-    r"(?<![A-Za-z0-9_@])(?:(?:https?|ftp)://" + _TAIL +
-    r"|mailto:" + _TAIL + r"|www\." + _TAIL +
-    r"|" + _DOMAIN + r"(?![A-Za-z0-9_-])(?::[0-9]{1,5})?(?:[/?#]" + _TAIL + r")?)",
+    r"(?:(?:https?|ftp)://" + _TAIL + r"|mailto:" + _TAIL +
+    r"|(?<![A-Za-z0-9_@])(?:www\." + _TAIL +
+    r"|" + _DOMAIN + r"(?![A-Za-z0-9_-])(?::[0-9]{1,5})?(?:[/?#]" + _TAIL + r")?))",
     re.I,
 )
 _ANCHOR = re.compile(r"<a\b[^>]*>(.*?)</a\s*>", re.I | re.S)

@@ -178,6 +178,7 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(remove_links("Ordinary text.\n\nKeep  two spaces."), "Ordinary text.\n\nKeep  two spaces.")
         self.assertEqual(remove_links("Contact mailto:help@example.org or ftp://example.org/a."), "Contact or.")
         self.assertEqual(remove_links("See https://example.org/a_(b)."), "See.")
+        self.assertEqual(remove_links("Readhttps://example.org/a now."), "Read now.")
         self.assertEqual(remove_links("Source: https://example.org/"), "")
         self.assertEqual(remove_links("Examples: [help](/relative/path)."), "Examples: help.")
 
