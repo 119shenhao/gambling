@@ -18,6 +18,7 @@ from urllib.request import Request, urlopen
 
 from gambling_forums import discover, parse_topic, parse_topic_pages, source_id
 from gambling_story_sources import ARTICLE_SOURCES
+from gambling_link_cleanup import clean_collected_draft
 
 PREVIEW = "https://dev-gambling-community.119shenhao.workers.dev"
 SITE_RE = re.compile(r"^[a-z0-9][a-z0-9_-]{1,31}$")
@@ -239,10 +240,21 @@ def lookup_published_topic_id(draft):
 
 def audit_completed(site, identifier, url, draft, n):
     """Read-only audit of old completed imports, never claim or re-import."""
+    # Historical DEV records are intentionally not rewritten. Verify the exact
+    # legacy or current representation, without claiming or importing again.
     topic_id = lookup_published_topic_id(draft)
     if not topic_id:
+        clean_collected_draft(draft)
+        topic_id = lookup_published_topic_id(draft)
+    if not topic_id:
         raise ValueError("completed_topic_not_visible_in_dev_feed")
-    readback(topic_id, draft, n, site, identifier)
+    try:
+        readback(topic_id, draft, n, site, identifier)
+    except ValueError as error:
+        if str(error) not in ("readback_topic_mismatch", "readback_reply_mismatch"):
+            raise
+        clean_collected_draft(draft)
+        readback(topic_id, draft, n, site, identifier)
     emit("completed_audit_ok", site=site, source_id=identifier,
          topic_id=topic_id, replies=n, source_url=url)
 
@@ -428,6 +440,7 @@ def collect_one(site, source, identifier, url, export_dir):
             metadata = {"source_total": len(flatten(draft.get("comments", []))),
                         "capped": False, "pages": 1}
         try:
+            clean_collected_draft(draft)
             n = validate(draft, allow_no_replies=site in ARTICLE_SOURCES)
         except ValueError as error:
             raise RejectedCandidate(str(error)) from None
@@ -597,6 +610,9 @@ def main():
                             draft = parse_topic(site, identifier, url, fetch_source(url))
                             meta = {"source_total": len(flatten(draft.get("comments", []))),
                                     "capped": False, "pages": 1}
+                        # Preserve legacy completed audits; new candidates use the import policy.
+                        if excluded.get(identifier) != "completed":
+                            clean_collected_draft(draft)
                         count = validate(draft, allow_no_replies=site in ARTICLE_SOURCES)
                         emit("parser_probe_pagination", site=site, source_id=identifier,
                              pages=meta["pages"], source_total=meta["source_total"],

@@ -222,3 +222,7 @@ GitHub 请求文件 `.github/gambling-collector-request.json` 的格式为：
 日志输出 `readback_pending_review_verified` 时代表“存储成功，其中部分内容待审”，区别于“全部回复已经公开可见”。一旦公开回复正文不符、数据库缺少评论、状态计数不符或无法验证回执，必须继续报错，不能凑数。已完成的来源不得重新导入以掩盖误报。
 
 [真实 67 条帖子只读复验](https://github.com/119shenhao/gambling/actions/runs/45000202855) 已确认：DEV 存储67，公开65，待审核2，GitHub workflow Success。既有按6小时的采集日程及各来源每轮最多2篇不变，生产不受影响。
+
+### 新采集内容去链接规则（2026-11-24）
+
+统一采集器在校验并提交 `/api/collect/complete` 或 `/api/collect/long/*` 前清理标题、正文及每层回复中的可点击 URL/链接目标。非网址锚文本保留，来源 ID 和后台 URL 不改。第三方 AI 通过 API 采集也应先遵守相同规则；不得把来源链接附加到内容中。清理后为空的标题、正文或评论应拒绝整个候选并释放认领，避免捏造或破坏评论树。严格回读对比清理后的内容。

@@ -140,6 +140,47 @@ class ParserTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "reply_count_invalid"):
             collect.validate(draft)
 
+    def test_links_removed_from_titles_bodies_and_nested_replies(self):
+        draft = {
+            "title": "My recovery https://example.org/story",
+            "body": "Read [my story](https://example.org/a_(b)).\n\n"
+                    "See https://example.org/path?q=1&b=2, then continue.\n"
+                    "保留中文https://example.org/path。谢谢。\n"
+                    "Source: https://example.org/story",
+            "source_lang": "en",
+            "comments": [{"body": "Try www.example.org/help today.",
+                          "source_lang": "en",
+                          "replies": [{"body": "Read example.com/help for support.",
+                                       "source_lang": "en",
+                                       "replies": [{"body": "Thanks <https://example.org/a>!"}]}]}]
+        }
+        # A URL immediately following non-ASCII prose must also be cleaned.
+        collect.clean_collected_draft(draft)
+        self.assertEqual(draft["title"], "My recovery")
+        self.assertEqual(draft["body"], "Read my story.\n\nSee, then continue.\n保留中文。谢谢。")
+        self.assertEqual(draft["comments"][0]["body"], "Try today.")
+        self.assertEqual(draft["comments"][0]["replies"][0]["body"], "Read for support.")
+        self.assertEqual(draft["comments"][0]["replies"][0]["replies"][0]["body"], "Thanks!")
+        self.assertEqual(collect.validate(draft), 3)
+        self.assertEqual([r["parent_index"] for r in collect.staged_replies(draft)], [None, 0, 1])
+        copy = __import__("copy").deepcopy(draft)
+        self.assertEqual(collect.clean_collected_draft(draft), copy)
+
+    def test_link_only_reply_rejects_without_flattening_or_fabricating(self):
+        draft = {"title": "A story", "body": "I stopped gambling.", "source_lang": "en",
+                 "comments": [{"body": "https://example.org", "replies": [{"body": "Thanks"}]}]}
+        with self.assertRaisesRegex(ValueError, "empty_reply_after_link_cleanup"):
+            collect.clean_collected_draft(draft)
+
+    def test_link_cleanup_preserves_readable_anchor_and_ordinary_text(self):
+        from gambling_link_cleanup import remove_links
+        self.assertEqual(remove_links('<a href="https://example.org">help page</a>'), "help page")
+        self.assertEqual(remove_links("Ordinary text.\n\nKeep  two spaces."), "Ordinary text.\n\nKeep  two spaces.")
+        self.assertEqual(remove_links("Contact mailto:help@example.org or ftp://example.org/a."), "Contact or.")
+        self.assertEqual(remove_links("See https://example.org/a_(b)."), "See.")
+        self.assertEqual(remove_links("Source: https://example.org/"), "")
+        self.assertEqual(remove_links("Examples: [help](/relative/path)."), "Examples: help.")
+
     def test_stable_original_slug(self):
         self.assertEqual(source_id(self.site, self.url), "trying-to-stop")
         with self.assertRaises(ValueError):
