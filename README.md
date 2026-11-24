@@ -1,10 +1,10 @@
-# 戒赌社区 / Problem Gambling
+# 戒赌社区 / Gambling Stories
 
 生产域名：`gambling.nbn369.com`。新仓库为 `119shenhao/gambling`，开发分支 `dev`。仓库地址：https://github.com/119shenhao/gambling 。
 
 从 `119shenhao/spine-community/main` 移植通用论坛框架：帖子、回复、用户互动、后台、多语言、搜索、可选翻译及 SEO。**不复制真实业务数据**。
 
-简体中文叫「戒赌社区」，繁体中文叫「戒賭社區」，提倡戒赌；除简繁中文外的语言遵循英文 **Problem Gambling** 客观中立定位。英文口号：**Real Stories. Real Impacts. Open Discussion.** 所有语言共享同一个社区。
+简体中文叫「戒赌社区」，繁体中文叫「戒賭社區」，提倡戒赌；除简繁中文外的语言遵循英文 **Gambling Stories** 客观中立定位。英文口号：**Real Stories. Real Impacts. Open Discussion.** 所有语言共享同一个社区。
 
 ## 本地运行
 
