@@ -1,0 +1,83 @@
+name: Gambling R2 DEV topic detail and translations (bounded)
+on:
+  push:
+    branches: [dev]
+    paths:
+      - .github/workflows/gambling-r2-dev-detail-e2e.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  topic-detail:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify single DEV topic detail and any preexisting translation JSON
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const dev='https://dev-gambling-community.119shenhao.workers.dev';
+          const cdn='https://gambling-data-dev.nbn369.com';
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          const signal=()=>AbortSignal.timeout(13000);
+          const feedRes=await fetch(cdn+'/feeds/latest/page-1.json',{headers:{Origin:dev},signal:signal()});
+          if(!feedRes.ok)throw Error('No public DEV CDN feed: '+feedRes.status);
+          const feed=await feedRes.json();
+          const topics=feed?.data?.topics;
+          if(!Array.isArray(topics))throw Error('DEV feed JSON schema invalid');
+          if(topics.length===0){console.log('No published DEV topics; detail check skipped without D1 writes');process.exit(0);}
+          const id=topics[0]?.id;
+          if(typeof id!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(id))throw Error('Invalid public topic ID');
+          const key='topics/'+id+'/detail.json';
+          async function cdnGet(){
+            const res=await fetch(cdn+'/'+key,{headers:{Origin:dev},signal:signal()});
+            return {status:res.status,cache:res.headers.get('cf-cache-status'),
+              cc:res.headers.get('cache-control'),cors:res.headers.get('access-control-allow-origin'),
+              body:res.ok?await res.json():null};
+          }
+          let result=await cdnGet();
+          console.log('DEV detail initial HTTP '+result.status);
+          if(result.status===404){
+            const fallback=await fetch(dev+'/api/topics/'+encodeURIComponent(id),{
+              headers:{'x-gambling-projection-miss':key},signal:signal()});
+            if(!fallback.ok)throw Error('Single DEV detail fallback failed HTTP '+fallback.status);
+            const data=await fallback.json();
+            if(data?.topic?.id!==id||!Array.isArray(data.comments))throw Error('DEV Worker detail schema mismatch');
+            console.log('DEV detail fallback succeeded; comments='+data.comments.length);
+            for(let i=0;i<6;i++){
+              await sleep(5000);
+              result=await cdnGet();
+              console.log('DEV detail CDN poll '+(i+1)+' HTTP '+result.status+' cache='+(result.cache||'none'));
+              if(result.status===200)break;
+              if(result.status!==404)throw Error('DEV detail unexpected CDN status '+result.status);
+            }
+          }else if(result.status!==200)throw Error('Unexpected CDN response '+result.status);
+          if(result.status!==200)throw Error('DEV topic projection not published after one fallback');
+          if(result.body?.schemaVersion!==1||!Number.isSafeInteger(result.body.contentVersion)||
+             result.body.data?.topic?.id!==id||!Array.isArray(result.body.data?.comments)||
+             result.body.data?.translationLayout!=='separate-v1')
+             throw Error('R2 topic JSON invalid');
+          if(result.cors!==dev&&result.cors!=='*')throw Error('CORS not configured for DEV forum');
+          if(!result.cc?.includes('s-maxage=60'))throw Error('DEV topic R2 cache TTL != 60');
+          const again=await cdnGet();
+          if(again.status!==200)throw Error('Second DEV topic CDN read failed');
+          console.log('PASS: original topic detail R2 JSON and CDN, cache='+(again.cache||'not-present'));
+          const locales=result.body.data.translationLocales||[];
+          if(!Array.isArray(locales))throw Error('Invalid language locales list');
+          if(locales.length===0){
+            console.log('Translation JSON not present in this topic; no Azure translation triggered');
+          }else{
+            const loc=locales[0];
+            const tr=await fetch(cdn+'/i18n/'+encodeURIComponent(loc)+'/'+key,{headers:{Origin:dev},signal:signal()});
+            if(!tr.ok)throw Error('Existing translation JSON URL HTTP '+tr.status);
+            const translation=await tr.json();
+            if(translation.schemaVersion!==1||translation.translationLayout!=='separate-v1'||
+               translation.locale!==loc||translation.sourceKey!==key||
+               translation.contentVersion!==result.body.contentVersion||!Array.isArray(translation.items))
+               throw Error('Existing translation JSON failed schema or version check');
+            console.log('PASS: previously cached separate translation JSON locale='+loc+' items='+translation.items.length);
+          }
+          console.log('No production request, no Azure call, no content changes, no private text logged');
+          NODE
