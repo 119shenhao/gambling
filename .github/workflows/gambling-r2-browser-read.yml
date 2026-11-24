@@ -20,12 +20,12 @@ jobs:
         with:
           node-version: '22'
       - name: Install minimal browser driver (not added to project lockfile)
-        run: npm install --no-save --no-package-lock --ignore-scripts playwright-core@1.56.1
+        run: npm install --prefix /tmp/gambling-r2-browser --no-save --no-package-lock --ignore-scripts playwright-core@1.56.1
       - name: Test actual HTML CSP and Chrome network requests against DEV
         shell: bash
         run: |
           node --input-type=module <<'NODE'
-          import {chromium} from 'playwright-core';
+          import {chromium} from '/tmp/gambling-r2-browser/node_modules/playwright-core/index.mjs';
           const origin='https://dev-gambling-community.119shenhao.workers.dev';
           const cdn='https://gambling-data-dev.nbn369.com';
           const topicId='1fa8a5ba-76d2-4c18-854e-fd35f591c075';
