@@ -1,10 +1,10 @@
 {
-  "run_id": 45040586861,
-  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45040586861",
-  "deployment_check": "failure",
-  "expected_worker_version": "0.5.2-community-parity.20261122",
+  "run_id": 45320398006,
+  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45320398006",
+  "deployment_check": "success",
+  "expected_worker_version": "0.5.3-r2-projection.20261124",
   "production_v2ex_original_language_expected": "zh-CN",
-  "source_commit": "fe66fbe1c488d424e41b2a30011a83304f8b80f2",
-  "checked_at": "2026-11-22T15:56:31.316Z",
-  "verified": false
+  "source_commit": "735643c7e1ac1cb2ab9ef2d4f4735b5ee13b5c7f",
+  "checked_at": "2026-11-24T03:34:43.829Z",
+  "verified": true
 }
