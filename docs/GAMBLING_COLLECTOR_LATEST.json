@@ -2,51 +2,6 @@
   "collector_job_result": "success",
   "events": [
     {
-      "candidates": 4,
-      "event": "listing_checked",
-      "site": "gamblingwithlives"
-    },
-    {
-      "candidates": 4,
-      "eligible": 4,
-      "event": "plan",
-      "excluded": 0,
-      "import_allowed": true,
-      "site": "gamblingwithlives"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamblingwithlives",
-      "source_id": "paul-wills"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamblingwithlives",
-      "source_id": "kimberly-wadsworth"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamblingwithlives",
-      "source_id": "philip-tomlinson"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamblingwithlives",
-      "source_id": "chris-bruney"
-    },
-    {
-      "duplicates": 0,
-      "event": "site_summary",
-      "new_comments": 0,
-      "new_topics": 0,
-      "site": "gamblingwithlives",
-      "target": 2
-    },
-    {
       "candidates": 0,
       "event": "listing_checked",
       "site": "australiadss"
@@ -319,7 +274,7 @@
     },
     {
       "board": "family-friends",
-      "candidates": 17,
+      "candidates": 15,
       "event": "listing_checked",
       "page": 2,
       "site": "gamcare"
@@ -337,22 +292,34 @@
       "source_id": "i-feel-so-alone-3"
     },
     {
-      "event": "imported",
-      "replies": 5,
+      "event": "candidate_rejected",
+      "reason": "other_error",
       "site": "gamcare",
-      "source_id": "has-he-sold-them",
-      "topic_id": "35a704ff-46b7-4f26-9b16-fe1aec35ae6b"
+      "source_id": "doing-it-solo"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "pokemon-trading"
     },
     {
       "event": "imported",
       "replies": 3,
       "site": "gamcare",
-      "source_id": "living-separately-3",
-      "topic_id": "e384f01d-1c6a-40c5-bb72-708c1ddd555c"
+      "source_id": "to-stay-or-go",
+      "topic_id": "cdc49051-eb50-42c8-bb94-bf0f32df9c76"
+    },
+    {
+      "event": "imported",
+      "replies": 2,
+      "site": "gamcare",
+      "source_id": "advice-12",
+      "topic_id": "b5172be4-578f-4862-8f78-f318be2e74af"
     },
     {
       "board": "overcoming-problem-gambling",
-      "candidates": 14,
+      "candidates": 12,
       "event": "listing_checked",
       "page": 2,
       "site": "gamcare"
@@ -394,22 +361,28 @@
       "source_id": "quote-of-the-day-9"
     },
     {
-      "event": "imported",
-      "replies": 6,
+      "event": "candidate_rejected",
+      "reason": "other_error",
       "site": "gamcare",
-      "source_id": "relapse-yet-again",
-      "topic_id": "28e2ca8d-49dc-49a2-a066-c12495f55b7e"
+      "source_id": "join-the-guru-challenge"
+    },
+    {
+      "event": "imported",
+      "replies": 4,
+      "site": "gamcare",
+      "source_id": "a-gamble-free-life-i-dream-off",
+      "topic_id": "557d5e0b-26f3-4ebd-a928-3124ffbe3577"
     },
     {
       "event": "imported",
       "replies": 1,
       "site": "gamcare",
-      "source_id": "quote-of-the-day-8",
-      "topic_id": "a6d77b74-cfa9-4d03-b9cf-b9451be16377"
+      "source_id": "gambling-recovery",
+      "topic_id": "051859ac-8cf1-4a78-8e5f-23fc13721414"
     },
     {
       "board": "new-members-intros-forum",
-      "candidates": 11,
+      "candidates": 9,
       "event": "listing_checked",
       "page": 2,
       "site": "gamcare"
@@ -445,22 +418,28 @@
       "source_id": "any-suggest"
     },
     {
-      "event": "imported",
-      "replies": 15,
+      "event": "candidate_rejected",
+      "reason": "other_error",
       "site": "gamcare",
-      "source_id": "back-again-any-help-would-be-appreciated-3",
-      "topic_id": "1ef8cceb-fe00-4dab-b0b2-e1bbfabce243"
+      "source_id": "struggling-to-breathe"
     },
     {
       "event": "imported",
-      "replies": 5,
+      "replies": 4,
       "site": "gamcare",
-      "source_id": "high-achieving-single-mother-with-the-weight-of-the-world-on-my-shoulders",
-      "topic_id": "89d80fb5-4a31-4fc3-8b5f-61482e1c5ce3"
+      "source_id": "uc-review",
+      "topic_id": "a211ee6f-0fee-4323-b2ff-de619fba517e"
+    },
+    {
+      "event": "imported",
+      "replies": 1,
+      "site": "gamcare",
+      "source_id": "new-joiner-whatnot-surprise-spins",
+      "topic_id": "c733f6b6-a3d4-4330-b4c4-df674dac148e"
     },
     {
       "board": "recovery-diaries",
-      "candidates": 10,
+      "candidates": 8,
       "event": "listing_checked",
       "page": 2,
       "site": "gamcare"
@@ -509,26 +488,45 @@
     },
     {
       "event": "imported",
-      "replies": 2,
+      "replies": 8,
       "site": "gamcare",
-      "source_id": "speed-1994-starring-dennis-hopper",
-      "topic_id": "2f780826-cf2b-48b7-8291-11a9bccdca45"
+      "source_id": "day-2-8",
+      "topic_id": "79aface3-3832-4e4b-9a09-c871058a428f"
+    },
+    {
+      "board": "recovery-diaries",
+      "candidates": 18,
+      "event": "listing_checked",
+      "page": 3,
+      "site": "gamcare"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "determined-to-keep-a-diary"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "24-hours-to-live-2018-starring-ethan-hawke"
     },
     {
       "event": "imported",
-      "replies": 7,
+      "replies": 27,
       "site": "gamcare",
-      "source_id": "dayones-recovery-journal",
-      "topic_id": "63702832-76a3-4eae-b297-502051f2e159"
+      "source_id": "day-30-2",
+      "topic_id": "11b159da-ef7e-4459-98e5-5ad12d25545d"
     },
     {
       "board": "family-friends",
       "duplicates": 0,
       "errors": 0,
       "event": "board_summary",
-      "new_comments": 8,
+      "new_comments": 5,
       "new_topics": 2,
-      "rejected": 10,
+      "rejected": 12,
       "site": "gamcare",
       "target": 2
     },
@@ -537,9 +535,9 @@
       "duplicates": 0,
       "errors": 0,
       "event": "board_summary",
-      "new_comments": 7,
+      "new_comments": 5,
       "new_topics": 2,
-      "rejected": 18,
+      "rejected": 19,
       "site": "gamcare",
       "target": 2
     },
@@ -548,9 +546,9 @@
       "duplicates": 0,
       "errors": 0,
       "event": "board_summary",
-      "new_comments": 20,
+      "new_comments": 5,
       "new_topics": 2,
-      "rejected": 11,
+      "rejected": 12,
       "site": "gamcare",
       "target": 2
     },
@@ -559,16 +557,16 @@
       "duplicates": 0,
       "errors": 0,
       "event": "board_summary",
-      "new_comments": 9,
+      "new_comments": 35,
       "new_topics": 2,
-      "rejected": 18,
+      "rejected": 20,
       "site": "gamcare",
       "target": 2
     },
     {
       "duplicates": 0,
       "event": "site_summary",
-      "new_comments": 44,
+      "new_comments": 50,
       "new_topics": 8,
       "site": "gamcare",
       "target": 8
@@ -640,25 +638,25 @@
       "duplicates": 0,
       "errors": 0,
       "event": "run_summary",
-      "new_comments": 44,
+      "new_comments": 50,
       "new_topics": 10,
       "ready_for_unattended_collect": true,
-      "rejected": 64
+      "rejected": 70
     }
   ],
   "has_run_summary": true,
   "production_database_writes": false,
   "report_type": "gambling_dev_collector_sanitized",
-  "run_id": 45361328888,
+  "run_id": 45380183683,
   "run_summary": {
     "duplicates": 0,
     "errors": 0,
     "event": "run_summary",
-    "new_comments": 44,
+    "new_comments": 50,
     "new_topics": 10,
     "ready_for_unattended_collect": true,
-    "rejected": 64
+    "rejected": 70
   },
-  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45361328888",
-  "trigger_commit": "9efe1ffbbffbaf5f2abdc079cf7b2c2ac59b46a7"
+  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45380183683",
+  "trigger_commit": "50cf2e13429b50c58532830c676c79f447e50df6"
 }
