@@ -472,3 +472,18 @@ test('R2 rollout preserves production configs while enabling separate per-enviro
  assert.match(read('src/index.ts'),/0\.5\.3-r2-projection\.20261124/);
  assert.match(read('.github/workflows/prod-readiness.yml'),/0\.5\.3-r2-projection\.20261124/);
 });
+
+test('SSR HTML CSP allows only its environment-specific R2 JSON host, never broad remote connections',()=>{
+ const seo=read('src/seo.ts');
+ const reader=read('public/public-content.js');
+ assert.match(seo,/jsonCdnOrigin=isPreview\(env\)\?'https:\/\/gambling-data-dev\.nbn369\.com':'https:\/\/gambling-data\.nbn369\.com'/);
+ assert.match(seo,/connect-src 'self' \$\{jsonCdnOrigin\}/);
+ assert.doesNotMatch(seo,/connect-src 'self' ;/);
+ assert.doesNotMatch(seo,/connect-src \*/);
+ assert.match(seo,/script-src 'self'/);
+ assert.match(seo,/frame-ancestors 'none'/);
+ assert.match(seo,/object-src 'none'/);
+ assert.match(reader,/const eligible=base===HOSTS\[health\?\.environment\]/);
+ assert.match(reader,/fetcher\(base\+'\/'\+key/);
+ assert.match(read('public/app.js'),/publicReads\(\)\.topic\(topicId,p\)/);
+});
