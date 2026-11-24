@@ -446,3 +446,29 @@ test('release candidate protects all production bindings and DEV-only collection
  assert.equal((server.match(/if\(env\.APP_ENV!=='preview'\)fail\(404,'not_found'\)/g)||[]).length,2);
  assert.doesNotMatch(read('scripts/prepare-build.mjs'),/secret\s+(?:put|delete|bulk)/);
 });
+
+test('R2 rollout preserves production configs while enabling separate per-environment CDN',()=>{
+ const c=JSON.parse(read('wrangler.jsonc'));
+ for(const [env,vars] of [['production',c.vars],['preview',c.previews.vars]]){
+  for(const key of ['PUBLIC_CONTENT_ENABLED','PUBLIC_CONTENT_READS','PUBLIC_CONTENT_FALLBACK','PUBLIC_CONTENT_ON_DEMAND'])
+   assert.equal(vars[key],'true',env+':'+key);
+  assert.equal(vars.PUBLIC_CONTENT_BASE_URL,env==='production'?'https://gambling-data.nbn369.com':'https://gambling-data-dev.nbn369.com');
+  assert.equal(vars.CDN_ZONE_ID,'7857d08dff2a46bf824914c687a21413');
+  assert.equal(vars.PUBLIC_CONTENT_PAGE_SIZE,'50');
+  for(const secret of ['CDN_PURGE_API_TOKEN','TRANSLATOR_KEY','IDENTITY_CLIENT_SECRET'])assert.equal(vars[secret],undefined);
+ }
+ assert.equal(c.keep_vars,true);
+ assert.equal(c.vars.IDENTITY_LOGIN_ENABLED,'true');
+ assert.equal(c.vars.TRANSLATION_ENABLED,'true');
+ assert.equal(c.vars.TRANSLATION_DAILY_LIMIT,'200000');
+ assert.equal(c.vars.TRANSLATION_MONTHLY_LIMIT,'1800000');
+ assert.equal(c.vars.IMPORT_ENABLED,'false');
+ assert.equal(c.vars.COLLECT_ENABLED,'false');
+ assert.equal(c.d1_databases[0].database_name,'gambling-community-prod');
+ assert.equal(c.r2_buckets[0].bucket_name,'gambling-community-public-prod');
+ assert.equal(c.previews.d1_databases.find(v=>v.binding==='DB')?.database_name,'gambling-community-dev');
+ assert.equal(c.previews.r2_buckets[0].bucket_name,'gambling-community-public-dev');
+ assert.match(read('src/public-projection.ts'),/const cacheControl='public, max-age=0, s-maxage=60, must-revalidate'/);
+ assert.match(read('src/index.ts'),/0\.5\.3-r2-projection\.20261124/);
+ assert.match(read('.github/workflows/prod-readiness.yml'),/0\.5\.3-r2-projection\.20261124/);
+});
