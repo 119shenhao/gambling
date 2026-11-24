@@ -13,40 +13,58 @@ permissions:
 jobs:
   verify-cdn-hosts:
     runs-on: ubuntu-latest
-    timeout-minutes: 4
+    timeout-minutes: 5
     steps:
-      - name: Check independent dev/prod R2 custom-domain DNS and CORS without database writes
+      - name: Probe CDN DNS, TLS, CORS and Worker health (never generate content)
         shell: bash
         run: |
           python3 - <<'PY'
-          import json,socket,urllib.request,urllib.error,ssl,os
-          cases=[
+          import json,socket,urllib.request,urllib.error,os
+          targets=[
             ("preview","gambling-data-dev.nbn369.com","https://dev-gambling-community.119shenhao.workers.dev"),
             ("production","gambling-data.nbn369.com","https://gambling.nbn369.com"),
           ]
-          rows=[]
-          for env,hostname,origin in cases:
-            item={"environment":env,"hostname":hostname,"dns":False,"tls_http":False,"cors":"unverified"}
+          results=[]
+          for env,hostname,origin in targets:
+            item={"environment":env,"hostname":hostname,"dns":False,"tls_http":False,
+                  "cors":"not_tested","http_status":None,"health_status":None}
             try:
               item["dns"]=bool(socket.getaddrinfo(hostname,443,type=socket.SOCK_STREAM))
-              request=urllib.request.Request(f"https://{hostname}/feeds/latest/page-1.json",headers={"Origin":origin,"User-Agent":"Gambling-R2-Readiness/1.0"},method="GET")
+              req=urllib.request.Request("https://"+hostname+"/feeds/latest/page-1.json",
+                headers={"Origin":origin,"User-Agent":"Gambling-R2-Readiness/1.1"},method="GET")
               try:
-                with urllib.request.urlopen(request,timeout=12) as response:
-                  status=response.status
-                  cors=response.headers.get("Access-Control-Allow-Origin")
-              except urllib.error.HTTPError as exc:
-                status=exc.code
-                cors=exc.headers.get("Access-Control-Allow-Origin")
-              item["http_status"]=status
-              item["tls_http"]=True
-              item["cors"]="accepted" if cors in (origin,"*") else "missing_or_unverified"
-            except Exception as exc:
-              item["diagnosis"]=type(exc).__name__
-            rows.append(item)
-          print(json.dumps(rows,ensure_ascii=False,sort_keys=True))
-          with open(os.environ["GITHUB_STEP_SUMMARY"],"a") as out:
-            print("### R2 public CDN external prerequisites (read-only)",file=out)
-            print("These checks do not prove correct Cloudflare R2 bucket association or purge-token permissions. A 404 can be normal before first materialization.",file=out)
-            for r in rows:
-              print("- "+json.dumps(r,sort_keys=True),file=out)
+                r=urllib.request.urlopen(req,timeout=12)
+              except urllib.error.HTTPError as e:
+                r=e
+              with r:
+                item["http_status"]=r.status if hasattr(r,"status") else r.code
+                item["tls_http"]=True
+                acao=r.headers.get("Access-Control-Allow-Origin")
+                item["cors"]="allowed" if acao in (origin,"*") else "not_present_for_this_response"
+                item["cache_status"]=r.headers.get("CF-Cache-Status")
+                # Never print body, URLs with query strings, token, or user content.
+              req=urllib.request.Request(origin+"/api/health",
+                headers={"User-Agent":"Gambling-R2-Readiness/1.1"},method="GET")
+              try:
+                h=urllib.request.urlopen(req,timeout=12)
+              except urllib.error.HTTPError as e:
+                h=e
+              with h:
+                item["health_status"]=h.status if hasattr(h,"status") else h.code
+                body=json.loads(h.read(90000))
+              public=body.get("publicContent") or {}
+              item["worker_environment"]=body.get("environment")
+              item["databaseReady"]=body.get("databaseReady")
+              item["projection"]={k:public.get(k) for k in
+                ["ready","enabled","purgeConfigured","zoneConfigured","tokenConfigured",
+                 "baseUrl","onDemand","fallback","pageSize"]}
+            except Exception as e:
+              item["diagnosis"]=type(e).__name__
+            results.append(item)
+          print(json.dumps(results,ensure_ascii=False,sort_keys=True))
+          with open(os.environ["GITHUB_STEP_SUMMARY"],"a",encoding="utf-8") as out:
+            print("### Gambling R2/CDN read-only readiness",file=out)
+            print("An empty bucket can return HTTP 404 with no CORS header; that alone does NOT prove a broken CORS policy.",file=out)
+            print("This run performs no D1 writes, no user login, no projection misses, and no cache purges.",file=out)
+            for entry in results: print("- "+json.dumps(entry,sort_keys=True),file=out)
           PY
