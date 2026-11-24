@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {spawnSync} from 'node:child_process';
 import {parseWranglerResults,assertProdConfig,assertReadiness,verifyEnvelope,parseManifest} from '../scripts/sync-production-cdn-acceptance.mjs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const database='7bba9ada-589f-493b-8fcf-60265fc0efac';
@@ -76,4 +77,39 @@ test('sync contract: manifest after source receipt, post-sync R2 wake, Cloudflar
  assert.match(cdn,/if\(row\.state==='done'&&row\.published_version===row\.version&&r\.status===200\)/);
  assert.match(cdn,/const after=pending\(\)/);
  assert.doesNotMatch(cdn,/\/purge_cache|env\.DB\.prepare/);
+});
+
+test('DEV receipt trigger persists unverified CDN obligations across reruns',()=>{
+ const migration=read('migrations/preview-only/0003_sync_cdn_acceptance.sql');
+ const py=[
+  "import sqlite3,sys",
+  "db=sqlite3.connect(':memory:')",
+  "db.execute('PRAGMA foreign_keys=ON')",
+  "db.executescript('CREATE TABLE topics(id TEXT PRIMARY KEY); CREATE TABLE topic_sync_receipts(source_topic_id TEXT PRIMARY KEY REFERENCES topics(id),production_topic_id TEXT NOT NULL); INSERT INTO topics(id) VALUES(\\'old\\'),(\\'new\\'); INSERT INTO topic_sync_receipts VALUES(\\'old\\',\\'existing-prod\\');')",
+  "sql=sys.stdin.read()",
+  "db.executescript(sql)",
+  "assert db.execute('SELECT source_topic_id,production_topic_id,verified_at FROM topic_cdn_sync_acceptance').fetchall()==[('old','existing-prod',None)]",
+  "db.execute(\"INSERT INTO topic_sync_receipts VALUES('new','new-prod')\")",
+  "assert db.execute('SELECT count(*) FROM topic_cdn_sync_acceptance WHERE verified_at IS NULL').fetchone()[0]==2",
+  "db.execute(\"UPDATE topic_cdn_sync_acceptance SET verified_at=unixepoch(),verified_version=9 WHERE source_topic_id='old'\")",
+  "db.executescript(sql)",
+  "rows=db.execute('SELECT source_topic_id,production_topic_id,verified_version,verified_at IS NOT NULL FROM topic_cdn_sync_acceptance ORDER BY source_topic_id').fetchall()",
+  "assert rows==[('new','new-prod',None,0),('old','existing-prod',9,1)],rows",
+  "print('PASS 2 durable acceptance records; no duplicate and no lost checkpoint')"
+ ].join('\n');
+ const result=spawnSync('python3',['-c',py],{input:migration,encoding:'utf8'});
+ assert.equal(result.status,0,result.stderr||result.stdout);
+ const preview=read('scripts/preview-migrate.mjs');
+ assert.match(preview,/0003_sync_cdn_acceptance\.sql/);
+ assert.match(preview,/topic_cdn_sync_receipt_insert/);
+});
+test('CDN checkpoints cannot mutate original sync receipt or disappear across Actions runs',()=>{
+ const s=read('scripts/sync-production-cdn-acceptance.mjs');
+ assert.match(s,/function unacceptedReceipts\(\)/);
+ assert.match(s,/WHERE verified_at IS NULL ORDER BY/);
+ assert.match(s,/ackAcceptedReceipts\(receipts,versions\)/);
+ assert.match(s,/verified_at=unixepoch\(\),verified_version=CASE source_topic_id/);
+ assert.match(s,/const left=unacceptedReceipts\(\)/);
+ assert.match(s,/if\(left\.some/);
+ assert.doesNotMatch(s,/UPDATE topic_sync_receipts|DELETE FROM topic_sync_receipts/);
 });
