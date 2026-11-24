@@ -44,8 +44,14 @@ export async function requestProjection(env:Env,req:Request,path:string) {
   }
   if(scope==='topic'&&!await one(db,"SELECT 1 FROM topics WHERE id=? AND status='published'",target))return;
   const existing=await config.bucket.head(key);
+  const current=await one(db,`SELECT state,version,published_version FROM public_projection WHERE scope=? AND target=?`,scope,target);
+  // Synchronization writes directly to PROD D1 (not through the Worker).
+  // A trusted post-sync read can wake a pending projection even when an older
+  // CDN/R2 object already exists. Never regenerate a fully published version.
+  const published=current?.state==='done'&&current.version===current.published_version;
   if(existing&&existing.customMetadata?.visibility!=='invalidated'&&
-     (config.separateTranslations?existing.customMetadata?.translationFormat==='separate-v1':existing.customMetadata?.translationFormat!=='separate-v1'))return;
+     (config.separateTranslations?existing.customMetadata?.translationFormat==='separate-v1':existing.customMetadata?.translationFormat!=='separate-v1')&&
+     published&&Number(existing.customMetadata?.projectionVersion)===current.version)return;
   if('before' in page&&page.before){
     const boundary=await one(db,`SELECT rowid FROM comments WHERE topic_id=? AND status IN ('published','deleted')
       ORDER BY rowid LIMIT 1 OFFSET ?`,target,(index-1)*page.pageSize-1);
