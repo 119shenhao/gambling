@@ -487,3 +487,12 @@
 - 新增仅 GET 的实时 CDN TTL 审查 `.github/workflows/gambling-r2-live-ttl-check.yml`：DEV `/api/health` 200，`publicContent.ready=true`、`purgeConfigured=true`、独立 DEV CDN 域名匹配；CDN 最新列表与已知测试帖子 HTTP 200、JSON 结构和 CORS 正常，缓存状态 `REVALIDATED`。**但这两份现存 R2 对象返回 `Cache-Control: public, max-age=0, s-maxage=60, must-revalidate, no-store`，并未升级到代码设定的 1 天或 7 天 TTL。** 日志 https://github.com/119shenhao/gambling/actions/runs/45316661608 。`no-store` 可能来自 Cloudflare Browser TTL 绕过缓存配置，不能仅根据该响应头判断边缘没有缓存，仍以 `CF-Cache-Status` 验证。
 - 尚未验收真实修改/删除测试帖后的 **Cloudflare Purge API 成功清理**、队列重试、评论及译文变更的失效，尤其要观察 R2 新元数据、生效 TTL、线上 CDN 新旧版本，以及已登录用户权限/回退。不能把模拟接口成功当成线上真实清理成功。
 - 下一阶段建议通过 Work 登录 DEV 的独立测试用户，测试专用新帖子与回复后清理；禁止改动现有真实故事和生产 D1/R2，禁止无限制批量回填。生产 R2 PR #8 保持 Draft，不在上述验收前合并。
+
+## 2026-11-24 生产同步成功的新增门禁：R2 生成和 CDN Purge 必须通过
+
+- 用户指定：生产 CDN 刷新必须成为“戒赌论坛同步生产帖子”任务的正式成功验收条件，不能只用 PROD D1 内容复制及 DEV 回执作为成功依据。同步仍限定首次完整主帖+当时评论楼中楼，不增量同步已有回执主题；不改采集任务或 Spine 任何资源。
+- DEV 已新增 `scripts/sync-production-cdn-acceptance.mjs`：`preflight` 校验既有 PRODUCTION D1 的准确绑定和正式 Worker R2/CDN/Purge 就绪（否则在任何 D1 写入前失败）；`verify` 在受保护同步完成后消费 GitHub Runner 专用临时清单及生产投影待处理队列，触发已存在的 PROD Worker `x-gambling-projection-miss` 按需更新路径，并读取 PROD CDN 真实 JSON，检查 D1 `public_projection.state=done`、`published_version=version`、JSON contentVersion、主题正文版本、首屏评论数量、原文分离布局与 TTL（feed 86400s/topic 604800s）。失败再唤醒并轮询，队列死信/超时/版本不匹配即失败，旧回执不会让上轮未完成 CDN 更新被跳过。
+- `scripts/sync-preview-to-production.mjs` 仅在 PROD D1 写入、全部回复和语言证明验证、DEV 回执成功之后写临时 CDN 清单。现有 Time Travel、D1 安全固定 ID 及 Source receipts 规则不变。Worker `src/projection-demand.ts` 修复：已有旧 R2 对象但 D1 投影版本已增加时允许重新排队和刷新，而不是误判“对象存在就跳过”；保持一次最大 2 项、已有队列退避和 Cloudflare Secret 控制。
+- 不向 GitHub 复制 `CDN_PURGE_API_TOKEN`；实际清理由 PROD Worker 已部署的 Secret 调用。测试 `tests/sync-cdn-acceptance.test.mjs` 覆盖正确绑定、准备失败拒绝、版本/回帖/TTL 校验、旧待处理补偿，以及工作流契约检查。CI（版本 `9c22089aa37ec8c63ce927ada499cfc528b9023d`）已运行成功，证据 https://github.com/119shenhao/gambling/actions/runs/45318230342 。
+- 已在认证中心 `119shenhao/identity-center` 建立 **草稿 PR #5**：https://github.com/119shenhao/identity-center/pull/5 ，更新受保护同步执行器固定 SHA、前置 CDN ready 门禁、后置强制验收和仅 inspect 的预备请求。生产 R2 激活稿仍为 `119shenhao/gambling` PR #8，**两者都尚未合并**，因此线上每 12 小时同步仍使用原有成功规则。禁止提前切换生产任务到未验收的 R2 配置，避免现有同步中断。
+- 正式上线顺序：确保生产 R2 配置/Secret/缓存 Purge 真实可用，先发布 PR #8 后验收，再合并受保护同步 PR #5、在正式定时任务描述中更新固定审核 SHA；新任务必须观察实际 CDN 内容版本成功才能标记“同步全部完成”。不新建 GitHub Actions schedule，也不影响生产 D1/开发 D1 已有数据。
