@@ -1,0 +1,67 @@
+name: Gambling R2 on-demand DEV end-to-end (bounded)
+on:
+  push:
+    branches: [dev]
+    paths:
+      - .github/workflows/gambling-r2-dev-e2e.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  public-json:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify one DEV-only on-demand feed request then R2/CDN response
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          // One and only one DEV fallback request. No production writes, content sync,
+          // migration, Azure translation or scheduled collection.
+          const base='https://dev-gambling-community.119shenhao.workers.dev';
+          const cdn='https://gambling-data-dev.nbn369.com';
+          const origin=base;
+          const key='feeds/latest/page-1.json';
+          const timeout=ms=>AbortSignal.timeout(ms);
+          const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+          async function publicJson(){
+            const res=await fetch(cdn+'/'+key,{headers:{Origin:origin},signal:timeout(14000),redirect:'error'});
+            return {status:res.status,cache:res.headers.get('cf-cache-status'),cors:res.headers.get('access-control-allow-origin'),
+              cc:res.headers.get('cache-control'),body:res.ok?await res.json():null};
+          }
+          const healthResponse=await fetch(base+'/api/health',{signal:timeout(12000),redirect:'error'});
+          const health=await healthResponse.json().catch(()=>null);
+          const p=health?.publicContent;
+          if(!healthResponse.ok||health?.environment!=='preview'||health?.databaseReady!==true||!p||
+             !p.ready||!p.enabled||!p.purgeConfigured||!p.onDemand||!p.fallback||
+             p.baseUrl!==cdn)throw Error('DEV projection prerequisites unavailable; no fallback request executed');
+          let first=await publicJson();
+          console.log('DEV initial CDN status='+first.status+' cache='+(first.cache||'none')+' cors='+(first.cors||'none'));
+          if(first.status===404){
+            const fallback=await fetch(base+'/api/topics?sort=latest&offset=0',{
+              headers:{'x-gambling-projection-miss':key},signal:timeout(15000),redirect:'error'});
+            if(!fallback.ok)throw Error('Single DEV on-demand fallback failed: HTTP '+fallback.status);
+            const feed=await fallback.json();
+            if(!Array.isArray(feed.topics))throw Error('DEV fallback response schema mismatch');
+            console.log('DEV fallback returned public topics count='+feed.topics.length);
+            for(let i=0;i<6;i++){
+              await sleep(5000);
+              first=await publicJson();
+              console.log('DEV CDN poll '+(i+1)+': HTTP '+first.status+' cache='+(first.cache||'none'));
+              if(first.status===200)break;
+              if(first.status!==404)throw Error('Unexpected CDN status '+first.status);
+            }
+          }else if(first.status!==200)throw Error('DEV R2 CDN response HTTP '+first.status);
+          if(first.status!==200)throw Error('DEV on-demand R2 materialization did not finish (no additional fallback requested)');
+          if(first.cors!==origin&&first.cors!=='*')throw Error('DEV CDN CORS not valid for forum');
+          if(first.body?.schemaVersion!==1||!Number.isSafeInteger(first.body.contentVersion)||
+             !Array.isArray(first.body.data?.topics)||first.body.data?.translationLayout!=='separate-v1')
+             throw Error('DEV CDN JSON schema or separated translation format invalid');
+          if(!first.cc?.includes('s-maxage=60'))throw Error('DEV CDN cache-control not 60 seconds: '+String(first.cc));
+          const second=await publicJson();
+          if(second.status!==200)throw Error('Subsequent CDN read did not return HTTP 200');
+          console.log('PASS: DEV R2 public JSON exists; 60-second headers and CORS verified. second CF-Cache-Status='+(second.cache||'not-present'));
+          console.log('No production write, no bulk backfill, no Azure translation, no private content logged');
+          NODE
