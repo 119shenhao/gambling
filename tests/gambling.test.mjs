@@ -468,7 +468,7 @@ test('R2 rollout preserves production configs while enabling separate per-enviro
  assert.equal(c.r2_buckets[0].bucket_name,'gambling-community-public-prod');
  assert.equal(c.previews.d1_databases.find(v=>v.binding==='DB')?.database_name,'gambling-community-dev');
  assert.equal(c.previews.r2_buckets[0].bucket_name,'gambling-community-public-dev');
- assert.match(read('src/public-projection.ts'),/const cacheControl='public, max-age=0, s-maxage=60, must-revalidate'/);
+ assert.match(read('src/public-projection.ts'),/const sourceTtl=scope==='feed'\?86400:604800/);
  assert.match(read('src/index.ts'),/0\.5\.3-r2-projection\.20261124/);
  assert.match(read('.github/workflows/prod-readiness.yml'),/0\.5\.3-r2-projection\.20261124/);
 });
