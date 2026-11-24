@@ -36,7 +36,7 @@ function xmlResponse(req:Request,env:Env,value:string,status=200):Response {
  return new Response(req.method==='HEAD'?null:value,{status,headers});
 }
 function forbiddenPage(req:Request,env:Env,status=404):Response {
- return new Response(req.method==='HEAD'?null:'<!doctype html><html lang="en"><meta charset="utf-8"><title>Not found — Problem Gambling</title><main><h1>Not found</h1><a href="/">All discussions</a></main></html>',{status,headers:pageHeaders(env,false)});
+ return new Response(req.method==='HEAD'?null:'<!doctype html><html lang="en"><meta charset="utf-8"><title>Not found — Gambling Stories</title><main><h1>Not found</h1><a href="/">All discussions</a></main></html>',{status,headers:pageHeaders(env,false)});
 }
 function pageXml(rows:Row[],homepage=false):string {
  const urls:{loc:string;date?:string|null}[]=(homepage?[{loc:CANONICAL_ORIGIN+'/'}]:[]).concat(rows.map(row=>({
@@ -83,7 +83,7 @@ function injectMetadata(html:string,canonical:string,title:string,summary:string
  html=html.replace(/<meta name="description" content="[^"]*">/i,'<meta name="description" content="'+escapeHtml(summary)+'">');
  const meta='<link rel="canonical" href="'+escapeHtml(canonical)+'">'+
   '<meta property="og:type" content="'+(topic?'article':'website')+'">'+
-  '<meta property="og:site_name" content="Problem Gambling">'+
+  '<meta property="og:site_name" content="Gambling Stories">'+
   '<meta property="og:title" content="'+escapeHtml(title)+'">'+
   '<meta property="og:description" content="'+escapeHtml(summary)+'">'+
   '<meta property="og:url" content="'+escapeHtml(canonical)+'">';
@@ -110,7 +110,7 @@ async function htmlPage(req:Request,env:Env,path:string):Promise<Response> {
  let html=original;
  if(topic&&record&&record.status==='published'){
   const canonical=CANONICAL_ORIGIN+'/topic/'+encodeURIComponent(record.id);
-  const title=String(record.title||'Problem Gambling')+' | Problem Gambling';
+  const title=String(record.title||'Gambling Stories')+' | Gambling Stories';
   html=injectMetadata(html,canonical,title,description(record.body),true,/^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8})?$/.test(record.source_lang)?record.source_lang:'und');
   // Google DiscussionForumPosting applies to first-party community members,
   // not imported/synthetic system-author posts. No claimed author profile URLs.
@@ -136,13 +136,13 @@ async function htmlPage(req:Request,env:Env,path:string):Promise<Response> {
   // private pending/hidden posts are 404/noindex and hydrate for their author.
   const removed=record.status==='deleted';
   html=html.replace(/<title>[^<]*<\/title>/i,
-    '<title>'+(removed?'Post removed':'Post unavailable')+' — Problem Gambling</title>');
+    '<title>'+(removed?'Post removed':'Post unavailable')+' — Gambling Stories</title>');
   html=html.replace('</head>','<meta name="robots" content="noindex, nofollow"></head>');
   if(removed)html=html.replace(/<main id="main" tabindex="-1">[\s\S]*?<\/main>/,
     '<main id="main" tabindex="-1"><article class="panel"><h1>Post removed</h1><p>The original post is no longer available. Replies may remain accessible.</p></article></main>');
   return new Response(req.method==='HEAD'?null:html,{status:removed?200:404,headers:pageHeaders(env,false)});
  }else if(!isPrivate){
-  html=injectMetadata(html,CANONICAL_ORIGIN+'/', 'Problem Gambling — Real stories and open discussion',
+  html=injectMetadata(html,CANONICAL_ORIGIN+'/', 'Gambling Stories — Real stories and open discussion',
    'Read personal accounts and discuss the financial, social and emotional impacts of gambling without judgment.');
  }else{
   html=html.replace('</head>','<meta name="robots" content="noindex, nofollow"></head>');
