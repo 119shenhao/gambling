@@ -43,9 +43,13 @@ if(!previewBuild){
  // Separate preview-only coordination queue. Never migrate it into production.
  remote(['execute',...opts,'--file','migrations/preview-only/0001_collector_queue.sql']);
  remote(['execute',...opts,'--file','migrations/preview-only/0002_collector_long.sql']);
+ remote(['execute',...opts,'--file','migrations/preview-only/0003_sync_cdn_acceptance.sql']);
  const queues=JSON.parse(remote(['execute',...opts,'--command',
    "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('collector_candidates','collector_source_state','collector_long_stages','collector_long_replies')",'--json']));
  if(new Set(queues.flatMap(x=>x.results||[]).map(x=>x.name)).size!==4)throw Error('Preview collector long-reply staging unavailable');
+ const cdnRows=JSON.parse(remote(['execute',...opts,'--command',
+   "SELECT name FROM sqlite_master WHERE (type='table' AND name='topic_cdn_sync_acceptance') OR (type='trigger' AND name='topic_cdn_sync_receipt_insert')",'--json']));
+ if(new Set(cdnRows.flatMap(x=>x.results||[]).map(x=>x.name)).size!==2)throw Error('Preview durable CDN sync acceptance ledger unavailable');
  const after=JSON.parse(remote(['execute',...opts,'--command',"SELECT value FROM settings WHERE key='schema_version'",'--json']));
  if(!after.some(r=>(r.results||[]).some(x=>x.value==='1')))throw Error('Preview schema version check failed after migration.');
  console.log('Verified migrations on gambling-community-dev only. Production D1 not accessed.');
