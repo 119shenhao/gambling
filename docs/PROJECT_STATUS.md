@@ -503,3 +503,8 @@
 - CDN 验收失败或 GitHub Actions 中断后，未确认的源记录会跨运行保留；即使生产 `public_projection` 已完成而上轮 CDN 查询失败，下一轮仍必须重新核对生产 CDN JSON。生产 D1 原文版本/评论、CDN 真实内容版本/长 TTL、Cloudflare Purge 已由 Worker 完成且投影队列确认 `done` 后才能写 `verified_at`。
 - 2026-11-24 新冻结代码 `89a0aaf09a19220d8237b98931ddae427f8efba7`：`npm run verify`、Preview 迁移 SQLite 回执/触发器重放、ESBuild 完整构建等 [CI #45319152201](https://github.com/119shenhao/gambling/actions/runs/45319152201) **success**；54 项测试通过、0 失败。对应 Cloudflare DEV Preview build 与密钥保护检查也为 success。这个证据不包含真实生产 CDN Purge 成功，正式上线前仍必须验证。
 - 认证中心安全同步执行器的候选为 [Draft PR #5](https://github.com/119shenhao/identity-center/pull/5)，固定指向上述代码版本；启动前的生产 R2 readiness 门禁和 D1 恢复点都必须通过。请求文件在候选分支保持 `mode=inspect`，避免候选合并时误执行生产同步。**现行** `identity-center/main`、正式同步脚本固定 SHA、每 12 小时 ChatGPT 自动任务仍保持原样，未在此轮发布生产 R2 也未改变 PROD D1。
+
+## 2026-11-24 独立故事正文不再追加来源网址（DEV）
+
+- 用户要求移除采集器自动添加的 `Source: URL` 正文尾缀；四个故事来源共用的 `scripts/gambling_story_sources.py` 仅拼接原站正文段落，保留稳定来源 ID 及回执；回归测试检查完整正文且不包含额外尾缀。
+- 此次代码变更不删除历史 D1 数据，不更改生产或其他论坛。历史已采集内容需通过精确来源回执匹配、语言证明/译文及 R2/CDN 失效检查另行验收；CI 结果以实际运行回执为准。

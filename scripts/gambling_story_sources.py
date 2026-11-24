@@ -111,5 +111,6 @@ def parse_story(site, expected_id, page_url, html):
         raise ValueError("not_problem_gambling")
     if PRIVATE.search(" ".join([title, *blocks])):
         raise ValueError("personal_identifier_in_public_content")
-    body = "\n\n".join([*blocks, "Source: " + page_url])
+    # Source identity remains in the collection receipt, never append metadata to the story.
+    body = "\n\n".join(blocks)
     return {"title": title, "body": body, "source_lang": "en", "comments": []}

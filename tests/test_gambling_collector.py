@@ -116,7 +116,7 @@ class ParserTests(unittest.TestCase):
                     collect.discover_source(source, {})
                 self.assertEqual(request.call_count, attempts)
 
-    def test_standalone_story_keeps_source_and_does_not_create_replies(self):
+    def test_standalone_story_keeps_only_original_text_and_does_not_create_replies(self):
         url = "https://www.agr.org.au/stories/sample"
         article = (
             f'<link rel="canonical" href="{url}"><main><h1>Sample story</h1>'
@@ -128,7 +128,14 @@ class ParserTests(unittest.TestCase):
             '</div></main>'
         )
         draft = parse_topic("agr", source_id("agr", url), url, article)
-        self.assertTrue(draft["body"].endswith("Source: " + url))
+        self.assertEqual(draft["body"], "\n\n".join([
+            "I had a gambling problem for several years and the debts kept growing.",
+            "My relatives found out when they received letters about the missed payments.",
+            "The financial problems and the damaged trust continued long after that.",
+            "My family and I had to make some very difficult decisions about our home.",
+        ]))
+        self.assertNotIn(url, draft["body"])
+        self.assertNotIn("Source:", draft["body"])
         self.assertEqual(collect.validate(draft, allow_no_replies=True), 0)
         with self.assertRaisesRegex(ValueError, "reply_count_invalid"):
             collect.validate(draft)
