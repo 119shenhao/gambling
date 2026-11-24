@@ -471,3 +471,12 @@
 - **真实浏览器验证通过**：GitHub Actions headless Chrome 从 DEV 打开该帖子，检查实时 SSR CSP，真正产生 `https://gambling-data-dev.nbn369.com/topics/1fa8a5ba-76d2-4c18-854e-fd35f591c075/detail.json` 请求且 HTTP 200，CSP 拦截报错 0；页面显示 Del Miles。日志 https://github.com/119shenhao/gambling/actions/runs/45311774093 。
 - 验证使用**未登录 Chrome**；已登录用户的 `/api/public-content/viewer` 权限/点赞/收藏核对仍需另行验证。不要把匿名成功当作登录态全部通过。
 - 同步修复到 R2 生产激活草稿 PR #8（尚未合并），保证将来 PROD 启用时允许各自 CDN；不修改 Cloudflare Secret/D1 数据、不启动采集同步；生产发布仍受 Secret 轮换及其余验收门槛限制。
+
+## 2026-11-24 R2/CDN 长 TTL：开发环境准备与风险控制（未发布生产）
+
+- 用户明确指出已具备 Cloudflare Cache Purge 权限，不需要所有公开 JSON 都使用 60 秒的 CDN TTL。确认策略：`feeds/latest/*.json` 1 天（86400 秒），`topics/*/detail.json` 和评论分页 7 天（604800 秒），`i18n/{lang}/*` 30 天（2592000 秒）。
+- `src/public-projection.ts` 改为按 R2 对象类型写入不同 `Cache-Control: public, max-age=0, s-maxage=N, must-revalidate` 与 `cachePolicy` 元数据。隐藏/删除/失效及译文墓碑对象设置 `no-store`，不缓存失效信息；保留既有独立 DEV/PROD R2 和 CDN URL。
+- 已有异步流程：D1 trigger 标记失效，`drainDemand` 重建 R2 正文/译文对象，成功调用 Cloudflare `purge_cache` 后才标记完成；失败退避重试，最多 8 次之后转为待人工介入状态。**Purge Token 已配置并不等于每次清理均已通过实测。**
+- 重要风险：高优先级（删除/隐藏）使用前缀 Purge，Cloudflare Free 有请求限流；遇到失败和死信时，匿名 CDN 内容仍可能在 TTL 内可见，不能把异步清除承诺成零延迟。必须验收编辑、评论、删除、隐藏、语言版本及主动清理失败重试，并设置错误/队列监控之后再正式发布长 TTL。
+- 原先已生成 R2 对象的 `httpMetadata` 不会仅因代码更新而改变；现有 60 秒缓存对象要等对应对象再次重建，或由受控的小批量元数据迁移更新。切勿对全库执行无界重建以免超出 D1 日额度。
+- 不动生产环境、生产 Secret、D1/R2 绑定及内容同步；生产 R2 PR #8 仍为草稿。开发环境代码和静态断言修改后由 GitHub CI 验证；在线长 TTL 与清理行为单独验收。
