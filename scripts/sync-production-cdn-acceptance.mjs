@@ -142,7 +142,8 @@ async function main(){
  console.log('PASS: production CDN fail-closed preflight (Worker R2 and purge readiness confirmed)');
  if(mode==='preflight')return;
  const path=env.GAMBLING_SYNC_CDN_MANIFEST_PATH;
- if(!path||!resolve(path).startsWith('/tmp/'))throw Error('Protected runner manifest path missing');
+ const runnerTemp=resolve(env.RUNNER_TEMP||'/tmp');
+ if(!path||!resolve(path).startsWith(runnerTemp+'/'))throw Error('Protected runner manifest path missing');
  const ids=parseManifest(existsSync(path)?readFileSync(path,'utf8'):'');
  // Also recover outstanding queues from previous sync attempts even when no new receipts are created.
  const queue=pending();
