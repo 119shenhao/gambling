@@ -165,6 +165,11 @@ async function main(){
  if(!['preflight','verify'].includes(mode))throw Error('Usage: node scripts/sync-production-cdn-acceptance.mjs preflight|verify');
  const env=process.env;
  assertProdConfig(JSON.parse(readFileSync('wrangler.production-sync.jsonc','utf8')),env);
+ const previewCfg=JSON.parse(readFileSync('wrangler.preview-migrations.jsonc','utf8'));
+ if(previewCfg?.d1_databases?.length!==1||previewCfg.d1_databases[0].binding!=='PREVIEW_DB'||
+   previewCfg.d1_databases[0].database_id!==PREVIEW_DB)
+  throw Error('Untrusted DEV D1 receipt binding: STOP BEFORE D1 WRITES');
+ previewLedger();
  await health();
  console.log('PASS: production CDN fail-closed preflight (Worker R2 and purge readiness confirmed)');
  if(mode==='preflight')return;
@@ -172,23 +177,37 @@ async function main(){
  const runnerTemp=resolve(env.RUNNER_TEMP||'/tmp');
  if(!path||!resolve(path).startsWith(runnerTemp+'/'))throw Error('Protected runner manifest path missing');
  const ids=parseManifest(existsSync(path)?readFileSync(path,'utf8'):'');
- // Also recover outstanding queues from previous sync attempts even when no new receipts are created.
+ // Unlike the ephemeral GitHub manifest, these source receipts survive failed jobs.
+ const receipts=unacceptedReceipts();
+ if(receipts.length>MAX_QUEUE)throw Error('Unbounded DEV CDN acceptance backlog');
+ if(receipts.some(row=>!IDENT.test(row.source_topic_id)||!IDENT.test(row.production_topic_id)))
+  throw Error('Invalid durable CDN acceptance receipt');
+ // Also recover unfinished PROD R2 purge attempts even when a source is already synced.
  const queue=pending();
  if(queue.length>MAX_QUEUE)throw Error('Unbounded production CDN queue; investigation required');
- const topics=new Set([...ids,...queue.filter(x=>x.scope==='topic').map(x=>x.target)]);
+ const topics=new Set([...ids,...receipts.map(row=>row.production_topic_id),
+   ...queue.filter(x=>x.scope==='topic').map(x=>x.target)]);
  const targets=[{scope:'feed',target:'latest'},...[...topics].sort().map(target=>({scope:'topic',target}))];
  if(targets.length>MAX_QUEUE+1)throw Error('Excessive CDN verification targets');
  const deadline=Date.now()+25*60*1000;
- const results=[];
+ const results=[],versions=new Map();
  for(const {scope,target} of targets){
   if(scope==='topic'&&!IDENT.test(target))throw Error('Untrusted production topic ID');
-  results.push(await accept(scope,target,deadline));
-  console.log('PASS: production CDN R2 version and purge acknowledged',JSON.stringify(results.at(-1)));
+  const verified=await accept(scope,target,deadline);
+  results.push(verified);
+  if(scope==='topic')versions.set(target,verified.version);
+  console.log('PASS: production CDN R2 version and purge acknowledged',JSON.stringify(verified));
  }
  const after=pending();
  if(after.some(x=>x.scope==='feed'||topics.has(x.target)))
   throw Error('Production CDN invalidation outbox still pending after per-topic verification');
- console.log(JSON.stringify({cdnAccepted:true,topics:topics.size,latestFeedVerified:true,verifiedObjects:results.length}));
+ // The original source receipt always stays immutable; the separate DEV ledger is
+ // acknowledged only after actual CDN content and PROD outbox versions agree.
+ ackAcceptedReceipts(receipts,versions);
+ const left=unacceptedReceipts();
+ if(left.some(row=>receipts.some(old=>old.source_topic_id===row.source_topic_id)))
+  throw Error('DEV CDN acceptance ledger still has unacknowledged source receipts');
+ console.log(JSON.stringify({cdnAccepted:true,topics:topics.size,acknowledged:receipts.length,latestFeedVerified:true,verifiedObjects:results.length}));
 }
 if(process.argv[1]&&resolve(process.argv[1])===resolve(new URL(import.meta.url).pathname))
   main().catch(e=>{console.error('PRODUCTION CDN ACCEPTANCE FAILED:',e.message);process.exitCode=1;});
