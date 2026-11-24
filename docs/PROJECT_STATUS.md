@@ -496,3 +496,10 @@
 - 不向 GitHub 复制 `CDN_PURGE_API_TOKEN`；实际清理由 PROD Worker 已部署的 Secret 调用。测试 `tests/sync-cdn-acceptance.test.mjs` 覆盖正确绑定、准备失败拒绝、版本/回帖/TTL 校验、旧待处理补偿，以及工作流契约检查。CI（版本 `9c22089aa37ec8c63ce927ada499cfc528b9023d`）已运行成功，证据 https://github.com/119shenhao/gambling/actions/runs/45318230342 。
 - 已在认证中心 `119shenhao/identity-center` 建立 **草稿 PR #5**：https://github.com/119shenhao/identity-center/pull/5 ，更新受保护同步执行器固定 SHA、前置 CDN ready 门禁、后置强制验收和仅 inspect 的预备请求。生产 R2 激活稿仍为 `119shenhao/gambling` PR #8，**两者都尚未合并**，因此线上每 12 小时同步仍使用原有成功规则。禁止提前切换生产任务到未验收的 R2 配置，避免现有同步中断。
 - 正式上线顺序：确保生产 R2 配置/Secret/缓存 Purge 真实可用，先发布 PR #8 后验收，再合并受保护同步 PR #5、在正式定时任务描述中更新固定审核 SHA；新任务必须观察实际 CDN 内容版本成功才能标记“同步全部完成”。不新建 GitHub Actions schedule，也不影响生产 D1/开发 D1 已有数据。
+
+### 2026-11-24 受保护同步 CDN 验收的持久回执已实现
+
+- 新增 Preview-only `migrations/preview-only/0003_sync_cdn_acceptance.sql`；`topic_cdn_sync_receipt_insert` 在源 DEV `topic_sync_receipts` 首次写入时原子创建独立 `topic_cdn_sync_acceptance` 待验收记录。已有源同步回执在独立 Preview 迁移时幂等补齐；生产 D1 不安装该表。对应受保护脚本只向 DEV 回执写 `verified_at/verified_version`，绝不删除/重置源同步回执，也不重新同步评论。
+- CDN 验收失败或 GitHub Actions 中断后，未确认的源记录会跨运行保留；即使生产 `public_projection` 已完成而上轮 CDN 查询失败，下一轮仍必须重新核对生产 CDN JSON。生产 D1 原文版本/评论、CDN 真实内容版本/长 TTL、Cloudflare Purge 已由 Worker 完成且投影队列确认 `done` 后才能写 `verified_at`。
+- 2026-11-24 新冻结代码 `89a0aaf09a19220d8237b98931ddae427f8efba7`：`npm run verify`、Preview 迁移 SQLite 回执/触发器重放、ESBuild 完整构建等 [CI #45319152201](https://github.com/119shenhao/gambling/actions/runs/45319152201) **success**；54 项测试通过、0 失败。对应 Cloudflare DEV Preview build 与密钥保护检查也为 success。这个证据不包含真实生产 CDN Purge 成功，正式上线前仍必须验证。
+- 认证中心安全同步执行器的候选为 [Draft PR #5](https://github.com/119shenhao/identity-center/pull/5)，固定指向上述代码版本；启动前的生产 R2 readiness 门禁和 D1 恢复点都必须通过。请求文件在候选分支保持 `mode=inspect`，避免候选合并时误执行生产同步。**现行** `identity-center/main`、正式同步脚本固定 SHA、每 12 小时 ChatGPT 自动任务仍保持原样，未在此轮发布生产 R2 也未改变 PROD D1。
