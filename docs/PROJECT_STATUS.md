@@ -480,3 +480,10 @@
 - 重要风险：高优先级（删除/隐藏）使用前缀 Purge，Cloudflare Free 有请求限流；遇到失败和死信时，匿名 CDN 内容仍可能在 TTL 内可见，不能把异步清除承诺成零延迟。必须验收编辑、评论、删除、隐藏、语言版本及主动清理失败重试，并设置错误/队列监控之后再正式发布长 TTL。
 - 原先已生成 R2 对象的 `httpMetadata` 不会仅因代码更新而改变；现有 60 秒缓存对象要等对应对象再次重建，或由受控的小批量元数据迁移更新。切勿对全库执行无界重建以免超出 D1 日额度。
 - 不动生产环境、生产 Secret、D1/R2 绑定及内容同步；生产 R2 PR #8 仍为草稿。开发环境代码和静态断言修改后由 GitHub CI 验证；在线长 TTL 与清理行为单独验收。
+
+## 2026-11-24 R2 缓存专项测试补充（GitHub CI + CDN 在线只读）
+
+- 新增 `tests/r2-cache-contract.test.mjs`：使用 esbuild 执行真实 `src/public-projection.ts` TS 函数，所有 R2 写入、Purge HTTP 调用均使用内存/模拟端点，不消耗 Cloudflare 生产或开发 D1/R2 写额度。7 个独立行为用例覆盖 1d/7d/30d 缓存头、原文与译文分离、同版本重复生成不重复写、从原 60s 缓存元数据升级、内容修改使旧译文失效、删除/隐藏后的无缓存墓碑、清理时精确 URL 与 Origin 变体/前缀格式、429/拒绝/断网错误向上抛出。自动 CI 共 45 测试通过、0 失败；日志 https://github.com/119shenhao/gambling/actions/runs/45316528665 。
+- 新增仅 GET 的实时 CDN TTL 审查 `.github/workflows/gambling-r2-live-ttl-check.yml`：DEV `/api/health` 200，`publicContent.ready=true`、`purgeConfigured=true`、独立 DEV CDN 域名匹配；CDN 最新列表与已知测试帖子 HTTP 200、JSON 结构和 CORS 正常，缓存状态 `REVALIDATED`。**但这两份现存 R2 对象返回 `Cache-Control: public, max-age=0, s-maxage=60, must-revalidate, no-store`，并未升级到代码设定的 1 天或 7 天 TTL。** 日志 https://github.com/119shenhao/gambling/actions/runs/45316661608 。`no-store` 可能来自 Cloudflare Browser TTL 绕过缓存配置，不能仅根据该响应头判断边缘没有缓存，仍以 `CF-Cache-Status` 验证。
+- 尚未验收真实修改/删除测试帖后的 **Cloudflare Purge API 成功清理**、队列重试、评论及译文变更的失效，尤其要观察 R2 新元数据、生效 TTL、线上 CDN 新旧版本，以及已登录用户权限/回退。不能把模拟接口成功当成线上真实清理成功。
+- 下一阶段建议通过 Work 登录 DEV 的独立测试用户，测试专用新帖子与回复后清理；禁止改动现有真实故事和生产 D1/R2，禁止无限制批量回填。生产 R2 PR #8 保持 Draft，不在上述验收前合并。
