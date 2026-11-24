@@ -37,12 +37,14 @@ jobs:
             fi
             sleep 15
           done
-          curl --fail-with-body --silent --show-error --max-time 15 "$PREVIEW_URL/" -o /tmp/gambling-home.html
-          node -e '
-            const s=require("node:fs").readFileSync("/tmp/gambling-home.html","utf8");
-            if(!s.includes("Problem Gambling"))process.exit(1);
-            console.log("Home page contains Problem Gambling branding");
-          '
+          for attempt in $(seq 1 12); do
+            if curl --fail-with-body --silent --show-error --max-time 15 "$PREVIEW_URL/" -o /tmp/gambling-home.html && grep -q 'id="brand-name">Gambling Stories<' /tmp/gambling-home.html; then
+              echo "Home page contains Gambling Stories branding"
+              break
+            fi
+            test "$attempt" != 12 || { echo "::error::Updated branding not deployed"; exit 1; }
+            sleep 15
+          done
           curl --fail-with-body --silent --show-error --max-time 12 "$PREVIEW_URL/robots.txt" -o /tmp/gambling-robots.txt
           grep -q '^Disallow: /$' /tmp/gambling-robots.txt
           echo 'Preview robots.txt disallows all crawlers.'
