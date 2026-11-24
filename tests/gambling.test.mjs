@@ -475,3 +475,19 @@ test('SSR HTML CSP allows only its environment-specific R2 JSON host, never broa
  assert.match(reader,/fetcher\(base\+'\/'\+key/);
  assert.match(read('public/app.js'),/publicReads\(\)\.topic\(topicId,p\)/);
 });
+
+
+test('localized gambling story brands preserve both Chinese names and mobile control space',async()=>{
+ const {languages,dictionaries}=await import('../public/i18n.js');
+ const expected={"en":"Gambling Stories","zh-CN":"戒赌社区","zh-TW":"戒賭社區","es":"Historias de apuestas","pt-BR":"Histórias de apostas","de":"Glücksspielgeschichten","fr":"Récits de jeux d’argent","ja":"ギャンブル体験談"};
+ assert.deepEqual(Object.fromEntries(languages.map(l=>[l,dictionaries[l].eyebrow])),expected);
+ const app=read('public/app.js'),html=read('public/index.html'),seo=read('src/seo.ts'),css=read('public/styles.css');
+ assert.ok(app.includes("brand.textContent=t('eyebrow')"));
+ assert.ok(app.includes("setAttribute('aria-label',t('eyebrow'))"));
+ for(const source of [app,html,seo,read('public/share-ui.js')])assert.doesNotMatch(source,/Problem Gambling/);
+ assert.match(html,/id="brand-name">Gambling Stories</);
+ assert.match(seo,/og:site_name" content="Gambling Stories"/);
+ assert.ok(css.includes('#brand-name {min-width:0;white-space:normal;overflow-wrap:anywhere;'));
+ assert.ok(css.includes('.header-inner {grid-template-columns:minmax(0,1fr) auto;}'));
+ assert.ok(css.includes('.header-actions {grid-column:2;grid-row:1;justify-self:end;flex-shrink:0;}'));
+});
