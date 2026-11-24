@@ -1,11 +1,13 @@
 // Production D1 -> R2 -> Cloudflare CDN acceptance gate for the protected sync executor.
-// Never writes directly to D1/R2 or invokes the Cloudflare purge API from GitHub.
+// Never directly writes PROD D1/R2 or invokes the CDN purge API from GitHub.
+// CDN acknowledgements persist only in the isolated DEV D1 companion ledger.
 // The production Worker owns the queue, R2 publishing and zone-purge secret.
 import {readFileSync,existsSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
 import {resolve} from 'node:path';
 
 const PROD_DB='7bba9ada-589f-493b-8fcf-60265fc0efac';
+const PREVIEW_DB='a92cf620-2a0b-46e1-a0ff-2e0c94218f37';
 const ACCOUNT='289976272520a38732bef34108585e11';
 const WORKER='https://gambling.nbn369.com';
 const CDN='https://gambling-data.nbn369.com';
@@ -70,13 +72,38 @@ export function parseManifest(raw){
  }
  return [...ids];
 }
-const query=(sql)=>{
- const args=['node_modules/wrangler/bin/wrangler.js','d1','execute','PRODUCTION_DB',
-   '--remote','--config','wrangler.production-sync.jsonc','--command',sql,'--json','--yes'];
+const query=(sql,preview=false)=>{
+ const args=['node_modules/wrangler/bin/wrangler.js','d1','execute',preview?'PREVIEW_DB':'PRODUCTION_DB',
+   '--remote','--config',preview?'wrangler.preview-migrations.jsonc':'wrangler.production-sync.jsonc',
+   '--command',sql,'--json','--yes'];
  const p=spawnSync(process.execPath,args,{encoding:'utf8',maxBuffer:5*1024*1024,timeout:60000});
- if(p.error||p.status!==0)throw Error('Production D1 read failed: '+String(p.stderr||p.error||'').slice(0,250));
+ if(p.error||p.status!==0)throw Error((preview?'DEV':'PROD')+' D1 query failed: '+String(p.stderr||p.error||'').slice(0,250));
  return parseWranglerResults(p.stdout);
 };
+function previewLedger(){
+ const rows=query("SELECT name FROM sqlite_master WHERE type='table' AND name='topic_cdn_sync_acceptance'",true);
+ if(rows.length!==1)throw Error('DEV durable CDN acceptance ledger missing: STOP BEFORE D1 WRITES');
+}
+function unacceptedReceipts(){
+ return query('SELECT source_topic_id,production_topic_id FROM topic_cdn_sync_acceptance '+
+   'WHERE verified_at IS NULL ORDER BY created_at,source_topic_id LIMIT '+(MAX_QUEUE+1),true);
+}
+function ackAcceptedReceipts(receipts,versions){
+ for(let i=0;i<receipts.length;i+=40){
+  const batch=receipts.slice(i,i+40);
+  const quote=id=>"'"+id.replaceAll("'","''")+"'";
+  const cases=batch.map(row=>{
+   const version=versions.get(row.production_topic_id);
+   if(!Number.isSafeInteger(version)||version<1)throw Error('Missing accepted R2 projection version');
+   return 'WHEN '+quote(row.source_topic_id)+' THEN '+version;
+  });
+  const sql='UPDATE topic_cdn_sync_acceptance SET verified_at=unixepoch(),verified_version=CASE source_topic_id '+
+   cases.join(' ')+' ELSE verified_version END WHERE verified_at IS NULL AND source_topic_id IN ('+
+   batch.map(row=>quote(row.source_topic_id)).join(',')+') RETURNING source_topic_id';
+  const changed=query(sql,true);
+  if(changed.length!==batch.length)throw Error('DEV CDN acceptance acknowledgements are incomplete');
+ }
+}
 async function health(){
  const r=await fetch(WORKER+'/api/health',{redirect:'error',signal:signal()});
  if(!r.ok)throw Error('PROD health HTTP '+r.status);
