@@ -60,10 +60,10 @@ jobs:
              result.body.data?.translationLayout!=='separate-v1')
              throw Error('R2 topic JSON invalid');
           if(result.cors!==dev&&result.cors!=='*')throw Error('CORS not configured for DEV forum');
-          if(!result.cc?.includes('s-maxage=60'))throw Error('DEV topic R2 cache TTL != 60');
+          if(!/s-maxage=(?:60|604800)(?:,|$)/.test(result.cc||''))throw Error('Unexpected DEV topic CDN TTL: '+String(result.cc));
           const again=await cdnGet();
           if(again.status!==200)throw Error('Second DEV topic CDN read failed');
-          console.log('PASS: original topic detail R2 JSON and CDN, cache='+(again.cache||'not-present'));
+          console.log('PASS: original topic detail R2 JSON and CDN, TTL='+result.cc+' (old objects may retain 60s), cache='+(again.cache||'not-present'));
           const locales=result.body.data.translationLocales||[];
           if(!Array.isArray(locales))throw Error('Invalid language locales list');
           if(locales.length===0){
