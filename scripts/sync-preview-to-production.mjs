@@ -1,6 +1,6 @@
 // Manual one-way publication of imported posts. No public production write API.
 // DRY RUN by default. Never run --apply without explicit production approval and a backup.
-import {readFileSync,writeFileSync,mkdtempSync,rmSync} from 'node:fs';
+import {readFileSync,writeFileSync,appendFileSync,mkdtempSync,rmSync} from 'node:fs';
 import {join,resolve} from 'node:path';
 import {tmpdir} from 'node:os';
 import {spawnSync} from 'node:child_process';
@@ -248,6 +248,10 @@ function run(){
   verifyComments(topic.id,comments);
   verifyWrittenLanguageEvidence(topic,comments);
   markPreview(topic,topic.id,hash,comments.length);counts.marked++;
+  // Keep the per-run CDN acceptance manifest in the protected runner, never in Git.
+  // A later retry can also discover pending projections directly from PROD D1.
+  if(process.env.GAMBLING_SYNC_CDN_MANIFEST_PATH)
+   appendFileSync(process.env.GAMBLING_SYNC_CDN_MANIFEST_PATH,JSON.stringify({id:topic.id,comments:comments.length})+'\n',{flag:'a',mode:0o600});
  }
  console.log(JSON.stringify({mode:apply?'apply':'dry_run',...counts},null,2));
 }
