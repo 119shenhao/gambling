@@ -443,11 +443,22 @@ test('R2/CDN activation is prepared in DEV but is fail-closed until real CDN + p
  assert.match(reader,/x-gambling-projection-miss/);
 });
 
-test('R2 projection JSON uses 60-second origin-controlled CDN TTL instead of free-plan 2-hour override',()=>{
+test('R2 JSON uses extended TTL with exact-key purge and no-cache tombstones',()=>{
  const p=read('src/public-projection.ts');
- assert.match(p,/const cacheControl='public, max-age=0, s-maxage=60, must-revalidate'/);
- assert.doesNotMatch(p,/s-maxage=7200/);
- assert.match(p,/cachePolicy:'edge-60'/);
+ const d=read('src/projection-demand.ts');
+ assert.match(p,/const sourceTtl=scope==='feed'\?86400:604800/);
+ assert.match(p,/s-maxage='\+sourceTtl/);
+ assert.match(p,/s-maxage=2592000/);
+ assert.match(p,/const cacheControl=visibility==='public'[\s\S]*?:'no-store'/);
+ assert.match(p,/const localeCacheControl=visible[\s\S]*?:'no-store'/);
+ assert.match(p,/oldLocale\.customMetadata\.cachePolicy===localePolicy/);
+ assert.match(p,/old\.customMetadata\.cachePolicy===cachePolicy/);
+ assert.match(p,/await purgeProjection\(env,config,key,false,localeKeys\)/);
+ assert.match(d,/await purgeProjection\(env,config,key,task\.priority>=2,localeKeys\)/);
+ assert.match(d,/await purgeProjection\(env,config,key,false,localeKeys\)/);
+ assert.match(d,/stage='purge_failed'/);
+ assert.match(d,/attempts>=MAX_ATTEMPTS\?'dead':'pending'/);
+ assert.doesNotMatch(p,/cachePolicy:'edge-60'/);
 });
 
 test('SSR HTML CSP allows only its environment-specific R2 JSON host, never broad remote connections',()=>{
