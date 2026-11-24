@@ -442,7 +442,7 @@ test('release candidate protects all production bindings and DEV-only collection
  assert.match(admin,/env\.APP_ENV!=='preview'&&env\.APP_ENV!=='production'/);
  assert.match(translation,/AZURE_PROD_MAX_MONTHLY=1800000/);
  assert.match(translation,/azureSiteMaxMonthly\(env\)/);
- assert.match(server,/0\.5\.2-community-parity\.20261122/);
+ assert.match(server,/0\.5\.3-r2-projection\.20261124/);
  assert.equal((server.match(/if\(env\.APP_ENV!=='preview'\)fail\(404,'not_found'\)/g)||[]).length,2);
  assert.doesNotMatch(read('scripts/prepare-build.mjs'),/secret\s+(?:put|delete|bulk)/);
 });
