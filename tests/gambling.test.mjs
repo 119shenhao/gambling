@@ -442,7 +442,67 @@ test('release candidate protects all production bindings and DEV-only collection
  assert.match(admin,/env\.APP_ENV!=='preview'&&env\.APP_ENV!=='production'/);
  assert.match(translation,/AZURE_PROD_MAX_MONTHLY=1800000/);
  assert.match(translation,/azureSiteMaxMonthly\(env\)/);
- assert.match(server,/0\.5\.2-community-parity\.20261122/);
+ assert.match(server,/0\.5\.3-r2-projection\.20261124/);
  assert.equal((server.match(/if\(env\.APP_ENV!=='preview'\)fail\(404,'not_found'\)/g)||[]).length,2);
  assert.doesNotMatch(read('scripts/prepare-build.mjs'),/secret\s+(?:put|delete|bulk)/);
 });
+
+test('R2 rollout preserves production configs while enabling separate per-environment CDN',()=>{
+ const c=JSON.parse(read('wrangler.jsonc'));
+ for(const [env,vars] of [['production',c.vars],['preview',c.previews.vars]]){
+  for(const key of ['PUBLIC_CONTENT_ENABLED','PUBLIC_CONTENT_READS','PUBLIC_CONTENT_FALLBACK','PUBLIC_CONTENT_ON_DEMAND'])
+   assert.equal(vars[key],'true',env+':'+key);
+  assert.equal(vars.PUBLIC_CONTENT_BASE_URL,env==='production'?'https://gambling-data.nbn369.com':'https://gambling-data-dev.nbn369.com');
+  assert.equal(vars.CDN_ZONE_ID,'7857d08dff2a46bf824914c687a21413');
+  assert.equal(vars.PUBLIC_CONTENT_PAGE_SIZE,'50');
+  for(const secret of ['CDN_PURGE_API_TOKEN','TRANSLATOR_KEY','IDENTITY_CLIENT_SECRET'])assert.equal(vars[secret],undefined);
+ }
+ assert.equal(c.keep_vars,true);
+ assert.equal(c.vars.IDENTITY_LOGIN_ENABLED,'true');
+ assert.equal(c.vars.TRANSLATION_ENABLED,'true');
+ assert.equal(c.vars.TRANSLATION_DAILY_LIMIT,'200000');
+ assert.equal(c.vars.TRANSLATION_MONTHLY_LIMIT,'1800000');
+ assert.equal(c.vars.IMPORT_ENABLED,'false');
+ assert.equal(c.vars.COLLECT_ENABLED,'false');
+ assert.equal(c.d1_databases[0].database_name,'gambling-community-prod');
+ assert.equal(c.r2_buckets[0].bucket_name,'gambling-community-public-prod');
+ assert.equal(c.previews.d1_databases.find(v=>v.binding==='DB')?.database_name,'gambling-community-dev');
+ assert.equal(c.previews.r2_buckets[0].bucket_name,'gambling-community-public-dev');
+ assert.match(read('src/public-projection.ts'),/const sourceTtl=scope==='feed'\?86400:604800/);
+ assert.match(read('src/index.ts'),/0\.5\.3-r2-projection\.20261124/);
+ assert.match(read('.github/workflows/prod-readiness.yml'),/0\.5\.3-r2-projection\.20261124/);
+});
+
+test('SSR HTML CSP allows only its environment-specific R2 JSON host, never broad remote connections',()=>{
+ const seo=read('src/seo.ts');
+ const reader=read('public/public-content.js');
+ assert.match(seo,/jsonCdnOrigin=isPreview\(env\)\?'https:\/\/gambling-data-dev\.nbn369\.com':'https:\/\/gambling-data\.nbn369\.com'/);
+ assert.match(seo,/connect-src 'self' \$\{jsonCdnOrigin\}/);
+ assert.doesNotMatch(seo,/connect-src 'self' ;/);
+ assert.doesNotMatch(seo,/connect-src \*/);
+ assert.match(seo,/script-src 'self'/);
+ assert.match(seo,/frame-ancestors 'none'/);
+ assert.match(seo,/object-src 'none'/);
+ assert.match(reader,/const eligible=base===HOSTS\[health\?\.environment\]/);
+ assert.match(reader,/fetcher\(base\+'\/'\+key/);
+ assert.match(read('public/app.js'),/publicReads\(\)\.topic\(topicId,p\)/);
+});
+
+test('R2 JSON uses extended TTL with exact-key purge and no-cache tombstones',()=>{
+ const p=read('src/public-projection.ts');
+ const d=read('src/projection-demand.ts');
+ assert.match(p,/const sourceTtl=scope==='feed'\?86400:604800/);
+ assert.match(p,/s-maxage='\+sourceTtl/);
+ assert.match(p,/s-maxage=2592000/);
+ assert.match(p,/const cacheControl=visibility==='public'[\s\S]*?:'no-store'/);
+ assert.match(p,/const localeCacheControl=visible[\s\S]*?:'no-store'/);
+ assert.match(p,/oldLocale\.customMetadata\.cachePolicy===localePolicy/);
+ assert.match(p,/old\.customMetadata\.cachePolicy===cachePolicy/);
+ assert.match(p,/await purgeProjection\(env,config,key,false,localeKeys\)/);
+ assert.match(d,/await purgeProjection\(env,config,key,task\.priority>=2,localeKeys\)/);
+ assert.match(d,/await purgeProjection\(env,config,key,false,localeKeys\)/);
+ assert.match(d,/stage='purge_failed'/);
+ assert.match(d,/attempts>=MAX_ATTEMPTS\?'dead':'pending'/);
+ assert.doesNotMatch(p,/cachePolicy:'edge-60'/);
+});
+

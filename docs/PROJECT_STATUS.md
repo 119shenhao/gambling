@@ -260,3 +260,27 @@ CI 额外校验 UI 纹理、骰子、暖色阅读主题，并断言生产 `IDENT
 - 发布保留原生产数据与权限：不迁移用户、帖子、评论和回执；不调用内容同步任务；不更改生产 D1/R2 UUID、Secret 明文、Cloudflare 控制台配置或 Identity Center；21 个正式 `migrations/v1` 文件在 DEV/main 内容一致，故本版本无需新增生产数据库迁移。
 - 新版代码预期健康版本 `0.5.2-community-parity.20261122`。生产只读检查包括版本、D1 Ready、原文语言、SSO 账号选择、Azure、翻译额度和公开页面；Cloudflare 构建/密钥保留及 UI 验收须以实际在线结果判定。
 - 本段首先纳入发布候选分支；**发布前**不表示已经部署。正式结果以合并 PR、生产 Actions、Cloudflare 实际运行及验收链接补录，失败时停止而非覆盖原生产数据库。
+
+## 2026-11-24 R2/CDN production activation candidate (DRAFT; NOT YET DEPLOYED)
+
+- User configured isolated DEV/PROD R2 custom domains, CORS, CDN JSON Cache Rule and purported purge-token bindings.
+- Live read-only DNS, TLS, CORS, Worker health: both domains resolved; DEV purgeConfigured=true with projection READY, PROD code still has projection OFF.
+- Actual DEV bounded on-demand: feed first CDN 404 -> Worker fallback 20 topics -> R2 generated CDN 200 -> CF-Cache-Status HIT with 60-second HTTP header; topic detail also verified R2 JSON/200/HIT. No Azure translation was generated. Logs: https://github.com/119shenhao/gambling/actions/runs/45307990746 and https://github.com/119shenhao/gambling/actions/runs/45308109212 .
+- Critical **security blocker**: user's Cloudflare screenshot shows `CDN_PURGE_API_TOKEN` stored as plain visible **Variable**, not **Secret**, with token value exposed. Revoke leaked token, issue a new zone-scoped Cache Purge token, save as Secret in **both** named DEV Preview and PROD before release. Do not paste or log the token. `tokenConfigured` in /api/health is not proof of Secret type.
+- This candidate stages PROD/Preview independent CDN flags and source-controlled 60-second headers, retains PROD OAuth/Azure daily 200000/monthly 180000, D1/R2, keep_vars, disables PROD collect/import; no schema migrations or content sync.
+- Keep PR as DRAFT until secret rotation, production purge readiness, CI and DEV content invalidation/translation checks. Deploy only after gates pass, then validate actual production CDN, data protection and Google/Azure.
+
+## 2026-11-24 R2 浏览器端无法加载：CSP 修复与真实 Chrome 验收
+
+- 问题证据：已登录用户在 DEV 打开 `/topic/1fa8a5ba-76d2-4c18-854e-fd35f591c075`，Chrome Network 筛选 `gambling-data-dev` 为零；虽然 D1→R2 及 CDN HTTP 已通，但 SSR HTML 的 `src/seo.ts` 仍写死 CSP `connect-src 'self'`，导致跨域 R2 JSON 被浏览器禁止，前端静默回退 `/api/topics/...`，原先只读 Node 探针无法发现。
+- 修复：SSR `pageHeaders` 按 `APP_ENV` 精确增加 CSP `connect-src 'self' https://gambling-data-dev.nbn369.com` (DEV) 或 `connect-src 'self' https://gambling-data.nbn369.com` (PROD)，不开放通配域名、不改变 `script-src 'self'`、`object-src 'none'`、`frame-ancestors 'none'`；新增静态回归测试。
+- **真实浏览器验证通过**：GitHub Actions headless Chrome 从 DEV 打开该帖子，检查实时 SSR CSP，真正产生 `https://gambling-data-dev.nbn369.com/topics/1fa8a5ba-76d2-4c18-854e-fd35f591c075/detail.json` 请求且 HTTP 200，CSP 拦截报错 0；页面显示 Del Miles。日志 https://github.com/119shenhao/gambling/actions/runs/45311774093 。
+- 验证使用**未登录 Chrome**；已登录用户的 `/api/public-content/viewer` 权限/点赞/收藏核对仍需另行验证。不要把匿名成功当作登录态全部通过。
+- 同步修复到 R2 生产激活草稿 PR #8（尚未合并），保证将来 PROD 启用时允许各自 CDN；不修改 Cloudflare Secret/D1 数据、不启动采集同步；生产发布仍受 Secret 轮换及其余验收门槛限制。
+
+## 2026-11-24 长 TTL 用户方案已进入 R2 生产发布候选（仍为 Draft，不能直接部署）
+
+- 用户确认：既然已经有特定 URL CDN Purge 权限，论坛内容无需全部缓存 60 秒。候选更新为 feed 86400s（1 天）、topic detail/comments 604800s（7 天）、独立译文 2592000s（30 天）；删除、隐藏、失效 Tombstone 为 `no-store`。
+- 更新 Cloudflare R2 `httpMetadata.cacheControl` 与自定义 `cachePolicy`，保持 R2 对象写入后 Purge 成功才确认处理完成的队列流程；代码及静态回归已准备，GitHub CI 待/已独立验收，Cloudflare 生产未启用。
+- 警示：异步重建与 CDN 清理不等于数据库一写就全球零延迟生效。此前生产 Token 曾明文显示；用户已将 DEV Token 改为 Secret，尚未取得生产 Secret 轮换完成的可靠证据。尤其高优先级更新使用按前缀清理，Cloudflare Free 每分钟 5 次请求限速；失败最多重试 8 次后可能进入待干预状态，需要监控、告警和修改/删除后的端到端验证。
+- 现有 R2 JSON 元数据不会因 GitHub 代码发布自动变为长 TTL；避免 D1 超限，不要无界批量重写历史对象。必须用少量指定帖子验证新长 TTL 与 Purge 失效后，才能宣布生产缓存策略生效。

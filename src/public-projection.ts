@@ -258,7 +258,12 @@ export async function writeProjection(config:NonNullable<ReturnType<typeof proje
   const old=await config.bucket.head(key);
   const oldVersion=Number(old?.customMetadata?.projectionVersion)||0;
   if(oldVersion>version)throw Error('r2_version_ahead');
-  const cacheControl='public, max-age=0, s-maxage=7200, must-revalidate';
+  // Public JSON can stay hot at the edge; every mutation republishes R2 before purging its URLs.
+  // Never keep an invalidation/tombstone object cached for days.
+  const sourceTtl=scope==='feed'?86400:604800;
+  const cachePolicy=visibility==='public'?'edge-'+sourceTtl:'edge-no-store';
+  const cacheControl=visibility==='public'
+    ?'public, max-age=0, s-maxage='+sourceTtl+', must-revalidate':'no-store';
   const format=separated?'separate-v1':config.directTranslations?'direct':'encrypted';
   let previousLocales:string[]=[];
   if(old?.customMetadata?.translationLocales){
@@ -289,18 +294,22 @@ export async function writeProjection(config:NonNullable<ReturnType<typeof proje
       const oldLocaleVersion=Number(oldLocale?.customMetadata?.projectionVersion)||0;
       if(oldLocaleVersion>version)throw Error('r2_version_ahead');
       const localeHash=await payloadHash(body);
-      if(oldLocaleVersion===version&&oldLocale?.customMetadata?.payloadHash===localeHash)continue;
+      const localePolicy=visible?'edge-2592000':'edge-no-store';
+      const localeCacheControl=visible
+        ?'public, max-age=0, s-maxage=2592000, must-revalidate':'no-store';
+      if(oldLocaleVersion===version&&oldLocale?.customMetadata?.payloadHash===localeHash&&
+        oldLocale.customMetadata.cachePolicy===localePolicy)continue;
       const result=await config.bucket.put(localeKey,JSON.stringify(body),{
         onlyIf:oldLocale?{etagMatches:oldLocale.etag}:{etagDoesNotMatch:'*'},
-        httpMetadata:{contentType:'application/json',cacheControl},
+        httpMetadata:{contentType:'application/json',cacheControl:localeCacheControl},
         customMetadata:{projectionVersion:String(version),payloadHash:localeHash,
-          visibility:visible?'public':'invalidated',translationFormat:'separate-v1'}
+          visibility:visible?'public':'invalidated',translationFormat:'separate-v1',cachePolicy:localePolicy}
       });
       if(!result)throw Error('r2_conditional_write_conflict');
     }
   }
   if(oldVersion===version&&old?.customMetadata?.payloadHash===digest&&old.customMetadata.visibility===visibility&&
-    old.customMetadata.translationFormat===format&&old.customMetadata.cachePolicy==='edge-60'&&
+    old.customMetadata.translationFormat===format&&old.customMetadata.cachePolicy===cachePolicy&&
     (!refresh||Number(old.customMetadata.translationCheckedAt)>=checkedAt))return keys;
   const result=await config.bucket.put(key,JSON.stringify({
     schemaVersion:1,contentVersion:version,generatedAt:new Date().toISOString(),
@@ -310,7 +319,7 @@ export async function writeProjection(config:NonNullable<ReturnType<typeof proje
     httpMetadata:{contentType:'application/json',cacheControl},
     customMetadata:{projectionVersion:String(version),payloadHash:digest,visibility,
       translationFormat:format,translationLocales:JSON.stringify(languages),
-      translationCheckedAt:String(checkedAt),cachePolicy:'edge-60'}
+      translationCheckedAt:String(checkedAt),cachePolicy}
   });
   if(!result)throw Error('r2_conditional_write_conflict');
   return keys;

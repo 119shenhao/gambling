@@ -35,10 +35,10 @@
   },
   "vars": {
     "APP_ENV": "production",
-    "PUBLIC_CONTENT_ENABLED": "false",
-    "PUBLIC_CONTENT_READS": "false",
-    "PUBLIC_CONTENT_FALLBACK": "false",
-    "PUBLIC_CONTENT_ON_DEMAND": "false",
+    "PUBLIC_CONTENT_ENABLED": "true",
+    "PUBLIC_CONTENT_READS": "true",
+    "PUBLIC_CONTENT_FALLBACK": "true",
+    "PUBLIC_CONTENT_ON_DEMAND": "true",
     "PUBLIC_TRANSLATION_DIRECT": "false",
     "PUBLIC_TRANSLATION_SEPARATE": "true",
     "IDENTITY_LOGIN_ENABLED": "true",
@@ -52,7 +52,10 @@
     "TRANSLATOR_F0_VERIFIED_AT": "2026-11-09T06:14:50Z",
     "TRANSLATION_DAILY_LIMIT": "200000",
     "TRANSLATION_MONTHLY_LIMIT": "1800000",
-    "ADMIN_CENTER_OWNER_SHA256": "eb367b5a659205efbacd7dfa4964e0c2a9852c072237b668d3d885e334105ba4"
+    "ADMIN_CENTER_OWNER_SHA256": "eb367b5a659205efbacd7dfa4964e0c2a9852c072237b668d3d885e334105ba4",
+    "PUBLIC_CONTENT_BASE_URL": "https://gambling-data.nbn369.com",
+    "CDN_ZONE_ID": "7857d08dff2a46bf824914c687a21413",
+    "PUBLIC_CONTENT_PAGE_SIZE": "50"
   },
   "build": {
     "command": "node scripts/prepare-build.mjs"
@@ -66,10 +69,10 @@
   "previews": {
     "vars": {
       "APP_ENV": "preview",
-      "PUBLIC_CONTENT_ENABLED": "false",
-      "PUBLIC_CONTENT_READS": "false",
-      "PUBLIC_CONTENT_FALLBACK": "false",
-      "PUBLIC_CONTENT_ON_DEMAND": "false",
+      "PUBLIC_CONTENT_ENABLED": "true",
+      "PUBLIC_CONTENT_READS": "true",
+      "PUBLIC_CONTENT_FALLBACK": "true",
+      "PUBLIC_CONTENT_ON_DEMAND": "true",
       "PUBLIC_TRANSLATION_DIRECT": "false",
       "PUBLIC_TRANSLATION_SEPARATE": "true",
       "IDENTITY_LOGIN_ENABLED": "true",
@@ -84,7 +87,10 @@
       "TRANSLATOR_F0_VERIFIED_AT": "2026-11-09T06:14:50Z",
       "TRANSLATION_DAILY_LIMIT": "5000",
       "TRANSLATION_MONTHLY_LIMIT": "10000",
-      "ADMIN_CENTER_OWNER_SHA256": "7df1b395981a31a651015a158eb1086264ecbea53b5dd41a34d62444ff29fa26"
+      "ADMIN_CENTER_OWNER_SHA256": "7df1b395981a31a651015a158eb1086264ecbea53b5dd41a34d62444ff29fa26",
+      "PUBLIC_CONTENT_BASE_URL": "https://gambling-data-dev.nbn369.com",
+      "CDN_ZONE_ID": "7857d08dff2a46bf824914c687a21413",
+      "PUBLIC_CONTENT_PAGE_SIZE": "50"
     },
     "r2_buckets": [
       {

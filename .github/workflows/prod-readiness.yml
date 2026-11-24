@@ -38,7 +38,7 @@ jobs:
               const h=await healthResp.json();
               if(!healthResp.ok||h.environment!=='production'||h.status!=='ok'||h.databaseReady!==true)
                 throw Error('production D1 or Worker not ready');
-              if(h.version!=='0.5.2-community-parity.20261122')
+              if(h.version!=='0.5.3-r2-projection.20261124')
                 throw Error('production Worker has not deployed the atomic language-proof release');
               const original=await get(origin+'/api/topics/5aae46c6-56d8-468d-8d24-76bc689f09d2');
               if(!original.ok)throw Error('production original-language V2EX topic not available');
@@ -73,7 +73,7 @@ jobs:
               if(legacy.status!==410)throw Error('legacy Google OAuth is not disabled');
               const callback=await get(origin+'/api/auth/identity/callback');
               if(callback.status!==401)throw Error('unbound OAuth callback is not rejected');
-              console.log('PASS: Gambling PROD Worker deployed 0.5.1 atomic language-proof release; live V2EX original zh-CN; D1 ready, Google chooser SSO and Azure translation configured.');
+              console.log('PASS: Gambling PROD Worker deployed R2 on-demand release; live V2EX original zh-CN; D1 ready, Google chooser SSO and Azure translation configured.');
               passed=true;
               break;
             }catch(e){
@@ -101,7 +101,7 @@ jobs:
             throw Error('invalid_production_readiness_report');
           const report={
             run_id:Number(run),run_url:'https://github.com/'+repo+'/actions/runs/'+run,
-            deployment_check:status,expected_worker_version:'0.5.2-community-parity.20261122',
+            deployment_check:status,expected_worker_version:'0.5.3-r2-projection.20261124',
             production_v2ex_original_language_expected:'zh-CN',
             source_commit:process.env.LIVE_COMMIT_SHA,
             checked_at:new Date().toISOString(),

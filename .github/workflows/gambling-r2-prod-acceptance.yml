@@ -1,0 +1,103 @@
+name: Gambling production R2 CDN release acceptance
+on:
+  push:
+    branches: [main, release/gambling-r2-cdn-20261124]
+    paths:
+      - .github/workflows/gambling-r2-prod-acceptance.yml
+      - wrangler.jsonc
+      - src/public-projection.ts
+      - src/projection-demand.ts
+      - src/seo.ts
+      - src/index.ts
+permissions:
+  contents: read
+jobs:
+  production-r2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Preflight on candidate; bounded live acceptance after main deployment
+        env:
+          RELEASE_REF: ${{ github.ref }}
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const origin='https://gambling.nbn369.com';
+          const cdn='https://gambling-data.nbn369.com';
+          const prod=process.env.RELEASE_REF==='refs/heads/main';
+          const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+          const get=(url,headers={})=>fetch(url,{headers,redirect:'error',signal:AbortSignal.timeout(12000)});
+          async function read(key){
+            const r=await get(cdn+'/'+key,{Origin:origin});
+            return {status:r.status,cors:r.headers.get('access-control-allow-origin'),cache:r.headers.get('cf-cache-status'),
+              cc:r.headers.get('cache-control'),json:r.ok?await r.json():null};
+          }
+          if(!prod){
+            const h=await get(origin+'/api/health');
+            const j=await h.json(), p=j.publicContent||{};
+            const f=await read('feeds/latest/page-1.json');
+            console.log(JSON.stringify({environment:j.environment,version:j.version,databaseReady:j.databaseReady,
+              tokenConfigured:p.tokenConfigured,purgeConfigured:p.purgeConfigured,enabled:p.enabled,cdnHTTP:f.status}));
+            if(!h.ok||j.environment!=='production'||!j.databaseReady||![200,404].includes(f.status))
+              throw Error('Production preflight failed');
+            console.log('Read-only preflight; cannot certify secret type, rotation or purge success.');
+            process.exit(0);
+          }
+          let ready=false;
+          for(let i=0;i<18;i++){
+            try{
+              const r=await get(origin+'/api/health'), h=await r.json(), p=h.publicContent||{};
+              ready=r.ok&&h.environment==='production'&&h.databaseReady===true&&
+                h.version==='0.5.3-r2-projection.20261124'&&p.ready&&p.enabled&&p.purgeConfigured&&
+                p.onDemand&&p.fallback&&p.baseUrl===cdn;
+              if(ready)break;
+            }catch{}
+            if(i<17)await sleep(12000);
+          }
+          if(!ready)throw Error('Production projection readiness failed; no projection wake requested');
+          async function verify(key,api,ttl,validate){
+            let r=await read(key);
+            if(r.status===404){
+              const fallback=await get(origin+api,{'x-gambling-projection-miss':key});
+              if(!fallback.ok)throw Error('Bounded production projection fallback failed');
+              for(let i=0;i<8;i++){
+                await sleep(4000);
+                r=await read(key);
+                if(r.status===200)break;
+                if(r.status!==404)throw Error('Unexpected CDN HTTP '+r.status);
+              }
+            }
+            if(r.status!==200||![origin,'*'].includes(r.cors)||r.json?.schemaVersion!==1||
+               !Number.isSafeInteger(r.json?.contentVersion)||!validate(r.json)||
+               !new RegExp('s-maxage='+ttl+'(?:,|$)').test(r.cc||''))
+              throw Error('Production CDN schema, CORS or long TTL failed: '+key);
+            let hit=false;
+            for(let i=0;i<4;i++){
+              const next=await read(key);
+              if(next.status===200&&next.cache==='HIT'){hit=true;break;}
+              await sleep(1500);
+            }
+            if(!hit)throw Error('No production CDN HIT: '+key);
+            console.log('PASS '+key+' TTL='+ttl+' CDN HIT');
+            return r.json;
+          }
+          const feed=await verify('feeds/latest/page-1.json','/api/topics?sort=latest&offset=0',86400,
+            j=>Array.isArray(j.data?.topics)&&j.data.translationLayout==='separate-v1');
+          const id=feed.data.topics[0]?.id;
+          if(typeof id!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(id))throw Error('No valid published topic for detail acceptance');
+          const key='topics/'+id+'/detail.json';
+          const detail=await verify(key,'/api/topics/'+id,604800,
+            j=>j.data?.topic?.id===id&&Array.isArray(j.data.comments)&&j.data.translationLayout==='separate-v1');
+          const locale=detail.data.translationLocales?.[0];
+          if(locale){
+            const t=await read('i18n/'+encodeURIComponent(locale)+'/'+key);
+            if(t.status!==200||t.json?.sourceKey!==key||t.json?.contentVersion!==detail.contentVersion||
+               t.json?.locale!==locale||!/s-maxage=2592000(?:,|$)/.test(t.cc||''))
+              throw Error('Existing separate translation CDN version/TTL failed');
+            console.log('PASS existing translation CDN JSON');
+          }else console.log('No existing translation in sampled topic; translation CDN acceptance remains untested.');
+          const html=await get(origin+'/topic/'+id);
+          if(!html.ok||!(html.headers.get('content-security-policy')||'').includes(cdn))
+            throw Error('Production browser CSP does not allow production CDN');
+          console.log('PASS production feed/detail/CORS/CSP. No bulk backfill, no Azure generation, no content sync. Mutation/purge acceptance requires separate evidence.');
+          NODE
