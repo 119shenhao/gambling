@@ -463,3 +463,11 @@
 - 用户要求启用而不再仅保留 R2 投影代码。DEV `wrangler.jsonc.previews.vars` 已准备 `PUBLIC_CONTENT_ENABLED/READS/FALLBACK/ON_DEMAND=true`、独立 `PUBLIC_CONTENT_BASE_URL` 和 `CDN_ZONE_ID`。
 - **上线仍受外部条件阻塞**：R2 custom domains 和 CORS 配置未能从 GitHub 读取或验证；`CDN_PURGE_API_TOKEN` 必须由 Cloudflare Secret 设置。现有 `projectionConfig` 的 `purgeReady` 缺失就保持 fail-closed，不触发 D1 到 R2 的投影，更不会把开发的公开 JSON 发到生产。
 - 新增只读 DNS/TLS/CORS/health 预检工作流和静态回归，生产 `main` 未修改。待 DEV 真实在线 CDN/原文/译文/缓存失效验收后，再保护生产配置发布。图片上传未实现、管理员 PV 统计可能增加 D1 写入、生产 Import/Collect 只能 DEV 运行，不能盲目打开。
+
+## 2026-11-24 R2 浏览器端无法加载：CSP 修复与真实 Chrome 验收
+
+- 问题证据：已登录用户在 DEV 打开 `/topic/1fa8a5ba-76d2-4c18-854e-fd35f591c075`，Chrome Network 筛选 `gambling-data-dev` 为零；虽然 D1→R2 及 CDN HTTP 已通，但 SSR HTML 的 `src/seo.ts` 仍写死 CSP `connect-src 'self'`，导致跨域 R2 JSON 被浏览器禁止，前端静默回退 `/api/topics/...`，原先只读 Node 探针无法发现。
+- 修复：SSR `pageHeaders` 按 `APP_ENV` 精确增加 CSP `connect-src 'self' https://gambling-data-dev.nbn369.com` (DEV) 或 `connect-src 'self' https://gambling-data.nbn369.com` (PROD)，不开放通配域名、不改变 `script-src 'self'`、`object-src 'none'`、`frame-ancestors 'none'`；新增静态回归测试。
+- **真实浏览器验证通过**：GitHub Actions headless Chrome 从 DEV 打开该帖子，检查实时 SSR CSP，真正产生 `https://gambling-data-dev.nbn369.com/topics/1fa8a5ba-76d2-4c18-854e-fd35f591c075/detail.json` 请求且 HTTP 200，CSP 拦截报错 0；页面显示 Del Miles。日志 https://github.com/119shenhao/gambling/actions/runs/45311774093 。
+- 验证使用**未登录 Chrome**；已登录用户的 `/api/public-content/viewer` 权限/点赞/收藏核对仍需另行验证。不要把匿名成功当作登录态全部通过。
+- 同步修复到 R2 生产激活草稿 PR #8（尚未合并），保证将来 PROD 启用时允许各自 CDN；不修改 Cloudflare Secret/D1 数据、不启动采集同步；生产发布仍受 Secret 轮换及其余验收门槛限制。
