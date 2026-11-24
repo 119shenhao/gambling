@@ -1,0 +1,49 @@
+name: Gambling R2 DEV live TTL audit (read-only)
+on:
+  push:
+    branches: [dev]
+    paths:
+      - .github/workflows/gambling-r2-live-ttl-check.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Read-only verify public R2 object headers and account-safe readiness
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const origin='https://dev-gambling-community.119shenhao.workers.dev';
+          const cdn='https://gambling-data-dev.nbn369.com';
+          const topic='1fa8a5ba-76d2-4c18-854e-fd35f591c075';
+          const keys=['feeds/latest/page-1.json','topics/'+topic+'/detail.json'];
+          const health=await fetch(origin+'/api/health',{signal:AbortSignal.timeout(12000)});
+          const body=await health.json();
+          const p=body?.publicContent||{};
+          console.log(JSON.stringify({item:'worker-health',http:health.status,preview:body.environment==='preview',
+            dbReady:body.databaseReady,enabled:p.enabled,ready:p.ready,purgeConfigured:p.purgeConfigured,
+            readsFromDevCDN:p.baseUrl===cdn}));
+          if(!health.ok||body.environment!=='preview'||!body.databaseReady||!p.purgeConfigured||p.baseUrl!==cdn)
+            throw Error('DEV Worker R2 readiness is not ready');
+          for(const key of keys){
+            const res=await fetch(cdn+'/'+key,{
+              headers:{Origin:origin},signal:AbortSignal.timeout(12000),redirect:'error'});
+            const summary={item:key,status:res.status,cache:res.headers.get('cf-cache-status'),
+              age:res.headers.get('age'),cacheControl:res.headers.get('cache-control'),
+              cors:res.headers.get('access-control-allow-origin')===origin};
+            if(res.ok){
+              const o=await res.json();
+              summary.schemaVersion=o.schemaVersion;
+              summary.hasContent=Boolean(o.data&&o.contentVersion);
+            }
+            console.log(JSON.stringify(summary));
+            if(res.status!==200||summary.hasContent!==true||summary.cors!==true)
+              throw Error('DEV CDN JSON response invalid for '+key);
+          }
+          console.log('PASS: R2 CDN files independently reachable. This is read-only; no changes or purges.');
+          NODE
