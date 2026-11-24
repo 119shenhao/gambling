@@ -80,7 +80,7 @@ async function showShareTopic(c){
  // transient user activation; an intermediate modal or async work may lose it.
  if(typeof navigator.share==='function'){
   try{
-   await navigator.share({title:c.title||'Problem Gambling',url});
+   await navigator.share({title:c.title||t('eyebrow'),url});
    return;
   }catch(e){
    // A cancelled native share leaves the fallback choices available.
@@ -144,7 +144,7 @@ function navigate(path){
  return render();
 }
 function highlight(value){let raw=String(value||'');const words=[...new Set(state.highlights.filter(s=>s.length>1))].sort((a,b)=>b.length-a.length).slice(0,120);if(!words.length)return esc(raw);const regex=new RegExp(words.map(w=>w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|'),'giu');let out='',last=0;for(const m of raw.matchAll(regex)){out+=esc(raw.slice(last,m.index))+'<mark>'+esc(m[0])+'</mark>';last=m.index+m[0].length;}return out+esc(raw.slice(last));}
-function renderChrome(){document.documentElement.lang=locale;$('#language').value=locale;const badge=$('#preview-badge');badge.textContent=isPreview()?t('preview'):'';badge.hidden=!isPreview();const {path,params}=route();
+function renderChrome(){document.documentElement.lang=locale;const brand=$('#brand-name');brand.textContent=t('eyebrow');brand.closest('.brand').setAttribute('aria-label',t('eyebrow'));$('#language').value=locale;const badge=$('#preview-badge');badge.textContent=isPreview()?t('preview'):'';badge.hidden=!isPreview();const {path,params}=route();
  const nav=(name,href,k,active=false)=>`<a class="nav-link ${active?'active':''}" href="${href}">${icon(k)}${t(name)}</a>`;
  $('#sidebar').innerHTML=`<nav class="primary-nav">${nav('home','/','home',path==='/')}${nav('search','/search','search',path==='/search')}${nav('mySpace','/me','user',path.startsWith('/me'))}<button type="button" class="nav-link nav-compose" data-action="compose">${icon('plus')}${t('newPost')}</button></nav><div class="sidebar-label">${t('spaces')}</div><nav class="secondary-nav">${nav('neck','/search?category=financial-impact','story',params.get('category')==='financial-impact')}${nav('back','/search?category=family-life','story',params.get('category')==='family-life')}${nav('stories','/search?category=personal-story','story',params.get('category')==='personal-story')}</nav>${state.user&&['admin','moderator'].includes(state.user.role)?`<div class="sidebar-label">${t('admin')}</div><nav class="admin-nav">${nav('admin','/admin','shield',path==='/admin')}</nav>`:''}<div class="sidebar-note"><strong>${t('welcome')}</strong>${t('communityReminder')}<p><a href="/privacy">${t('privacy')}</a></p></div>`;
  $('#account-actions').innerHTML=state.user?`<a href="/notifications" class="bell" aria-label="${t('notifications')}">${icon('bell')}${state.unread?`<span class="count">${state.unread>99?'99+':state.unread}</span>`:''}</a><details class="account-menu"><summary class="account-trigger" aria-label="${esc(t('mySpace'))}"><span class="avatar">${esc(state.user.nickname.slice(0,1))}</span><span class="nickname">${esc(state.user.nickname)}</span><span class="account-chevron" aria-hidden="true">▾</span></summary><div class="account-dropdown"><a href="/me">${t('mySpace')}</a><a href="/me?kind=settings">${t('settings')}</a>${['admin','moderator'].includes(state.user.role)?`<a href="/admin">${t('admin')}</a>`:''}<button type="button" data-action="reading-options">${esc(readingText('link'))}</button><button type="button" data-action="logout">${t('logout')}</button></div></details>`:button(t('login'),'login');
@@ -335,7 +335,7 @@ async function clicked(el,event){const action=el.dataset.action,{id,type,active}
  }
  if(action==='share-native'){
   const input=$('#share-url');if(!input||typeof navigator.share!=='function')return;
-  try{await navigator.share({title:state.topic?.title||'Problem Gambling',url:input.value});closeModal();}
+  try{await navigator.share({title:state.topic?.title||t('eyebrow'),url:input.value});closeModal();}
   catch(e){if(e?.name!=='AbortError')toast(t('shareSystemError'));}
   return;
  }
@@ -480,7 +480,7 @@ document.addEventListener('submit',async event=>{const form=event.target;if(!(fo
   if(form.id==='term-form'){await send('/api/admin/taxonomy',{id:form.dataset.id||undefined,term_type:v.term_type,slug:v.slug,labels:{[locale]:v.label},...(v.aliases.trim()?{aliases:v.aliases.split(/[,，]/).map(s=>s.trim()).filter(Boolean)}:{}),reason:v.reason});state.terms=(await api('/api/taxonomy?locale='+locale)).terms;closeModal();toast(t('success'));await render();return;}
  }catch(e){toast(errorText(e));}finally{if(submit)submit.disabled=false;}
 });
-$('#language').addEventListener('change',async e=>{locale=e.target.value;const brand=document.getElementById('brand-name');if(brand)brand.textContent=locale==='zh-CN'?'戒赌社区':locale==='zh-TW'?'戒賭社區':'Problem Gambling';translations?.close();++sequence;localStorage.setItem('gc_locale',locale);try{state.terms=(await api('/api/taxonomy?locale='+locale)).terms;}catch{}await render();});
+$('#language').addEventListener('change',async e=>{locale=e.target.value;translations?.close();++sequence;localStorage.setItem('gc_locale',locale);try{state.terms=(await api('/api/taxonomy?locale='+locale)).terms;}catch{}await render();});
 document.addEventListener('change',e=>{
  if(e.target.matches('input[name="reading-theme"],input[name="reading-size"]')){
   const field=e.target.name==='reading-theme'?'theme':'size';
@@ -495,7 +495,7 @@ window.addEventListener('popstate',event=>{
  window.scrollTo({top:0,behavior:'instant'});
  render(false,true);
 });
-async function boot(){const brand=document.getElementById('brand-name');if(brand)brand.textContent=locale==='zh-CN'?'戒赌社区':locale==='zh-TW'?'戒賭社區':'Problem Gambling';renderChrome();await Promise.allSettled([refreshMe(),api('/api/health').then(r=>state.health=r),api('/api/taxonomy?locale='+locale).then(r=>state.terms=r.terms)]);await render();refreshUnread();}
+async function boot(){renderChrome();await Promise.allSettled([refreshMe(),api('/api/health').then(r=>state.health=r),api('/api/taxonomy?locale='+locale).then(r=>state.terms=r.terms)]);await render();refreshUnread();}
 boot();setInterval(()=>{if(document.visibilityState==='visible')refreshUnread();},60000);
 
 
