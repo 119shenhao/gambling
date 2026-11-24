@@ -269,3 +269,11 @@ CI 额外校验 UI 纹理、骰子、暖色阅读主题，并断言生产 `IDENT
 - Critical **security blocker**: user's Cloudflare screenshot shows `CDN_PURGE_API_TOKEN` stored as plain visible **Variable**, not **Secret**, with token value exposed. Revoke leaked token, issue a new zone-scoped Cache Purge token, save as Secret in **both** named DEV Preview and PROD before release. Do not paste or log the token. `tokenConfigured` in /api/health is not proof of Secret type.
 - This candidate stages PROD/Preview independent CDN flags and source-controlled 60-second headers, retains PROD OAuth/Azure daily 200000/monthly 180000, D1/R2, keep_vars, disables PROD collect/import; no schema migrations or content sync.
 - Keep PR as DRAFT until secret rotation, production purge readiness, CI and DEV content invalidation/translation checks. Deploy only after gates pass, then validate actual production CDN, data protection and Google/Azure.
+
+## 2026-11-24 R2 浏览器端无法加载：CSP 修复与真实 Chrome 验收
+
+- 问题证据：已登录用户在 DEV 打开 `/topic/1fa8a5ba-76d2-4c18-854e-fd35f591c075`，Chrome Network 筛选 `gambling-data-dev` 为零；虽然 D1→R2 及 CDN HTTP 已通，但 SSR HTML 的 `src/seo.ts` 仍写死 CSP `connect-src 'self'`，导致跨域 R2 JSON 被浏览器禁止，前端静默回退 `/api/topics/...`，原先只读 Node 探针无法发现。
+- 修复：SSR `pageHeaders` 按 `APP_ENV` 精确增加 CSP `connect-src 'self' https://gambling-data-dev.nbn369.com` (DEV) 或 `connect-src 'self' https://gambling-data.nbn369.com` (PROD)，不开放通配域名、不改变 `script-src 'self'`、`object-src 'none'`、`frame-ancestors 'none'`；新增静态回归测试。
+- **真实浏览器验证通过**：GitHub Actions headless Chrome 从 DEV 打开该帖子，检查实时 SSR CSP，真正产生 `https://gambling-data-dev.nbn369.com/topics/1fa8a5ba-76d2-4c18-854e-fd35f591c075/detail.json` 请求且 HTTP 200，CSP 拦截报错 0；页面显示 Del Miles。日志 https://github.com/119shenhao/gambling/actions/runs/45311774093 。
+- 验证使用**未登录 Chrome**；已登录用户的 `/api/public-content/viewer` 权限/点赞/收藏核对仍需另行验证。不要把匿名成功当作登录态全部通过。
+- 同步修复到 R2 生产激活草稿 PR #8（尚未合并），保证将来 PROD 启用时允许各自 CDN；不修改 Cloudflare Secret/D1 数据、不启动采集同步；生产发布仍受 Secret 轮换及其余验收门槛限制。
