@@ -284,3 +284,8 @@ CI 额外校验 UI 纹理、骰子、暖色阅读主题，并断言生产 `IDENT
 - 更新 Cloudflare R2 `httpMetadata.cacheControl` 与自定义 `cachePolicy`，保持 R2 对象写入后 Purge 成功才确认处理完成的队列流程；代码及静态回归已准备，GitHub CI 待/已独立验收，Cloudflare 生产未启用。
 - 警示：异步重建与 CDN 清理不等于数据库一写就全球零延迟生效。此前生产 Token 曾明文显示；用户已将 DEV Token 改为 Secret，尚未取得生产 Secret 轮换完成的可靠证据。尤其高优先级更新使用按前缀清理，Cloudflare Free 每分钟 5 次请求限速；失败最多重试 8 次后可能进入待干预状态，需要监控、告警和修改/删除后的端到端验证。
 - 现有 R2 JSON 元数据不会因 GitHub 代码发布自动变为长 TTL；避免 D1 超限，不要无界批量重写历史对象。必须用少量指定帖子验证新长 TTL 与 Purge 失效后，才能宣布生产缓存策略生效。
+
+
+## 2026-11-24 Gambling Stories 多语言站名生产发布
+
+- 用户已验收 DEV 手机显示并明确批准生产发布；DEV CI #45356380979、在线 smoke #45356380874 均通过。仅移植站名、UI 顶栏、SEO/分享品牌、配套检查及文档，不合并整个 DEV、不改变生产配置、数据库、R2、身份中心或同步任务。正式上线以 Cloudflare 构建与实际 HTTP 验证为准。

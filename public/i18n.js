@@ -204,7 +204,7 @@ dictionaries['zh-TW']=traditionalChinese;
 // Gambling community policy: zh-CN and zh-TW may promote quitting; other languages stay descriptive and neutral.
 const gamblingCopy={
   "en": {
-    "eyebrow": "Problem Gambling",
+    "eyebrow": "Gambling Stories",
     "hero": "Real Stories. Real Impacts. Open Discussion.",
     "intro": "A place to share experiences and discuss how gambling affects finances, relationships and daily life. Perspectives are welcome without a prescribed conclusion.",
     "neck": "Financial impact",
@@ -267,7 +267,7 @@ const gamblingCopy={
     "publicNote": "貼文與回覆預設公開。請使用暱稱，避免透露身分、聯絡方式與財務帳戶資訊。可申請刪除資料。分享經驗不構成專業建議。"
   },
   "es": {
-    "eyebrow": "Problemas con el juego",
+    "eyebrow": "Historias de apuestas",
     "hero": "Historias reales. Impactos reales. Debate abierto.",
     "intro": "Un espacio para compartir experiencias y conversar sin juicios sobre el juego de azar y sus consecuencias.",
     "neck": "Impacto económico",
@@ -281,7 +281,7 @@ const gamblingCopy={
     "publicNote": "Los testimonios no sustituyen el asesoramiento profesional."
   },
   "pt-BR": {
-    "eyebrow": "Problemas com jogos de azar",
+    "eyebrow": "Histórias de apostas",
     "hero": "Histórias reais. Impactos reais. Discussão aberta.",
     "intro": "Compartilhe experiências e discuta sem julgamentos os impactos dos jogos de azar.",
     "neck": "Impacto financeiro",
@@ -295,7 +295,7 @@ const gamblingCopy={
     "publicNote": "Relatos pessoais não substituem orientação profissional."
   },
   "de": {
-    "eyebrow": "Problematisches Glücksspiel",
+    "eyebrow": "Glücksspielgeschichten",
     "hero": "Echte Geschichten. Echte Folgen. Offene Diskussion.",
     "intro": "Ein Raum für Erfahrungen und sachliche Diskussionen über die Auswirkungen von Glücksspiel.",
     "neck": "Finanzielle Folgen",
@@ -309,7 +309,7 @@ const gamblingCopy={
     "publicNote": "Persönliche Berichte ersetzen keine fachliche Beratung."
   },
   "fr": {
-    "eyebrow": "Jeu problématique",
+    "eyebrow": "Récits de jeux d’argent",
     "hero": "Histoires réelles. Impacts réels. Discussion ouverte.",
     "intro": "Un espace pour partager des expériences et discuter sans jugement des conséquences des jeux d'argent.",
     "neck": "Conséquences financières",
@@ -323,7 +323,7 @@ const gamblingCopy={
     "publicNote": "Les témoignages ne remplacent pas les conseils de professionnels."
   },
   "ja": {
-    "eyebrow": "ギャンブル問題",
+    "eyebrow": "ギャンブル体験談",
     "hero": "実際の経験。現実への影響。自由な議論。",
     "intro": "ギャンブルが生活に与える影響について、体験を共有し、判断を押し付けずに話し合う場です。",
     "neck": "経済的な影響",
