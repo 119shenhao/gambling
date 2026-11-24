@@ -2,47 +2,6 @@
   "collector_job_result": "success",
   "events": [
     {
-      "candidates": 0,
-      "event": "listing_checked",
-      "site": "australiadss"
-    },
-    {
-      "candidates": 0,
-      "eligible": 0,
-      "event": "plan",
-      "excluded": 0,
-      "import_allowed": true,
-      "site": "australiadss"
-    },
-    {
-      "duplicates": 0,
-      "event": "site_summary",
-      "new_comments": 0,
-      "new_topics": 0,
-      "site": "australiadss",
-      "target": 2
-    },
-    {
-      "candidates": 8,
-      "event": "listing_checked",
-      "site": "gamcare"
-    },
-    {
-      "candidates": 12,
-      "event": "listing_checked",
-      "site": "gamcare"
-    },
-    {
-      "candidates": 6,
-      "event": "listing_checked",
-      "site": "gamcare"
-    },
-    {
-      "candidates": 11,
-      "event": "listing_checked",
-      "site": "gamcare"
-    },
-    {
       "candidates": 37,
       "eligible": 37,
       "event": "plan",
@@ -274,7 +233,7 @@
     },
     {
       "board": "family-friends",
-      "candidates": 15,
+      "candidates": 13,
       "event": "listing_checked",
       "page": 2,
       "site": "gamcare"
@@ -305,21 +264,39 @@
     },
     {
       "event": "imported",
-      "replies": 3,
+      "replies": 8,
       "site": "gamcare",
-      "source_id": "to-stay-or-go",
-      "topic_id": "cdc49051-eb50-42c8-bb94-bf0f32df9c76"
+      "source_id": "is-there-any-chance-my-relationship-can-be-saved",
+      "topic_id": "f3056261-6226-4024-bb70-b2c31b247af5"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "hes-doing-it-again-i-think"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "should-i-leavw-my-gambling-boyfriend"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "should-i-leavw-my-gambling-boyfriend-2"
     },
     {
       "event": "imported",
-      "replies": 2,
+      "replies": 4,
       "site": "gamcare",
-      "source_id": "advice-12",
-      "topic_id": "b5172be4-578f-4862-8f78-f318be2e74af"
+      "source_id": "cg-parental-access-to-young-child",
+      "topic_id": "24568e8e-a8e5-4f53-b01e-a48b3987fc97"
     },
     {
       "board": "overcoming-problem-gambling",
-      "candidates": 12,
+      "candidates": 10,
       "event": "listing_checked",
       "page": 2,
       "site": "gamcare"
@@ -367,22 +344,28 @@
       "source_id": "join-the-guru-challenge"
     },
     {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "quote-of-the-day-7"
+    },
+    {
       "event": "imported",
       "replies": 4,
       "site": "gamcare",
-      "source_id": "a-gamble-free-life-i-dream-off",
-      "topic_id": "557d5e0b-26f3-4ebd-a928-3124ffbe3577"
+      "source_id": "block-gambling-transactions",
+      "topic_id": "76b6a607-7538-48ff-b1ad-79f255184978"
     },
     {
       "event": "imported",
-      "replies": 1,
+      "replies": 2,
       "site": "gamcare",
-      "source_id": "gambling-recovery",
-      "topic_id": "051859ac-8cf1-4a78-8e5f-23fc13721414"
+      "source_id": "how-to-over-come-gambling-harm",
+      "topic_id": "c7399f0c-1cf0-4ef9-81f0-c0b8e633c6f1"
     },
     {
       "board": "new-members-intros-forum",
-      "candidates": 9,
+      "candidates": 7,
       "event": "listing_checked",
       "page": 2,
       "site": "gamcare"
@@ -425,21 +408,14 @@
     },
     {
       "event": "imported",
-      "replies": 4,
+      "replies": 5,
       "site": "gamcare",
-      "source_id": "uc-review",
-      "topic_id": "a211ee6f-0fee-4323-b2ff-de619fba517e"
-    },
-    {
-      "event": "imported",
-      "replies": 1,
-      "site": "gamcare",
-      "source_id": "new-joiner-whatnot-surprise-spins",
-      "topic_id": "c733f6b6-a3d4-4330-b4c4-df674dac148e"
+      "source_id": "start-of-non-gamble-journey",
+      "topic_id": "aebd9efe-1bba-43c8-8113-d5e454d3d961"
     },
     {
       "board": "recovery-diaries",
-      "candidates": 8,
+      "candidates": 7,
       "event": "listing_checked",
       "page": 2,
       "site": "gamcare"
@@ -487,15 +463,22 @@
       "source_id": "christopher-robin-2018-starring-ewan-mcgregor"
     },
     {
+      "board": "new-members-intros-forum",
+      "candidates": 20,
+      "event": "listing_checked",
+      "page": 3,
+      "site": "gamcare"
+    },
+    {
       "event": "imported",
-      "replies": 8,
+      "replies": 9,
       "site": "gamcare",
-      "source_id": "day-2-8",
-      "topic_id": "79aface3-3832-4e4b-9a09-c871058a428f"
+      "source_id": "hi-everyone-9",
+      "topic_id": "9557ddb0-73f6-4573-a10d-994909e36494"
     },
     {
       "board": "recovery-diaries",
-      "candidates": 18,
+      "candidates": 17,
       "event": "listing_checked",
       "page": 3,
       "site": "gamcare"
@@ -513,20 +496,39 @@
       "source_id": "24-hours-to-live-2018-starring-ethan-hawke"
     },
     {
-      "event": "imported",
-      "replies": 27,
+      "event": "candidate_rejected",
+      "reason": "other_error",
       "site": "gamcare",
-      "source_id": "day-30-2",
-      "topic_id": "11b159da-ef7e-4459-98e5-5ad12d25545d"
+      "source_id": "addams-family-values-1993-starring-anjelica-huston"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "gctid104132"
+    },
+    {
+      "event": "imported",
+      "replies": 2,
+      "site": "gamcare",
+      "source_id": "ticket-to-ride-in-production-netflix-cast-not-announced",
+      "topic_id": "70e51d6f-a2d4-41ee-b44d-56525d0b0fbd"
+    },
+    {
+      "event": "imported",
+      "replies": 251,
+      "site": "gamcare",
+      "source_id": "706-days-gamble-free",
+      "topic_id": "ae059a06-1ab6-4ae0-a97b-e9c36abc1c9f"
     },
     {
       "board": "family-friends",
       "duplicates": 0,
       "errors": 0,
       "event": "board_summary",
-      "new_comments": 5,
+      "new_comments": 12,
       "new_topics": 2,
-      "rejected": 12,
+      "rejected": 15,
       "site": "gamcare",
       "target": 2
     },
@@ -535,9 +537,9 @@
       "duplicates": 0,
       "errors": 0,
       "event": "board_summary",
-      "new_comments": 5,
+      "new_comments": 6,
       "new_topics": 2,
-      "rejected": 19,
+      "rejected": 20,
       "site": "gamcare",
       "target": 2
     },
@@ -546,7 +548,7 @@
       "duplicates": 0,
       "errors": 0,
       "event": "board_summary",
-      "new_comments": 5,
+      "new_comments": 14,
       "new_topics": 2,
       "rejected": 12,
       "site": "gamcare",
@@ -557,16 +559,16 @@
       "duplicates": 0,
       "errors": 0,
       "event": "board_summary",
-      "new_comments": 35,
+      "new_comments": 253,
       "new_topics": 2,
-      "rejected": 20,
+      "rejected": 22,
       "site": "gamcare",
       "target": 2
     },
     {
       "duplicates": 0,
       "event": "site_summary",
-      "new_comments": 50,
+      "new_comments": 285,
       "new_topics": 8,
       "site": "gamcare",
       "target": 8
@@ -638,25 +640,25 @@
       "duplicates": 0,
       "errors": 0,
       "event": "run_summary",
-      "new_comments": 50,
+      "new_comments": 285,
       "new_topics": 10,
       "ready_for_unattended_collect": true,
-      "rejected": 70
+      "rejected": 76
     }
   ],
   "has_run_summary": true,
   "production_database_writes": false,
   "report_type": "gambling_dev_collector_sanitized",
-  "run_id": 45380183683,
+  "run_id": 45399068604,
   "run_summary": {
     "duplicates": 0,
     "errors": 0,
     "event": "run_summary",
-    "new_comments": 50,
+    "new_comments": 285,
     "new_topics": 10,
     "ready_for_unattended_collect": true,
-    "rejected": 70
+    "rejected": 76
   },
-  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45380183683",
-  "trigger_commit": "50cf2e13429b50c58532830c676c79f447e50df6"
+  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45399068604",
+  "trigger_commit": "2c3efe424a3375273b80b0255673d843cd61d487"
 }
