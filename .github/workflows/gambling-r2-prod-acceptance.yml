@@ -1,103 +1,54 @@
-name: Gambling production R2 CDN release acceptance
+name: Gambling production translation CDN read-only acceptance
 on:
   push:
-    branches: [main, release/gambling-r2-cdn-20261124]
-    paths:
-      - .github/workflows/gambling-r2-prod-acceptance.yml
-      - wrangler.jsonc
-      - src/public-projection.ts
-      - src/projection-demand.ts
-      - src/seo.ts
-      - src/index.ts
+    branches: [qa/prod-translation-cdn-20261124]
+    paths: [.github/workflows/gambling-r2-prod-acceptance.yml]
 permissions:
   contents: read
 jobs:
-  production-r2:
+  translation-cdn:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
-      - name: Preflight on candidate; bounded live acceptance after main deployment
-        env:
-          RELEASE_REF: ${{ github.ref }}
-        shell: bash
+      - name: Check existing independent translation objects, no translation generation
         run: |
           node --input-type=module <<'NODE'
-          const origin='https://gambling.nbn369.com';
-          const cdn='https://gambling-data.nbn369.com';
-          const prod=process.env.RELEASE_REF==='refs/heads/main';
+          const origin='https://gambling.nbn369.com', cdn='https://gambling-data.nbn369.com';
           const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-          const get=(url,headers={})=>fetch(url,{headers,redirect:'error',signal:AbortSignal.timeout(12000)});
-          async function read(key){
-            const r=await get(cdn+'/'+key,{Origin:origin});
-            return {status:r.status,cors:r.headers.get('access-control-allow-origin'),cache:r.headers.get('cf-cache-status'),
-              cc:r.headers.get('cache-control'),json:r.ok?await r.json():null};
+          async function read(key) {
+            const r=await fetch(cdn+'/'+key,{headers:{Origin:origin},redirect:'error',signal:AbortSignal.timeout(10000)});
+            return {status:r.status,cache:r.headers.get('cf-cache-status'),cc:r.headers.get('cache-control'),cors:r.headers.get('access-control-allow-origin'),json:r.ok?await r.json():null};
           }
-          if(!prod){
-            const h=await get(origin+'/api/health');
-            const j=await h.json(), p=j.publicContent||{};
-            const f=await read('feeds/latest/page-1.json');
-            console.log(JSON.stringify({environment:j.environment,version:j.version,databaseReady:j.databaseReady,
-              tokenConfigured:p.tokenConfigured,purgeConfigured:p.purgeConfigured,enabled:p.enabled,cdnHTTP:f.status}));
-            if(!h.ok||j.environment!=='production'||!j.databaseReady||![200,404].includes(f.status))
-              throw Error('Production preflight failed');
-            console.log('Read-only preflight; cannot certify secret type, rotation or purge success.');
-            process.exit(0);
+          const h=await fetch(origin+'/api/health',{signal:AbortSignal.timeout(10000)}).then(r=>r.json());
+          const p=h.publicContent||{};
+          console.log(JSON.stringify({environment:h.environment,ready:p.ready,separateTranslations:p.separateTranslations,purgeConfigured:p.purgeConfigured}));
+          if(h.environment!=='production'||!p.ready||!p.separateTranslations||p.baseUrl!==cdn) throw Error('Production separate translations not ready');
+          const feed=await read('feeds/latest/page-1.json');
+          if(feed.status!==200||!Array.isArray(feed.json?.data?.topics))throw Error('Feed unavailable');
+          const ids=new Set([...feed.json.data.topics.map(t=>t.id),'74956015-0694-42ba-a3a7-a850f21b064b','5aae46c6-56d8-468d-8d24-76bc689f09d2','7c0be916-a370-402e-9c94-ea3ed3719ba5','abff2069-97ed-446e-ac5d-ee18f1ce6ae2']);
+          async function verify(key,src) {
+            const d=src.json?.data;
+            if(!d||!Array.isArray(d.translationLocales)||!d.translationLocales.length)return false;
+            const locale=d.translationLocales[0];
+            const url='i18n/'+encodeURIComponent(locale)+'/'+key;
+            let t=await read(url);
+            const rows=[...(d.topics||[]).map(r=>['topic','summary',r]),...(d.topic?[['topic','full',d.topic]]:[]),...(d.comments||[]).map(r=>['comment','full',r]),...(d.progress||[]).map(r=>['comment','preview',r])];
+            const index=new Map(rows.map(([type,scope,r])=>[[type,r.id,scope].join(':'),r.content_version]));
+            function valid(x){return x.status===200&&[origin,'*'].includes(x.cors)&&/s-maxage=2592000(?:,|$)/.test(x.cc||'')&&x.json?.schemaVersion===1&&x.json?.translationLayout==='separate-v1'&&x.json?.locale===locale&&x.json?.sourceKey===key&&x.json?.contentVersion===src.json.contentVersion&&!x.json?.invalidated&&Array.isArray(x.json?.items)&&x.json.items.length>0&&x.json.items.every(i=>index.get([i.type,i.id,i.scope].join(':'))===i.sourceVersion&&typeof i.body==='string');}
+            if(!valid(t))throw Error('Translation object validation failed: '+JSON.stringify({key,locale,http:t.status,cache:t.cache,cc:t.cc,sourceVersion:src.json.contentVersion,translationVersion:t.json?.contentVersion,items:t.json?.items?.length}));
+            for(let i=0;i<4&&t.cache!=='HIT';i++){await sleep(1000);t=await read(url);if(!valid(t))throw Error('Translation changed during sample');}
+            if(t.cache!=='HIT')throw Error('No translation CDN HIT for '+key);
+            console.log('PASS '+JSON.stringify({key,locale,http:t.status,cache:t.cache,cacheControl:t.cc,version:t.json.contentVersion,items:t.json.items.length}));
+            return true;
           }
-          let ready=false;
-          for(let i=0;i<18;i++){
-            try{
-              const r=await get(origin+'/api/health'), h=await r.json(), p=h.publicContent||{};
-              ready=r.ok&&h.environment==='production'&&h.databaseReady===true&&
-                h.version==='0.5.3-r2-projection.20261124'&&p.ready&&p.enabled&&p.purgeConfigured&&
-                p.onDemand&&p.fallback&&p.baseUrl===cdn;
-              if(ready)break;
-            }catch{}
-            if(i<17)await sleep(12000);
+          const feedPass=await verify('feeds/latest/page-1.json',feed);
+          let detailPass=0,checked=0;
+          for(const id of ids){if(!/^[A-Za-z0-9_-]{1,128}$/.test(id))continue;
+            const key='topics/'+id+'/detail.json';const d=await read(key);checked++;
+            if(d.status===200&&await verify(key,d))detailPass++;
+            if(detailPass>=2)break;
           }
-          if(!ready)throw Error('Production projection readiness failed; no projection wake requested');
-          async function verify(key,api,ttl,validate){
-            let r=await read(key);
-            if(r.status===404){
-              const fallback=await get(origin+api,{'x-gambling-projection-miss':key});
-              if(!fallback.ok)throw Error('Bounded production projection fallback failed');
-              for(let i=0;i<8;i++){
-                await sleep(4000);
-                r=await read(key);
-                if(r.status===200)break;
-                if(r.status!==404)throw Error('Unexpected CDN HTTP '+r.status);
-              }
-            }
-            if(r.status!==200||![origin,'*'].includes(r.cors)||r.json?.schemaVersion!==1||
-               !Number.isSafeInteger(r.json?.contentVersion)||!validate(r.json)||
-               !new RegExp('s-maxage='+ttl+'(?:,|$)').test(r.cc||''))
-              throw Error('Production CDN schema, CORS or long TTL failed: '+key);
-            let hit=false;
-            for(let i=0;i<4;i++){
-              const next=await read(key);
-              if(next.status===200&&next.cache==='HIT'){hit=true;break;}
-              await sleep(1500);
-            }
-            if(!hit)throw Error('No production CDN HIT: '+key);
-            console.log('PASS '+key+' TTL='+ttl+' CDN HIT');
-            return r.json;
-          }
-          const feed=await verify('feeds/latest/page-1.json','/api/topics?sort=latest&offset=0',86400,
-            j=>Array.isArray(j.data?.topics)&&j.data.translationLayout==='separate-v1');
-          const id=feed.data.topics[0]?.id;
-          if(typeof id!=='string'||!/^[A-Za-z0-9_-]{1,128}$/.test(id))throw Error('No valid published topic for detail acceptance');
-          const key='topics/'+id+'/detail.json';
-          const detail=await verify(key,'/api/topics/'+id,604800,
-            j=>j.data?.topic?.id===id&&Array.isArray(j.data.comments)&&j.data.translationLayout==='separate-v1');
-          const locale=detail.data.translationLocales?.[0];
-          if(locale){
-            const t=await read('i18n/'+encodeURIComponent(locale)+'/'+key);
-            if(t.status!==200||t.json?.sourceKey!==key||t.json?.contentVersion!==detail.contentVersion||
-               t.json?.locale!==locale||!/s-maxage=2592000(?:,|$)/.test(t.cc||''))
-              throw Error('Existing separate translation CDN version/TTL failed');
-            console.log('PASS existing translation CDN JSON');
-          }else console.log('No existing translation in sampled topic; translation CDN acceptance remains untested.');
-          const html=await get(origin+'/topic/'+id);
-          if(!html.ok||!(html.headers.get('content-security-policy')||'').includes(cdn))
-            throw Error('Production browser CSP does not allow production CDN');
-          console.log('PASS production feed/detail/CORS/CSP. No bulk backfill, no Azure generation, no content sync. Mutation/purge acceptance requires separate evidence.');
+          console.log(JSON.stringify({feedPass,detailPass,checked,noAzureCalls:true,noDatabaseWrites:true}));
+          if(!detailPass)throw Error('INCONCLUSIVE: no existing translated detail object found in sampled topics');
+          if(!feedPass)console.log('INCONCLUSIVE: feed translation absent; no new translation generated');
           NODE
