@@ -442,3 +442,10 @@ test('R2/CDN activation is prepared in DEV but is fail-closed until real CDN + p
  assert.match(reader,/health\.publicContent\.fallback/);
  assert.match(reader,/x-gambling-projection-miss/);
 });
+
+test('R2 projection JSON uses 60-second origin-controlled CDN TTL instead of free-plan 2-hour override',()=>{
+ const p=read('src/public-projection.ts');
+ assert.match(p,/const cacheControl='public, max-age=0, s-maxage=60, must-revalidate'/);
+ assert.doesNotMatch(p,/s-maxage=7200/);
+ assert.match(p,/cachePolicy:'edge-60'/);
+});

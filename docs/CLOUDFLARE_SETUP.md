@@ -172,3 +172,10 @@ Cloudflare 文档：`https://developers.cloudflare.com/workers/previews/configur
 7. GitHub DEV 工作流 `gambling-r2-readiness.yml` 只做公网 DNS/TLS/HTTP/CORS 读取和只读健康检查，不调用 D1 改动或触发队列。DNS 或 CORS 未通过时不表示 R2 已开启。
 
 项目先前所有“计划域名未上线”历史记录仍保留，不把准备代码写成已正式上线。
+
+### Cloudflare Free 缓存 TTL 注意事项（2026-11-24）
+
+- Cloudflare 文档对 **强制覆盖 Edge Cache TTL** 的免费套餐最小值是 **2 小时**，不能把该下拉框设置为 60 秒并指望生效。
+- 论坛 R2 JSON 的响应头已在 DEV 改为 `Cache-Control: public, max-age=0, s-maxage=60, must-revalidate`。缓存规则选择 **Eligible for cache**，Edge TTL 选择 **Use cache-control header if present, bypass cache if not**，Browser TTL 选择 **Respect origin**；不要选择 **Ignore cache-control and use 2 hours**。
+- R2 存储桶里缺失对象的 404 通常不含该响应头，规则会选择绕过缓存而不是负缓存；必须以 HTTP/Cloudflare 在线响应验收确认。
+- 该改动仅 DEV；生产仍未启用 R2。更改已有对象的 HTTP 元数据需要按正常投影重建流程验证，不能简单宣布旧对象已获得新 TTL。
