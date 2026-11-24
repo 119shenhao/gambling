@@ -15,6 +15,8 @@ const xmlDate=(timestamp:unknown)=>{
 };
 const isPreview=(env:Env)=>env.APP_ENV!=='production';
 const pageHeaders=(env:Env,indexable:boolean):Headers=>{
+ // Only the intended environment's public R2 CDN may receive browser JSON requests.
+ const jsonCdnOrigin=isPreview(env)?'https://gambling-data-dev.nbn369.com':'https://gambling-data.nbn369.com';
  const headers=new Headers({
   'content-type':'text/html; charset=utf-8',
   'cache-control':'no-store, max-age=0',
@@ -23,7 +25,7 @@ const pageHeaders=(env:Env,indexable:boolean):Headers=>{
   'referrer-policy':'no-referrer',
   'x-frame-options':'DENY',
   'permissions-policy':'camera=(), microphone=(), geolocation=()',
-  'content-security-policy':"default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' ; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'"
+  'content-security-policy':`default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' ${jsonCdnOrigin}; frame-ancestors 'none'; base-uri 'none'; form-action 'self'; object-src 'none'`
  });
  if(isPreview(env)||!indexable)headers.set('x-robots-tag','noindex, nofollow');
  return headers;
