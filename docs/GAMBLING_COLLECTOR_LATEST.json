@@ -5,12 +5,6 @@
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamcare",
-      "source_id": "new-gamcare-volunteering-opportunity-online-peer-supporters-3"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
       "source_id": "chatrooms-4"
     },
     {
@@ -313,7 +307,7 @@
     },
     {
       "board": "family-friends",
-      "candidates": 15,
+      "candidates": 13,
       "event": "listing_checked",
       "page": 3,
       "site": "gamcare"
@@ -350,21 +344,27 @@
     },
     {
       "event": "imported",
-      "replies": 2,
+      "replies": 1,
       "site": "gamcare",
-      "source_id": "adult-child-just-found-out-my-dad-has-a-gambling-problem",
-      "topic_id": "344e13da-ff1c-46c0-acf3-49a8c16a1636"
+      "source_id": "tips-for-how-to-exist-whilst-gambling-is-still-legal-as-an-affected-other",
+      "topic_id": "c6077b58-a88c-4507-be7f-e2f7731d634b"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "relapse-and-ready-to-leave"
     },
     {
       "event": "imported",
       "replies": 3,
       "site": "gamcare",
-      "source_id": "feeling-betrayed-is-it-better-to-just-walk-away",
-      "topic_id": "0e93ae4b-254c-4e1f-b018-6cb13caad558"
+      "source_id": "how-you-fix-your-money-problems",
+      "topic_id": "61874973-2e87-45bf-9ecf-a484e5bf1c8b"
     },
     {
       "board": "overcoming-problem-gambling",
-      "candidates": 10,
+      "candidates": 8,
       "event": "listing_checked",
       "page": 3,
       "site": "gamcare"
@@ -406,22 +406,20 @@
       "source_id": "quote-of-the-day-2"
     },
     {
-      "event": "imported",
-      "replies": 1,
+      "event": "candidate_rejected",
+      "reason": "other_error",
       "site": "gamcare",
-      "source_id": "new-lived-experience-volunteering-opportunities",
-      "topic_id": "e8a3e833-026d-49c0-8de7-9197d663c816"
+      "source_id": "interesting-website"
     },
     {
-      "event": "imported",
-      "replies": 3,
+      "event": "candidate_rejected",
+      "reason": "other_error",
       "site": "gamcare",
-      "source_id": "football-betting",
-      "topic_id": "9da93174-0f96-4c51-8ccf-cdcc33eabb47"
+      "source_id": "quote-4"
     },
     {
       "board": "new-members-intros-forum",
-      "candidates": 11,
+      "candidates": 9,
       "event": "listing_checked",
       "page": 3,
       "site": "gamcare"
@@ -433,13 +431,6 @@
       "source_id": "failed-as-a-parent"
     },
     {
-      "event": "imported",
-      "replies": 2,
-      "site": "gamcare",
-      "source_id": "is-my-partner-relapsing",
-      "topic_id": "a6908782-7387-4370-bc37-0120d80f4229"
-    },
-    {
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamcare",
@@ -449,8 +440,15 @@
       "event": "imported",
       "replies": 3,
       "site": "gamcare",
-      "source_id": "first-timer-hoping-its-the-only-time",
-      "topic_id": "e5abf858-a019-404c-be04-1f64c47df8bd"
+      "source_id": "messed-up-after-15-months-gf-2",
+      "topic_id": "344b6507-fb54-4257-8949-eba9f6ed8b3d"
+    },
+    {
+      "event": "imported",
+      "replies": 1,
+      "site": "gamcare",
+      "source_id": "2-months-gf-after-the-toughest-year-yet",
+      "topic_id": "c771bd1a-ced1-4fad-b506-c2a9349bdecc"
     },
     {
       "board": "recovery-diaries",
@@ -524,9 +522,9 @@
       "duplicates": 0,
       "errors": 0,
       "event": "board_summary",
-      "new_comments": 5,
+      "new_comments": 4,
       "new_topics": 2,
-      "rejected": 20,
+      "rejected": 21,
       "site": "gamcare",
       "target": 2
     },
@@ -535,9 +533,9 @@
       "duplicates": 0,
       "errors": 0,
       "event": "board_summary",
-      "new_comments": 4,
-      "new_topics": 2,
-      "rejected": 26,
+      "new_comments": 0,
+      "new_topics": 0,
+      "rejected": 28,
       "site": "gamcare",
       "target": 2
     },
@@ -546,7 +544,7 @@
       "duplicates": 0,
       "errors": 0,
       "event": "board_summary",
-      "new_comments": 5,
+      "new_comments": 4,
       "new_topics": 2,
       "rejected": 14,
       "site": "gamcare",
@@ -566,8 +564,8 @@
     {
       "duplicates": 0,
       "event": "site_summary",
-      "new_comments": 14,
-      "new_topics": 6,
+      "new_comments": 8,
+      "new_topics": 4,
       "site": "gamcare",
       "target": 8
     },
@@ -638,25 +636,25 @@
       "duplicates": 0,
       "errors": 0,
       "event": "run_summary",
-      "new_comments": 14,
-      "new_topics": 8,
+      "new_comments": 8,
+      "new_topics": 6,
       "ready_for_unattended_collect": true,
-      "rejected": 97
+      "rejected": 100
     }
   ],
   "has_run_summary": true,
   "production_database_writes": false,
   "report_type": "gambling_dev_collector_sanitized",
-  "run_id": 45537123915,
+  "run_id": 45550255322,
   "run_summary": {
     "duplicates": 0,
     "errors": 0,
     "event": "run_summary",
-    "new_comments": 14,
-    "new_topics": 8,
+    "new_comments": 8,
+    "new_topics": 6,
     "ready_for_unattended_collect": true,
-    "rejected": 97
+    "rejected": 100
   },
-  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45537123915",
-  "trigger_commit": "fc950cb0275ecbc3dc341897ece3cabebc8f7e65"
+  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45550255322",
+  "trigger_commit": "a5cd3e25dd27a9e152e055bf68d6d0bca7bb0c50"
 }
