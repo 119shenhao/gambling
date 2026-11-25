@@ -17,7 +17,7 @@
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamcare",
-      "source_id": "help-29"
+      "source_id": "why-me-i-wish-i-knew-the-reason"
     },
     {
       "event": "candidate_rejected",
@@ -41,6 +41,12 @@
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamcare",
+      "source_id": "help-29"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
       "source_id": "day-one-of-what-i-hope-is-a-new-and-normal-life"
     },
     {
@@ -53,7 +59,7 @@
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamcare",
-      "source_id": "podcast-forum"
+      "source_id": "10-days-after-relalpse-progress"
     },
     {
       "event": "candidate_rejected",
@@ -65,7 +71,7 @@
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamcare",
-      "source_id": "17yo-lost-everything-i-have"
+      "source_id": "podcast-forum"
     },
     {
       "event": "candidate_rejected",
@@ -77,7 +83,7 @@
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamcare",
-      "source_id": "stopping-sports-gambling-sharing-advice"
+      "source_id": "17yo-lost-everything-i-have"
     },
     {
       "event": "candidate_rejected",
@@ -89,7 +95,7 @@
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamcare",
-      "source_id": "quote-8"
+      "source_id": "stopping-sports-gambling-sharing-advice"
     },
     {
       "event": "candidate_rejected",
@@ -101,7 +107,7 @@
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamcare",
-      "source_id": "humiliating"
+      "source_id": "quote-8"
     },
     {
       "event": "candidate_rejected",
@@ -160,10 +166,16 @@
     },
     {
       "board": "overcoming-problem-gambling",
-      "candidates": 8,
+      "candidates": 9,
       "event": "listing_checked",
       "page": 2,
       "site": "gamcare"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "humiliating"
     },
     {
       "event": "candidate_rejected",
@@ -258,7 +270,7 @@
     },
     {
       "board": "recovery-diaries",
-      "candidates": 8,
+      "candidates": 7,
       "event": "listing_checked",
       "page": 2,
       "site": "gamcare"
@@ -304,12 +316,6 @@
       "reason": "other_error",
       "site": "gamcare",
       "source_id": "clash-of-the-titans-2010-starring-sam-worth"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "christopher-robin-2018-starring-ewan-mcgregor"
     },
     {
       "board": "family-friends",
@@ -368,7 +374,7 @@
     },
     {
       "board": "overcoming-problem-gambling",
-      "candidates": 8,
+      "candidates": 7,
       "event": "listing_checked",
       "page": 3,
       "site": "gamcare"
@@ -416,14 +422,8 @@
       "source_id": "interesting-website"
     },
     {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "quote-4"
-    },
-    {
       "board": "new-members-intros-forum",
-      "candidates": 3,
+      "candidates": 2,
       "event": "listing_checked",
       "page": 3,
       "site": "gamcare"
@@ -441,17 +441,17 @@
       "source_id": "has-anyone-been-to-the-gordon-moody-treatment-centre"
     },
     {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "hello-everyone-ndangolowa"
-    },
-    {
       "board": "recovery-diaries",
-      "candidates": 10,
+      "candidates": 11,
       "event": "listing_checked",
       "page": 3,
       "site": "gamcare"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "christopher-robin-2018-starring-ewan-mcgregor"
     },
     {
       "event": "candidate_rejected",
@@ -641,7 +641,7 @@
   "has_run_summary": true,
   "production_database_writes": false,
   "report_type": "gambling_dev_collector_sanitized",
-  "run_id": 45660274139,
+  "run_id": 45699585261,
   "run_summary": {
     "duplicates": 0,
     "errors": 0,
@@ -651,6 +651,6 @@
     "ready_for_unattended_collect": true,
     "rejected": 103
   },
-  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45660274139",
-  "trigger_commit": "0def1db41f52d83b780a7602f446daf1b1ad7f1f"
+  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45699585261",
+  "trigger_commit": "99346d381bb2bf606300050c773d17ec66b91ff3"
 }
