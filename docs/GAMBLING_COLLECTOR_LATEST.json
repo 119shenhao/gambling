@@ -5,6 +5,18 @@
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamcare",
+      "source_id": "new-gamcare-volunteering-opportunity-online-peer-supporters-3"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "chatrooms-4"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
       "source_id": "help-29"
     },
     {
@@ -301,7 +313,7 @@
     },
     {
       "board": "family-friends",
-      "candidates": 9,
+      "candidates": 8,
       "event": "listing_checked",
       "page": 3,
       "site": "gamcare"
@@ -347,13 +359,6 @@
       "reason": "other_error",
       "site": "gamcare",
       "source_id": "what-has-worked-for-you-would-love-to-hear-from-affected-other"
-    },
-    {
-      "event": "imported",
-      "replies": 2,
-      "site": "gamcare",
-      "source_id": "partner-relapsed",
-      "topic_id": "ff2e4edb-199d-4881-8f3d-f38593354bc9"
     },
     {
       "event": "candidate_rejected",
@@ -418,7 +423,7 @@
     },
     {
       "board": "new-members-intros-forum",
-      "candidates": 5,
+      "candidates": 3,
       "event": "listing_checked",
       "page": 3,
       "site": "gamcare"
@@ -436,18 +441,10 @@
       "source_id": "has-anyone-been-to-the-gordon-moody-treatment-centre"
     },
     {
-      "event": "imported",
-      "replies": 3,
+      "event": "candidate_rejected",
+      "reason": "other_error",
       "site": "gamcare",
-      "source_id": "300-days-gamble-free",
-      "topic_id": "3742fdde-dea2-4970-913b-dbac8cc794f3"
-    },
-    {
-      "event": "imported",
-      "replies": 2,
-      "site": "gamcare",
-      "source_id": "long-road-ahead-2",
-      "topic_id": "ecc6ae2f-d015-4867-9e88-9b46d5b46a3d"
+      "source_id": "hello-everyone-ndangolowa"
     },
     {
       "board": "recovery-diaries",
@@ -521,8 +518,8 @@
       "duplicates": 0,
       "errors": 0,
       "event": "board_summary",
-      "new_comments": 2,
-      "new_topics": 1,
+      "new_comments": 0,
+      "new_topics": 0,
       "rejected": 23,
       "site": "gamcare",
       "target": 2
@@ -543,9 +540,9 @@
       "duplicates": 0,
       "errors": 0,
       "event": "board_summary",
-      "new_comments": 5,
-      "new_topics": 2,
-      "rejected": 14,
+      "new_comments": 0,
+      "new_topics": 0,
+      "rejected": 15,
       "site": "gamcare",
       "target": 2
     },
@@ -563,8 +560,8 @@
     {
       "duplicates": 0,
       "event": "site_summary",
-      "new_comments": 7,
-      "new_topics": 3,
+      "new_comments": 0,
+      "new_topics": 0,
       "site": "gamcare",
       "target": 8
     },
@@ -635,25 +632,25 @@
       "duplicates": 0,
       "errors": 0,
       "event": "run_summary",
-      "new_comments": 7,
-      "new_topics": 5,
+      "new_comments": 0,
+      "new_topics": 2,
       "ready_for_unattended_collect": true,
-      "rejected": 102
+      "rejected": 103
     }
   ],
   "has_run_summary": true,
   "production_database_writes": false,
   "report_type": "gambling_dev_collector_sanitized",
-  "run_id": 45639906696,
+  "run_id": 45660274139,
   "run_summary": {
     "duplicates": 0,
     "errors": 0,
     "event": "run_summary",
-    "new_comments": 7,
-    "new_topics": 5,
+    "new_comments": 0,
+    "new_topics": 2,
     "ready_for_unattended_collect": true,
-    "rejected": 102
+    "rejected": 103
   },
-  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45639906696",
-  "trigger_commit": "3b03ccd164425b499929326aad0c5243c6f5b41f"
+  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45660274139",
+  "trigger_commit": "0def1db41f52d83b780a7602f446daf1b1ad7f1f"
 }
