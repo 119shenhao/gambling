@@ -5,102 +5,6 @@
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamcare",
-      "source_id": "have-your-say-two-new-surveys-to-shape-our-chatroom-forum-4"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "have-your-say-two-new-surveys-to-shape-our-chatroom-forum-3"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "say-hello-to-our-online-peer-supporters"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "forum-language-changes-2"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "we-need-your-feedback-2"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "we-need-your-feedback"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "have-your-say-two-new-surveys-to-shape-our-chatroom-forum"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "new-gamcare-volunteering-opportunity-online-peer-supporters"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "festive-support-2"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "festive-support"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "want-to-do-something-read-this-130738"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "want-to-do-something-read-this-132213"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "chatrooms-2"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "empowerme-feedback-2"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "chatrooms-3"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "charlys-life"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
       "source_id": "new-gamcare-volunteering-opportunity-online-peer-supporters-3"
     },
     {
@@ -110,11 +14,10 @@
       "source_id": "chatrooms-4"
     },
     {
-      "event": "imported",
-      "replies": 2,
+      "event": "candidate_rejected",
+      "reason": "other_error",
       "site": "gamcare",
-      "source_id": "gambled-again-today-but-want-to-change",
-      "topic_id": "1e4d0681-b509-4938-9903-84d01df6ea3c"
+      "source_id": "help-29"
     },
     {
       "event": "candidate_rejected",
@@ -133,13 +36,6 @@
       "reason": "other_error",
       "site": "gamcare",
       "source_id": "favourite-posts"
-    },
-    {
-      "event": "imported",
-      "replies": 1,
-      "site": "gamcare",
-      "source_id": "back-to-square-1-2",
-      "topic_id": "df460c2a-3155-4be8-b269-ff392bf6ae02"
     },
     {
       "event": "candidate_rejected",
@@ -318,6 +214,49 @@
       "source_id": "quote-of-the-day-7"
     },
     {
+      "board": "new-members-intros-forum",
+      "candidates": 6,
+      "event": "listing_checked",
+      "page": 2,
+      "site": "gamcare"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "hello-everyone-5"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "day-1-50"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "first-day-9"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "im-on-week-2-and-never-felt-this-good-in-years"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "any-suggest"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "struggling-to-breathe"
+    },
+    {
       "board": "recovery-diaries",
       "candidates": 8,
       "event": "listing_checked",
@@ -374,7 +313,7 @@
     },
     {
       "board": "family-friends",
-      "candidates": 17,
+      "candidates": 15,
       "event": "listing_checked",
       "page": 3,
       "site": "gamcare"
@@ -386,22 +325,46 @@
       "source_id": "sick-of-husbands-gambling-and-feel-really-depressed"
     },
     {
-      "event": "imported",
-      "replies": 8,
+      "event": "candidate_rejected",
+      "reason": "other_error",
       "site": "gamcare",
-      "source_id": "emotionally-financially-abusive-manipulater",
-      "topic_id": "731ce1ac-38a7-4073-9d5f-9e995cfe3137"
+      "source_id": "dont-know-if-i-can-get-over-the-betrayal"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "what-do-i-do-3"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "hurt-2"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "reflection-3"
     },
     {
       "event": "imported",
-      "replies": 5,
+      "replies": 2,
       "site": "gamcare",
-      "source_id": "is-it-time-to-stop-forgiving-him",
-      "topic_id": "d19acd84-f47b-4266-870c-259bc55f0583"
+      "source_id": "adult-child-just-found-out-my-dad-has-a-gambling-problem",
+      "topic_id": "344e13da-ff1c-46c0-acf3-49a8c16a1636"
+    },
+    {
+      "event": "imported",
+      "replies": 3,
+      "site": "gamcare",
+      "source_id": "feeling-betrayed-is-it-better-to-just-walk-away",
+      "topic_id": "0e93ae4b-254c-4e1f-b018-6cb13caad558"
     },
     {
       "board": "overcoming-problem-gambling",
-      "candidates": 12,
+      "candidates": 10,
       "event": "listing_checked",
       "page": 3,
       "site": "gamcare"
@@ -437,18 +400,57 @@
       "source_id": "how-to-get-the-money-to-get-myself-out-of-the-rut"
     },
     {
-      "event": "imported",
-      "replies": 9,
+      "event": "candidate_rejected",
+      "reason": "other_error",
       "site": "gamcare",
-      "source_id": "lost-everything-4",
-      "topic_id": "be9e60b5-41a6-488c-af8b-6a9b7658046a"
+      "source_id": "quote-of-the-day-2"
+    },
+    {
+      "event": "imported",
+      "replies": 1,
+      "site": "gamcare",
+      "source_id": "new-lived-experience-volunteering-opportunities",
+      "topic_id": "e8a3e833-026d-49c0-8de7-9197d663c816"
     },
     {
       "event": "imported",
       "replies": 3,
       "site": "gamcare",
-      "source_id": "back-trying-again",
-      "topic_id": "12a32222-87de-4171-99f7-b4e6af60ff0e"
+      "source_id": "football-betting",
+      "topic_id": "9da93174-0f96-4c51-8ccf-cdcc33eabb47"
+    },
+    {
+      "board": "new-members-intros-forum",
+      "candidates": 11,
+      "event": "listing_checked",
+      "page": 3,
+      "site": "gamcare"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "failed-as-a-parent"
+    },
+    {
+      "event": "imported",
+      "replies": 2,
+      "site": "gamcare",
+      "source_id": "is-my-partner-relapsing",
+      "topic_id": "a6908782-7387-4370-bc37-0120d80f4229"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "has-anyone-been-to-the-gordon-moody-treatment-centre"
+    },
+    {
+      "event": "imported",
+      "replies": 3,
+      "site": "gamcare",
+      "source_id": "first-timer-hoping-its-the-only-time",
+      "topic_id": "e5abf858-a019-404c-be04-1f64c47df8bd"
     },
     {
       "board": "recovery-diaries",
@@ -522,9 +524,9 @@
       "duplicates": 0,
       "errors": 0,
       "event": "board_summary",
-      "new_comments": 13,
+      "new_comments": 5,
       "new_topics": 2,
-      "rejected": 16,
+      "rejected": 20,
       "site": "gamcare",
       "target": 2
     },
@@ -533,9 +535,9 @@
       "duplicates": 0,
       "errors": 0,
       "event": "board_summary",
-      "new_comments": 12,
+      "new_comments": 4,
       "new_topics": 2,
-      "rejected": 25,
+      "rejected": 26,
       "site": "gamcare",
       "target": 2
     },
@@ -544,9 +546,9 @@
       "duplicates": 0,
       "errors": 0,
       "event": "board_summary",
-      "new_comments": 3,
+      "new_comments": 5,
       "new_topics": 2,
-      "rejected": 5,
+      "rejected": 14,
       "site": "gamcare",
       "target": 2
     },
@@ -564,7 +566,7 @@
     {
       "duplicates": 0,
       "event": "site_summary",
-      "new_comments": 28,
+      "new_comments": 14,
       "new_topics": 6,
       "site": "gamcare",
       "target": 8
@@ -636,25 +638,25 @@
       "duplicates": 0,
       "errors": 0,
       "event": "run_summary",
-      "new_comments": 28,
+      "new_comments": 14,
       "new_topics": 8,
       "ready_for_unattended_collect": true,
-      "rejected": 83
+      "rejected": 97
     }
   ],
   "has_run_summary": true,
   "production_database_writes": false,
   "report_type": "gambling_dev_collector_sanitized",
-  "run_id": 45522713589,
+  "run_id": 45537123915,
   "run_summary": {
     "duplicates": 0,
     "errors": 0,
     "event": "run_summary",
-    "new_comments": 28,
+    "new_comments": 14,
     "new_topics": 8,
     "ready_for_unattended_collect": true,
-    "rejected": 83
+    "rejected": 97
   },
-  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45522713589",
-  "trigger_commit": "c278cfd8b1d443c3d8fed6ef15d40e86cd1c7b26"
+  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45537123915",
+  "trigger_commit": "fc950cb0275ecbc3dc341897ece3cabebc8f7e65"
 }
