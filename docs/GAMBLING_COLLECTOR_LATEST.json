@@ -5,18 +5,6 @@
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamcare",
-      "source_id": "chatrooms-4"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "help-29"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
       "source_id": "welcome-to-the-recovery-diaries"
     },
     {
@@ -32,10 +20,11 @@
       "source_id": "favourite-posts"
     },
     {
-      "event": "candidate_rejected",
-      "reason": "other_error",
+      "event": "imported",
+      "replies": 2,
       "site": "gamcare",
-      "source_id": "day-one-of-what-i-hope-is-a-new-and-normal-life"
+      "source_id": "really-need-help-3",
+      "topic_id": "aa307dd6-2586-4bb2-920c-ca186ce6e895"
     },
     {
       "event": "candidate_rejected",
@@ -53,7 +42,7 @@
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamcare",
-      "source_id": "a-day-at-a-moment-123-living-in-this-moment-adam123"
+      "source_id": "day-one-of-what-i-hope-is-a-new-and-normal-life"
     },
     {
       "event": "candidate_rejected",
@@ -65,7 +54,7 @@
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamcare",
-      "source_id": "the-last-bath-2020-starring-anabella-moreira"
+      "source_id": "a-day-at-a-moment-123-living-in-this-moment-adam123"
     },
     {
       "event": "candidate_rejected",
@@ -77,7 +66,7 @@
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamcare",
-      "source_id": "dear-oh-dear-oh-dear-diary-number-53"
+      "source_id": "the-last-bath-2020-starring-anabella-moreira"
     },
     {
       "event": "candidate_rejected",
@@ -89,13 +78,19 @@
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamcare",
-      "source_id": "cheese-chasers-1951-starring-mel-blanc"
+      "source_id": "dear-oh-dear-oh-dear-diary-number-53"
     },
     {
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamcare",
       "source_id": "humiliating"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "cheese-chasers-1951-starring-mel-blanc"
     },
     {
       "event": "candidate_rejected",
@@ -307,7 +302,7 @@
     },
     {
       "board": "family-friends",
-      "candidates": 13,
+      "candidates": 11,
       "event": "listing_checked",
       "page": 3,
       "site": "gamcare"
@@ -343,13 +338,6 @@
       "source_id": "reflection-3"
     },
     {
-      "event": "imported",
-      "replies": 1,
-      "site": "gamcare",
-      "source_id": "tips-for-how-to-exist-whilst-gambling-is-still-legal-as-an-affected-other",
-      "topic_id": "c6077b58-a88c-4507-be7f-e2f7731d634b"
-    },
-    {
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamcare",
@@ -357,10 +345,23 @@
     },
     {
       "event": "imported",
-      "replies": 3,
+      "replies": 5,
       "site": "gamcare",
-      "source_id": "how-you-fix-your-money-problems",
-      "topic_id": "61874973-2e87-45bf-9ecf-a484e5bf1c8b"
+      "source_id": "does-gamble-free-time-mean-anything-in-tbe-real-world",
+      "topic_id": "0eabfc6b-1025-4892-80ef-241af2b5d6a6"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "what-has-worked-for-you-would-love-to-hear-from-affected-other"
+    },
+    {
+      "event": "imported",
+      "replies": 2,
+      "site": "gamcare",
+      "source_id": "lived-experience-podcast",
+      "topic_id": "98d9eaaa-77f2-4efe-ab95-c37f6d9e8a6c"
     },
     {
       "board": "overcoming-problem-gambling",
@@ -419,7 +420,7 @@
     },
     {
       "board": "new-members-intros-forum",
-      "candidates": 9,
+      "candidates": 7,
       "event": "listing_checked",
       "page": 3,
       "site": "gamcare"
@@ -438,17 +439,17 @@
     },
     {
       "event": "imported",
-      "replies": 3,
+      "replies": 1,
       "site": "gamcare",
-      "source_id": "messed-up-after-15-months-gf-2",
-      "topic_id": "344b6507-fb54-4257-8949-eba9f6ed8b3d"
+      "source_id": "13-years-gambling-now-to-change",
+      "topic_id": "479a15f3-1d12-4ebe-8df4-6fadbbdd2e38"
     },
     {
       "event": "imported",
-      "replies": 1,
+      "replies": 2,
       "site": "gamcare",
-      "source_id": "2-months-gf-after-the-toughest-year-yet",
-      "topic_id": "c771bd1a-ced1-4fad-b506-c2a9349bdecc"
+      "source_id": "gambling-addiction-online-live-casino-games",
+      "topic_id": "d8461ed3-d507-4c57-a3f2-edb27c017793"
     },
     {
       "board": "recovery-diaries",
@@ -522,9 +523,9 @@
       "duplicates": 0,
       "errors": 0,
       "event": "board_summary",
-      "new_comments": 4,
+      "new_comments": 7,
       "new_topics": 2,
-      "rejected": 21,
+      "rejected": 22,
       "site": "gamcare",
       "target": 2
     },
@@ -544,7 +545,7 @@
       "duplicates": 0,
       "errors": 0,
       "event": "board_summary",
-      "new_comments": 4,
+      "new_comments": 3,
       "new_topics": 2,
       "rejected": 14,
       "site": "gamcare",
@@ -555,8 +556,8 @@
       "duplicates": 0,
       "errors": 0,
       "event": "board_summary",
-      "new_comments": 0,
-      "new_topics": 0,
+      "new_comments": 2,
+      "new_topics": 1,
       "rejected": 30,
       "site": "gamcare",
       "target": 2
@@ -564,8 +565,8 @@
     {
       "duplicates": 0,
       "event": "site_summary",
-      "new_comments": 8,
-      "new_topics": 4,
+      "new_comments": 12,
+      "new_topics": 5,
       "site": "gamcare",
       "target": 8
     },
@@ -636,25 +637,25 @@
       "duplicates": 0,
       "errors": 0,
       "event": "run_summary",
-      "new_comments": 8,
-      "new_topics": 6,
+      "new_comments": 12,
+      "new_topics": 7,
       "ready_for_unattended_collect": true,
-      "rejected": 100
+      "rejected": 101
     }
   ],
   "has_run_summary": true,
   "production_database_writes": false,
   "report_type": "gambling_dev_collector_sanitized",
-  "run_id": 45550255322,
+  "run_id": 45619077273,
   "run_summary": {
     "duplicates": 0,
     "errors": 0,
     "event": "run_summary",
-    "new_comments": 8,
-    "new_topics": 6,
+    "new_comments": 12,
+    "new_topics": 7,
     "ready_for_unattended_collect": true,
-    "rejected": 100
+    "rejected": 101
   },
-  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45550255322",
-  "trigger_commit": "a5cd3e25dd27a9e152e055bf68d6d0bca7bb0c50"
+  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45619077273",
+  "trigger_commit": "e4abcfcab73d4a9f95853e905af8521e270b5644"
 }
