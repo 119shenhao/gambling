@@ -1,5 +1,5 @@
 {
-  "collector_job_result": "success",
+  "collector_job_result": "failure",
   "events": [
     {
       "event": "candidate_rejected",
@@ -630,10 +630,10 @@
     },
     {
       "duplicates": 0,
-      "errors": 0,
+      "errors": 1,
       "event": "run_summary",
       "new_comments": 0,
-      "new_topics": 2,
+      "new_topics": 0,
       "ready_for_unattended_collect": true,
       "rejected": 101
     }
@@ -641,16 +641,16 @@
   "has_run_summary": true,
   "production_database_writes": false,
   "report_type": "gambling_dev_collector_sanitized",
-  "run_id": 45844062737,
+  "run_id": 45864607480,
   "run_summary": {
     "duplicates": 0,
-    "errors": 0,
+    "errors": 1,
     "event": "run_summary",
     "new_comments": 0,
-    "new_topics": 2,
+    "new_topics": 0,
     "ready_for_unattended_collect": true,
     "rejected": 101
   },
-  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45844062737",
-  "trigger_commit": "bb8556419445a913ef112d9c2653a773ed7894cd"
+  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45864607480",
+  "trigger_commit": "efbf5575bb033045a7313e2b3d197083e250cbea"
 }
