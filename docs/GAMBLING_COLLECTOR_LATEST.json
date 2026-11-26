@@ -5,6 +5,18 @@
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamcare",
+      "source_id": "chatrooms-3"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "charlys-life"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
       "source_id": "new-gamcare-volunteering-opportunity-online-peer-supporters-3"
     },
     {
@@ -14,11 +26,10 @@
       "source_id": "chatrooms-4"
     },
     {
-      "event": "imported",
-      "replies": 1,
+      "event": "candidate_rejected",
+      "reason": "other_error",
       "site": "gamcare",
-      "source_id": "why-me-i-wish-i-knew-the-reason",
-      "topic_id": "4d553bfe-d5e4-453e-8ea8-a95f0815c3cb"
+      "source_id": "help-29"
     },
     {
       "event": "candidate_rejected",
@@ -42,32 +53,13 @@
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamcare",
-      "source_id": "help-29"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "a-day-at-a-moment-123-living-in-this-moment-adam123"
+      "source_id": "april-fools"
     },
     {
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamcare",
       "source_id": "gambling-ruined-my-life-and-ive-never-placed-a-bet-5"
-    },
-    {
-      "event": "imported",
-      "replies": 1,
-      "site": "gamcare",
-      "source_id": "10-days-after-relalpse-progress",
-      "topic_id": "0ee84098-47ab-45e1-94c6-e3f0e77ac141"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "day-one-of-what-i-hope-is-a-new-and-normal-life"
     },
     {
       "event": "candidate_rejected",
@@ -79,7 +71,7 @@
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamcare",
-      "source_id": "the-last-bath-2020-starring-anabella-moreira"
+      "source_id": "a-day-at-a-moment-123-living-in-this-moment-adam123"
     },
     {
       "event": "candidate_rejected",
@@ -91,7 +83,7 @@
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamcare",
-      "source_id": "dear-oh-dear-oh-dear-diary-number-53"
+      "source_id": "tinker-tailor-soldier-spy-1979-starring-alec-guiness"
     },
     {
       "event": "candidate_rejected",
@@ -103,7 +95,7 @@
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamcare",
-      "source_id": "cheese-chasers-1951-starring-mel-blanc"
+      "source_id": "day-one-of-what-i-hope-is-a-new-and-normal-life"
     },
     {
       "event": "candidate_rejected",
@@ -115,7 +107,19 @@
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamcare",
-      "source_id": "homeward-bound-the-incredible-journey-1993-starring-michael-j-fox"
+      "source_id": "the-last-bath-2020-starring-anabella-moreira"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "dear-oh-dear-oh-dear-diary-number-53"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
+      "source_id": "cheese-chasers-1951-starring-mel-blanc"
     },
     {
       "board": "family-friends",
@@ -272,7 +276,7 @@
     },
     {
       "board": "recovery-diaries",
-      "candidates": 7,
+      "candidates": 6,
       "event": "listing_checked",
       "page": 2,
       "site": "gamcare"
@@ -281,7 +285,7 @@
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamcare",
-      "source_id": "april-fools"
+      "source_id": "homeward-bound-the-incredible-journey-1993-starring-michael-j-fox"
     },
     {
       "event": "candidate_rejected",
@@ -312,12 +316,6 @@
       "reason": "other_error",
       "site": "gamcare",
       "source_id": "everything-everywhere-all-at-once-2022-starring-michelle-yeoh-2"
-    },
-    {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "clash-of-the-titans-2010-starring-sam-worth"
     },
     {
       "board": "family-friends",
@@ -453,6 +451,12 @@
       "event": "candidate_rejected",
       "reason": "other_error",
       "site": "gamcare",
+      "source_id": "clash-of-the-titans-2010-starring-sam-worth"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "other_error",
+      "site": "gamcare",
       "source_id": "christopher-robin-2018-starring-ewan-mcgregor"
     },
     {
@@ -510,12 +514,6 @@
       "source_id": "bradley-walsh-tv-program"
     },
     {
-      "event": "candidate_rejected",
-      "reason": "other_error",
-      "site": "gamcare",
-      "source_id": "the-polar-express-2004-starring-tom-hanks"
-    },
-    {
       "board": "family-friends",
       "duplicates": 0,
       "errors": 0,
@@ -531,8 +529,8 @@
       "duplicates": 0,
       "errors": 0,
       "event": "board_summary",
-      "new_comments": 1,
-      "new_topics": 1,
+      "new_comments": 0,
+      "new_topics": 0,
       "rejected": 27,
       "site": "gamcare",
       "target": 2
@@ -542,8 +540,8 @@
       "duplicates": 0,
       "errors": 0,
       "event": "board_summary",
-      "new_comments": 1,
-      "new_topics": 1,
+      "new_comments": 0,
+      "new_topics": 0,
       "rejected": 14,
       "site": "gamcare",
       "target": 2
@@ -562,8 +560,8 @@
     {
       "duplicates": 0,
       "event": "site_summary",
-      "new_comments": 2,
-      "new_topics": 2,
+      "new_comments": 0,
+      "new_topics": 0,
       "site": "gamcare",
       "target": 8
     },
@@ -634,8 +632,8 @@
       "duplicates": 0,
       "errors": 0,
       "event": "run_summary",
-      "new_comments": 2,
-      "new_topics": 4,
+      "new_comments": 0,
+      "new_topics": 2,
       "ready_for_unattended_collect": true,
       "rejected": 101
     }
@@ -643,16 +641,16 @@
   "has_run_summary": true,
   "production_database_writes": false,
   "report_type": "gambling_dev_collector_sanitized",
-  "run_id": 45718551737,
+  "run_id": 45788308844,
   "run_summary": {
     "duplicates": 0,
     "errors": 0,
     "event": "run_summary",
-    "new_comments": 2,
-    "new_topics": 4,
+    "new_comments": 0,
+    "new_topics": 2,
     "ready_for_unattended_collect": true,
     "rejected": 101
   },
-  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45718551737",
-  "trigger_commit": "bdc3783db4c9292a12aa6c3b2a652c1763e7c048"
+  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45788308844",
+  "trigger_commit": "16acf8b7b792c058fa914ae97d9fd38f3d531c8b"
 }
