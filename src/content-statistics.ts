@@ -24,23 +24,9 @@ export async function contentStatistics(db:D1Database,days:number){
    FROM content_origin_day_totals
    WHERE day_utc>=date('now',?) AND day_utc<date('now','+1 day')
    GROUP BY day_utc`, '-'+(days-1)+' days');
- // Separate Beijing content calendar from UTC traffic statistics.
- const beijing=await all(db,`WITH RECURSIVE days(d,n) AS(
-   SELECT date('now','+8 hours'),1 UNION ALL SELECT date(d,'-1 day'),n+1 FROM days WHERE n<?
- ) SELECT d day_beijing,
-   COALESCE(sum(CASE WHEN content_type='topic' THEN c.n ELSE 0 END),0) new_topics,
-   COALESCE(sum(CASE WHEN content_type='comment' THEN c.n ELSE 0 END),0) new_comments,
-   COALESCE(sum(CASE WHEN content_type='topic' AND source='imported' THEN c.n ELSE 0 END),0) imported_topics,
-   COALESCE(sum(CASE WHEN content_type='comment' AND source='imported' THEN c.n ELSE 0 END),0) imported_comments,
-   COALESCE(sum(CASE WHEN content_type='topic' AND source='user' THEN c.n ELSE 0 END),0) user_topics,
-   COALESCE(sum(CASE WHEN content_type='comment' AND source='user' THEN c.n ELSE 0 END),0) user_comments,
-   COALESCE(sum(CASE WHEN content_type='topic' AND source='unknown' THEN c.n ELSE 0 END),0) unknown_topics,
-   COALESCE(sum(CASE WHEN content_type='comment' AND source='unknown' THEN c.n ELSE 0 END),0) unknown_comments
- FROM days LEFT JOIN content_origin_beijing_day_totals c ON c.day_beijing=d
- GROUP BY d ORDER BY d DESC`,days);
  const undated=await one(db,`SELECT
    sum(CASE WHEN content_type='topic' THEN n ELSE 0 END) topics,
    sum(CASE WHEN content_type='comment' THEN n ELSE 0 END) comments
    FROM content_origin_day_totals WHERE day_utc=''`);
- return {current,daily,beijing,undated:{topics:undated?.topics||0,comments:undated?.comments||0}};
+ return {current,daily,undated:{topics:undated?.topics||0,comments:undated?.comments||0}};
 }

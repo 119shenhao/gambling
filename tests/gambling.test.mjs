@@ -517,24 +517,37 @@ test('Beijing content day aggregates respect midnight and provenance mutations',
  }finally{db.close();}
 });
 
-test('analytics retains every original UTC column and Beijing content for both date ranges',async()=>{
+
+test('UTC-only daily statistics retain every original column for both date ranges',async()=>{
  const {renderContentPeriod}=await import('../public/content-stats-ui.js');
  const metrics=Array.from({length:30},(_,i)=>({day_utc:'utc-'+i,new_users:12,new_topics:13,new_comments:14,imported_topics:15,imported_comments:16,user_topics:17,user_comments:18,new_reports:19,uv_estimate:20,pv:21,peak_active_5m_estimate:22,peak_hour_utc:23,peak_hour_pv:24}));
- const contentDaily=Array.from({length:30},(_,i)=>({day_beijing:'bj-'+i,new_topics:31,new_comments:32,imported_topics:33,imported_comments:34,user_topics:35,user_comments:36}));
- const t=k=>k,esc=v=>String(v);
  for(const days of [7,30]){
-  const html=renderContentPeriod({days,metrics,contentDaily,contentUndated:{topics:0,comments:0}},t,esc);
+  const html=renderContentPeriod({days,metrics,contentUndated:{topics:0,comments:0}},k=>k,String);
   const utc=html.split('id="daily-utc-statistics"')[1].split('</table>')[0];
-  const bj=html.split('id="daily-beijing-statistics"')[1].split('</table>')[0];
   assert.equal((utc.match(/<th>/g)||[]).length,14);
-  for(const label of ['users','reports','UV ≈','PV','5m ≈','Hour UTC','Peak PV','periodTopics','periodComments'])assert.ok(utc.includes('<th>'+label+'</th>'),label);
   for(let n=12;n<=24;n++)assert.ok(utc.includes('<td>'+n+'</td>'));
   assert.equal((utc.match(/<tr>/g)||[]).length,days+1);
-  assert.equal((bj.match(/<tr>/g)||[]).length,days+1);
-  assert.ok(bj.includes('<td>bj-'+(days-1)+'</td>'));
-  if(days===7)assert.ok(!bj.includes('<td>bj-7</td>'));
-  assert.ok(html.includes('<td>'+31*days+'</td>'));
+  assert.ok(html.includes('<td>'+13*days+'</td>'));
+  assert.ok(!html.includes('Asia/Shanghai')&&!html.includes('daily-beijing-statistics'));
  }
- const fallback=renderContentPeriod({days:7,metrics,contentDaily:null,contentUndated:{topics:0,comments:0}},t,esc);
- assert.ok(fallback.includes('daily-utc-statistics')&&!fallback.includes('daily-beijing-statistics'));
+ assert.doesNotMatch(read('src/content-statistics.ts'),/beijing|healthSchema/);
+ assert.doesNotMatch(read('src/admin.ts'),/content\.beijing|contentDaily/);
+});
+test('UTC rollback removes duplicate writes without touching provenance or original UTC triggers',async()=>{
+ const {DatabaseSync}=await import('node:sqlite');
+ const db=new DatabaseSync(':memory:');
+ try{
+  db.exec("CREATE TABLE content_origins(content_type TEXT,content_id TEXT,source TEXT,entered_at INTEGER,PRIMARY KEY(content_type,content_id)); CREATE TABLE utc_counter(n INTEGER); INSERT INTO utc_counter VALUES(0); CREATE TRIGGER origin_daily_add AFTER INSERT ON content_origins BEGIN UPDATE utc_counter SET n=n+1; END;");
+  db.exec(read('migrations/v1/0020_beijing_content_statistics.sql'));
+  const insert=db.prepare("INSERT INTO content_origins VALUES('topic',?,'imported',?)");
+  insert.run('first',1795622400);
+  const count=()=>db.prepare('SELECT COALESCE(sum(n),0) n FROM content_origin_beijing_day_totals').get().n;
+  assert.equal(count(),1);
+  db.exec(read('migrations/v1/0021_restore_utc_content_statistics.sql'));
+  insert.run('second',1795622401);
+  assert.equal(count(),1);
+  assert.equal(db.prepare('SELECT n FROM utc_counter').get().n,2);
+  assert.equal(db.prepare("SELECT count(*) n FROM sqlite_master WHERE type='trigger' AND name LIKE 'origin_beijing_%'").get().n,0);
+  assert.equal(db.prepare('SELECT count(*) n FROM content_origins').get().n,2);
+ }finally{db.close();}
 });

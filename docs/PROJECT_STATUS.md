@@ -533,3 +533,7 @@
 ## 2026-11-27 Analytics presentation regression correction
 - Restore the complete original daily UTC table (all 14 columns: users, topics/comments by source, reports, UV/PV, peak active and peak hour metrics). Place the additional clearly labeled Beijing content table below; the two calendars are not merged. Both 7/30-day content and traffic rows are sliced consistently, with tests covering every old column and date range.
 - UI only; no D1 writes, migration, traffic-toggle change, source data edits or sync. Production verification must confirm versioned frontend and real rendering; no authenticated admin session is available for browser acceptance.
+
+## 2026-11-27 用户确认恢复原 UTC 统计
+- 用户取消北京时间统计，恢复原 14 列每日 UTC 表、7/30 天范围及原汇总查询；不再读取额外北京时间汇总、不在后台额外检查 schema。
+- 0021 仅停用三个重复写入触发器，保留旧派生表作为不读不写的静态快照，避免滚动部署时旧 Worker 查询失败。原 UTC 汇总、帖子、回复、流量、来源和采集修复不变。

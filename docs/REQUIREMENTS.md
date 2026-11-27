@@ -101,3 +101,6 @@
 
 - 简繁中文保持「戒赌社区／戒賭社區」。其他语言名称：en：Gambling Stories；es：Historias de apuestas；pt-BR：Histórias de apostas；de：Glücksspielgeschichten；fr：Récits de jeux d’argent；ja：ギャンブル体験談。
 - 品牌名通过当前 UI 语言字典显示，完整文字保留；手机顶栏为品牌和操作区预留独立列，长名称可换行，不遮挡语言选择和登录/账户入口。不改变站点定位、内容、原文语言 SEO、域名、Worker/D1/R2 技术名称或其他项目。仅 DEV 开发，生产另行批准。
+
+## 2026-11-27 后台统计最终口径（用户确认）
+- 帖子、回复、UV/PV 等每日统计统一使用原 UTC 时间，恢复单张完整每日明细表；不再使用或维护额外北京时间汇总，避免增加 D1 读写额度。原始数据及其他功能不变。
