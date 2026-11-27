@@ -522,3 +522,36 @@ test('localized gambling story brands preserve both Chinese names and mobile con
  assert.ok(css.includes('.header-inner {grid-template-columns:minmax(0,1fr) auto;}'));
  assert.ok(css.includes('.header-actions {grid-column:2;grid-row:1;justify-self:end;flex-shrink:0;}'));
 });
+
+test('Beijing content day aggregates respect midnight and provenance mutations',async()=>{
+ const {DatabaseSync}=await import('node:sqlite');
+ const db=new DatabaseSync(':memory:');
+ try{
+  db.exec("CREATE TABLE content_origins(content_type TEXT,content_id TEXT,source TEXT,entered_at INTEGER,PRIMARY KEY(content_type,content_id));");
+  const add=db.prepare("INSERT INTO content_origins VALUES(?,?,?,?)");
+  const ts=s=>Date.parse(s)/1000;
+  add.run('topic','a','imported',ts('2026-11-25T15:59:59Z'));
+  add.run('topic','b','imported',ts('2026-11-25T16:00:00Z'));
+  add.run('comment','c','user',null);
+  db.exec(read('migrations/v1/0020_beijing_content_statistics.sql'));
+  const count=(day,type,source)=>db.prepare('SELECT n FROM content_origin_beijing_day_totals WHERE day_beijing=? AND content_type=? AND source=?').get(day,type,source)?.n||0;
+  assert.equal(count('2026-11-25','topic','imported'),1);
+  assert.equal(count('2026-11-26','topic','imported'),1);
+  assert.equal(count('','comment','user'),1);
+  add.run('topic','d','imported',ts('2026-11-26T15:59:59Z'));
+  assert.equal(count('2026-11-26','topic','imported'),2);
+  db.prepare("UPDATE content_origins SET entered_at=?,source='user' WHERE content_id='b'").run(ts('2026-11-26T16:00:00Z'));
+  assert.equal(count('2026-11-26','topic','imported'),1);
+  assert.equal(count('2026-11-27','topic','user'),1);
+  db.exec("DELETE FROM content_origins WHERE content_id='d'");
+  assert.equal(count('2026-11-26','topic','imported'),0);
+ }finally{db.close();}
+});
+
+test('Beijing production rollout keeps UTC fallback and existing production settings',()=>{
+ const s=read('src/content-statistics.ts'), h=read('src/health-schema.ts');
+ assert.match(s,/healthSchema\(db\)\)\.beijingStats/);
+ assert.match(h,/origin_beijing_add/);
+ assert.match(read('src/index.ts'),/contentStatisticsTimeZone:beijingStatsReady/);
+ assert.match(read('public/content-stats-ui.js'),/data\.contentDaily\|\|data\.metrics/);
+});

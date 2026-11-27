@@ -289,3 +289,9 @@ CI 额外校验 UI 纹理、骰子、暖色阅读主题，并断言生产 `IDENT
 ## 2026-11-24 Gambling Stories 多语言站名生产发布
 
 - 用户已验收 DEV 手机显示并明确批准生产发布；DEV CI #45356380979、在线 smoke #45356380874 均通过。仅移植站名、UI 顶栏、SEO/分享品牌、配套检查及文档，不合并整个 DEV、不改变生产配置、数据库、R2、身份中心或同步任务。正式上线以 Cloudflare 构建与实际 HTTP 验证为准。
+
+
+## 2026-11-27 Beijing content statistics production release (owner approved)
+- Scoped production release from current main, retaining all production bindings, Secrets, translation budgets, R2/CDN, sync workflow, and source timestamps. The collector recovery remains DEV-only by design; production import and collection stay disabled.
+- Add approved migration 0020 via the protected production D1 executor, checking recovery point and exact aggregate parity. Worker and admin keep explicit UTC fallback until all three new triggers and aggregate table are available. Traffic stays UTC; content calendar is Asia/Shanghai. No source content rewrite or production sync triggered by this release.
+- Deployment success requires migration and actual HTTP/frontend acceptance in gambling-beijing-stats-release.yml, not merely a source commit or local CI.

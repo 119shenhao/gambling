@@ -1,0 +1,116 @@
+name: Gambling Beijing statistics production migration and acceptance
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/gambling-beijing-stats-release.yml
+      - migrations/v1/0020_beijing_content_statistics.sql
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: gambling-beijing-statistics-release
+  cancel-in-progress: false
+jobs:
+  migrate:
+    if: github.repository == '119shenhao/gambling' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 12
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.GAMBLING_PROD_D1_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: "289976272520a38732bef34108585e11"
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run verify
+      - name: Verify target and prepare exactly one approved migration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          node --input-type=module <<'NODE'
+          import {readFileSync,writeFileSync,mkdirSync,copyFileSync} from 'node:fs';
+          import {join} from 'node:path';
+          const prod=JSON.parse(readFileSync('wrangler.production-sync.jsonc','utf8'));
+          const app=JSON.parse(readFileSync('wrangler.jsonc','utf8'));
+          const db=prod.d1_databases?.[0];
+          if(prod.d1_databases?.length!==1 || db.binding!=='PRODUCTION_DB'|| db.database_name!=='gambling-community-prod'||db.database_id!=='7bba9ada-589f-493b-8fcf-60265fc0efac' ||
+             app.name!=='gambling-community'||app.d1_databases?.[0]?.database_id!==db.database_id||
+             app.previews?.d1_databases?.[0]?.database_id!=='a92cf620-2a0b-46e1-a0ff-2e0c94218f37'||
+             app.vars.APP_ENV!=='production'||app.vars.IMPORT_ENABLED!=='false'||app.vars.COLLECT_ENABLED!=='false')
+            throw Error('Wrong target; no D1 writes');
+          const dir=join(process.env.RUNNER_TEMP,'gambling-beijing-stats');
+          mkdirSync(join(dir,'migrations'),{recursive:true});
+          copyFileSync('migrations/v1/0020_beijing_content_statistics.sql',join(dir,'migrations','0020_beijing_content_statistics.sql'));
+          writeFileSync(join(dir,'wrangler.json'),JSON.stringify({name:prod.name,compatibility_date:prod.compatibility_date,d1_databases:[{...db,migrations_dir:'migrations'}]}));
+          NODE
+          echo "CFG=$RUNNER_TEMP/gambling-beijing-stats/wrangler.json" >> "$GITHUB_ENV"
+      - name: Read existing schema and verify production recovery point
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./node_modules/.bin/wrangler d1 execute PRODUCTION_DB --remote --config "$CFG" --command "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('content_origins','content_origin_day_totals','settings')" --json > "$RUNNER_TEMP/schema.json"
+          ./node_modules/.bin/wrangler d1 time-travel info gambling-community-prod --config "$CFG" --json > "$RUNNER_TEMP/beijing-restore.json"
+          python3 - <<'PY'
+          import json,os
+          p=os.environ['RUNNER_TEMP']
+          rows=json.load(open(p+'/schema.json'))
+          names={r['name'] for x in rows for r in x.get('results',[])}
+          assert names=={'content_origins','content_origin_day_totals','settings'}, 'Missing prerequisite schema'
+          assert json.load(open(p+'/beijing-restore.json')).get('bookmark'), 'No restore point'
+          print('PASS: isolated production D1 and Time Travel restore point verified')
+          PY
+      - name: Apply only approved Beijing statistics migration
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./node_modules/.bin/wrangler d1 migrations apply PRODUCTION_DB --remote --config "$CFG"
+      - name: Verify new triggers and exact backfill counts
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./node_modules/.bin/wrangler d1 execute PRODUCTION_DB --remote --config "$CFG" --command "WITH expected AS (SELECT COALESCE(date(entered_at,'unixepoch','+8 hours'),'') day_beijing,content_type,source,count(*) n FROM content_origins GROUP BY 1,2,3), actual AS (SELECT day_beijing,content_type,source,n FROM content_origin_beijing_day_totals WHERE n>0) SELECT (SELECT count(*) FROM (SELECT * FROM expected EXCEPT SELECT * FROM actual)) missing,(SELECT count(*) FROM (SELECT * FROM actual EXCEPT SELECT * FROM expected)) extra,(SELECT count(*) FROM sqlite_master WHERE type='trigger' AND name IN ('origin_beijing_add','origin_beijing_remove','origin_beijing_change')) triggers,(SELECT COALESCE(sum(n),0) FROM actual WHERE day_beijing='2026-11-26' AND content_type='topic') beijing_nov26_topics" --json > "$RUNNER_TEMP/beijing-counts.json"
+          python3 - <<'PY'
+          import json,os
+          x=json.load(open(os.environ['RUNNER_TEMP']+'/beijing-counts.json'))[0]['results'][0]
+          assert x['missing']==0 and x['extra']==0 and x['triggers']==3, 'Backfill or trigger mismatch'
+          print('PASS: production Beijing statistics reconcile exactly:',json.dumps(x))
+          PY
+  live:
+    needs: migrate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Verify actual public Worker capability and versioned frontend after migration
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const base='https://gambling.nbn369.com';
+          const get=p=>fetch(base+p,{signal:AbortSignal.timeout(12000)});
+          let ready=false;
+          for(let i=0;i<28;i++){
+            try{
+              const r=await get('/api/health'), h=await r.json();
+              if(!r.ok||h.environment!=='production'||h.databaseReady!==true||h.contentStatisticsTimeZone!=='Asia/Shanghai'||
+                 h.translationConfigured!==true||h.collectEnabled!==false||h.importEnabled!==false||!h.publicContent?.ready)
+                throw Error('New capability or existing production readiness not confirmed');
+              const html=await (await get('/')).text();
+              const entry=html.match(/\/_app\/[a-f0-9]{16}\/app\.js/);
+              if(!entry)throw Error('Versioned app asset missing');
+              const asset=await get(entry[0].replace(/app\.js$/,'content-stats-ui.js'));
+              if(!asset.ok||!(await asset.text()).includes('UTC+08:00 (Asia/Shanghai)'))throw Error('New frontend not served');
+              const me=await (await get('/api/me')).json();
+              if(me.identityConfigured!==true)throw Error('Production SSO not ready');
+              ready=true;console.log('PASS: live production Beijing content statistics, versioned frontend, D1, SSO and translation readiness');break;
+            }catch(e){console.log('Attempt '+(i+1)+': '+e.message);}
+            if(i<27)await new Promise(r=>setTimeout(r,12000));
+          }
+          if(!ready)throw Error('Live production deployment not verified');
+          NODE
