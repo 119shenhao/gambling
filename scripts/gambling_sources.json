@@ -142,10 +142,10 @@
         "https://www.v2ex.com/tag/%E8%B5%8C%E5%8D%9A"
       ],
       "adapter": "gambling_forums",
-      "approved": true,
+      "approved": false,
       "parser_verified": true,
-      "reuse_allowed": true,
-      "permission_evidence": "User explicitly confirmed on 2026-11-22 in project conversation that complete V2EX gambling-related threads and their replies can be republished in Gambling Community; technical full-parser and DEV D1 verification is still pending. Statement recorded as user confirmation, not independently reviewed written agreement.",
+      "reuse_allowed": false,
+      "permission_evidence": "Disabled at user request on 2026-11-27; do not collect from V2EX.",
       "parser_sample": "https://www.v2ex.com/t/1121755",
       "note": "2026-11-22 read-only GitHub Actions run 45003064070: LIVE strict parser read 251 original replies across 3 HTML pages (100+100+51), 45 Python contract tests pass, no truncation; source-wide user-confirmed reuse eligibility recorded in permission_evidence. PII contact fragments replaced with [联系方式已隐藏] in V2EX parser. Enabled for DEV collection with existing 6-hour ChatGPT collector task; initial DEV D1 write and verification to be run next. Never change PROD.",
       "seed_topics": [
