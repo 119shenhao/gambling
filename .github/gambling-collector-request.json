@@ -1,9 +1,18 @@
 {
-  "request_id": "gambling_20261127_1339_manual_collect",
-  "mode": "collect",
+  "request_id": "gambling_20261127_two_source_probe",
+  "mode": "inspect",
   "sites": [
-    "all"
+    "moneysavingexpert",
+    "psychforums"
   ],
-  "candidates": {},
+  "candidates": {
+    "moneysavingexpert": [
+      "https://forums.moneysavingexpert.com/discussion/6352275/debt-free-diary",
+      "https://forums.moneysavingexpert.com/discussion/6337668/gambling-addict-debt-diary"
+    ],
+    "psychforums": [
+      "https://www.psychforums.com/lost-1k-today-for-the-last-time/topic224726.html"
+    ]
+  },
   "limit": 2
 }
