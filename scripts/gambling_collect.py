@@ -288,7 +288,13 @@ def discover_source(source, excluded, cap=60):
     listing_batches = []
     listing_available = False
     listing_error = None
-    for listing in source.get("listings", [])[:5]:
+    discovery_listings = source.get("listings", [])[:5]
+    if source["id"] == "moneysavingexpert":
+        # Vanilla forum category pagination; keep discovery bounded.
+        discovery_listings = [url for base in discovery_listings
+                              for url in [base, *(base.rstrip("/") + "/p" + str(page)
+                                                  for page in range(2, 11))]]
+    for listing in discovery_listings:
         try:
             candidates = discover(source["id"], listing, fetch_source(listing), excluded, cap)
             if interleave_listings:
