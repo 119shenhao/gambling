@@ -520,3 +520,9 @@
 
 - 按用户确认英文品牌改为 Gambling Stories，简繁中文不变，其余五种语言采用本地化名称（详见 REQUIREMENTS）。原先顶栏仅按中/英文硬编码，现统一使用字典并更新无障碍名称；静态 HTML、SEO、分享默认品牌及开发在线 smoke 一并更新。
 - 手机顶栏使用可收缩品牌列与独立操作列；品牌文字自然换行，极窄屏缩减间距而不隐藏登录/语言入口。新增静态回归，CI 和真实设备验收以实际回执为准。未发布生产、未操作数据库或其他论坛。
+
+
+## 2026-11-27 DEV: Beijing statistics and collector shortfall
+- 11/26 Beijing: five collector reports recorded 10 new topics; eight successful production sync jobs applied 15 (7+6+2). UTC 11/26 included four inserts (2+2); exact user-visible page not directly inspected.
+- Stage separate UTC+8 materialized content-day aggregates, preserving UTC traffic and source timestamps. Migration and CI require DEV verification; production approval separately required.
+- Retain privacy, completeness and source approval gates. Add one bounded rotating older GamCare listing page, per-source targets/shortfalls, sanitized reason codes and nonzero exit for zero imports. Yield improvement requires live verification; no access-control bypass or enabling unapproved sources.

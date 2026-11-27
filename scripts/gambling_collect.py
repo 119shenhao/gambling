@@ -5,6 +5,7 @@ spine project. Without affirmative source rights and live parser verification,
 inspect can discover candidates, but collect will not copy forum content.
 """
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -496,8 +497,14 @@ def collect_one(site, source, identifier, url, export_dir):
 
 
 
-def older_board_candidates(site, listings, boards, limit, seen):
-    for page in (2, 3):
+def older_pages_for_request(request_id):
+    # Keep nearby pages and rotate one additional older page per run.
+    offset = int.from_bytes(hashlib.sha256(request_id.encode()).digest()[:4], "big")
+    return (2, 3, 4 + offset % 12)
+
+
+def older_board_candidates(site, listings, boards, limit, seen, pages=(2, 3)):
+    for page in pages:
         for listing in listings:
             path = urlsplit(listing).path.rstrip("/")
             if boards[path]["new_topics"] >= limit:
@@ -514,7 +521,7 @@ def older_board_candidates(site, listings, boards, limit, seen):
             yield from found.items()
 
 
-def collect_candidates(site, source, eligible, limit, export_dir, listings=(), excluded=()):
+def collect_candidates(site, source, eligible, limit, export_dir, listings=(), excluded=(), older_pages=(2, 3)):
     # The site's original IDs still deduplicate topics across boards. Only the
     # successful import count is scoped to each configured automatic listing.
     boards = {urlsplit(url).path.rstrip("/"): Counter() for url in listings}
@@ -522,7 +529,7 @@ def collect_candidates(site, source, eligible, limit, export_dir, listings=(), e
         boards[""] = Counter()
     total = Counter()
     target = limit * len(boards)
-    older = older_board_candidates(site, listings, boards, limit, {*excluded, *eligible}) if listings else ()
+    older = older_board_candidates(site, listings, boards, limit, {*excluded, *eligible}, older_pages) if listings else ()
     for identifier, url in chain(eligible.items(), older):
         if total["new_topics"] >= target:
             break
@@ -567,20 +574,22 @@ def main():
         raise ValueError("preview_not_ready")
     emit("readiness", preview=True, configured_sources=len(sources),
          importable_sources=sum(available(v) for v in sources.values()))
-    total_topics = total_comments = total_duplicates = errors = rejected = 0
+    total_topics = total_comments = total_duplicates = errors = rejected = total_target = 0
     for site in sites:
         source = sources[site]
         if req["mode"] == "collect" and not available(source):
             emit("source_not_enabled", site=site,
                  reason="source_not_enabled_or_parser_not_verified")
             continue
+        explicit = req["candidates"].get(site, [])
+        listings = (source.get("listings", [])[:5] if source.get("limit_per_listing") is True
+                    and req["mode"] == "collect" and not explicit and not args.export_dir else [])
+        site_target = req["limit"] * max(1, len(listings)) if req["mode"] == "collect" else 0
+        total_target += site_target
         try:
             excluded = excluded_ids(site)
-            explicit = req["candidates"].get(site, [])
             if not isinstance(explicit, list):
                 raise ValueError("invalid_candidate_list")
-            listings = (source.get("listings", [])[:5] if source.get("limit_per_listing") is True
-                        and req["mode"] == "collect" and not explicit and not args.export_dir else [])
             if explicit:
                 candidates = {}
                 for value in explicit:
@@ -631,7 +640,8 @@ def main():
                 emit("source_not_enabled", site=site, reason="reuse_or_parser_verification_required")
                 continue
             counts, target = collect_candidates(
-                site, source, eligible, req["limit"], args.export_dir, listings, excluded)
+                site, source, eligible, req["limit"], args.export_dir, listings, excluded,
+                older_pages_for_request(req["request_id"]))
             total_topics += counts["new_topics"]
             total_comments += counts["new_comments"]
             total_duplicates += counts["duplicates"]
@@ -639,16 +649,21 @@ def main():
             errors += counts["errors"]
             emit("site_summary", site=site, new_topics=counts["new_topics"],
                  new_comments=counts["new_comments"], duplicates=counts["duplicates"],
-                 target=target)
+                 rejected=counts["rejected"], errors=counts["errors"],
+                 target=target, shortfall=max(0, target-counts["new_topics"]))
         except (ValueError, KeyError, TypeError) as error:
             errors += 1
             emit("site_error", site=site, reason=str(error))
+            if site_target:
+                emit("site_summary", site=site, new_topics=0, new_comments=0,
+                     duplicates=0, rejected=0, errors=1, target=site_target, shortfall=site_target)
     emit("run_summary", new_topics=total_topics, new_comments=total_comments,
          duplicates=total_duplicates, rejected=rejected, errors=errors,
+         target=total_target, shortfall=max(0, total_target-total_topics),
          ready_for_unattended_collect=bool(sum(available(s) for s in sources.values())))
     if errors:
         return 1
-    if req["mode"] == "collect" and not any(available(sources[s]) for s in sites):
+    if req["mode"] == "collect" and total_topics == 0:
         return 2  # A safe, visible failure, NEVER a green zero-post success.
     return 0
 

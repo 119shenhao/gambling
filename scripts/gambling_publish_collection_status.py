@@ -25,9 +25,13 @@ SAFE_TEXT = {"site", "board", "source_id", "topic_id", "event"}
 SAFE_NUM = {"importable_sources", "configured_sources", "candidates", "excluded",
             "eligible", "replies", "new_topics", "new_comments", "duplicates",
             "rejected", "errors", "target", "page", "pages", "source_total", "captured",
-            "stored", "public", "pending_review", "limit"}
+            "stored", "public", "pending_review", "limit", "shortfall"}
 SAFE_BOOL = {"preview", "capped", "import_allowed", "ready_for_unattended_collect"}
 REASON_CODES = ("http_403", "http_404", "http_429", "network_error_or_timeout",
+                "forum_total_posts_unavailable", "personal_identifier_in_public_content",
+                "invalid_gambling_topic", "not_problem_gambling", "empty_post_or_reply",
+                "reply_too_long", "pagination_required_but_unavailable", "invalid_story_url",
+                "story_text_container_missing_or_ambiguous", "forum_reply_count_mismatch",
                 "v2ex_reply_total_changed", "v2ex_reply_page_incomplete",
                 "v2ex_page_size_unverified", "v2ex_reply_pages_mismatch",
                 "v2ex_only_private_identifier", "v2ex_empty_text",

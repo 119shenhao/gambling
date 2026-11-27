@@ -94,6 +94,12 @@ class ParserTests(unittest.TestCase):
         self.assertEqual([call.args[2] for call in attempt.call_args_list],
                          ["family-one", "family-two", "intro-one", "intro-two"])
 
+    def test_older_page_rotation_is_bounded_and_replayable(self):
+        pages = [collect.older_pages_for_request("request-" + str(i)) for i in range(20)]
+        self.assertTrue(all(p[:2] == (2, 3) and 4 <= p[2] <= 15 for p in pages))
+        self.assertGreater(len(set(pages)), 1)
+        self.assertEqual(pages[0], collect.older_pages_for_request("request-0"))
+
     def test_psychforums_discovery_retries_one_timeout(self):
         listing = "https://www.psychforums.com/gambling-addiction-forum-f204/"
         source = {"id": "psychforums", "listings": [listing]}
