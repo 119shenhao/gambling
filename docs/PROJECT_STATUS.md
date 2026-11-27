@@ -528,3 +528,8 @@
 - Retain privacy, completeness and source approval gates. Add one bounded rotating older GamCare listing page, per-source targets/shortfalls, sanitized reason codes and nonzero exit for zero imports. Yield improvement requires live verification; no access-control bypass or enabling unapproved sources.
 
 - Collector follow-up: parse/validate before D1 claim so rejected posts issue no claim/release writes. The final server-side reservation, atomic import, readback and uncertain-completion handling remain. Treat failed listings without fallback as failures across sources; persist all sanitized site summaries and rejection counts even when detailed events are truncated. Added regression tests; real live yield still pending.
+
+
+## 2026-11-27 Analytics presentation regression correction
+- Restore the complete original daily UTC table (all 14 columns: users, topics/comments by source, reports, UV/PV, peak active and peak hour metrics). Place the additional clearly labeled Beijing content table below; the two calendars are not merged. Both 7/30-day content and traffic rows are sliced consistently, with tests covering every old column and date range.
+- UI only; no D1 writes, migration, traffic-toggle change, source data edits or sync. Production verification must confirm versioned frontend and real rendering; no authenticated admin session is available for browser acceptance.

@@ -11,24 +11,29 @@ function countTable(values,period,t,esc){
  return `<div class="table-wrap"><table class="metric-table"><thead><tr><th>${t('contentSource')}</th><th>${t(period?'periodTopics':'topicCount')}</th><th>${t(period?'periodComments':'commentCount')}</th></tr></thead><tbody>${labels}${missing}</tbody></table></div>`;
 }
 export function renderContentPeriod(data,t,esc){
- const contentRows=data.contentDaily||data.metrics;
+ const days=data.days===30?30:7;
+ const metrics=data.metrics.slice(0,days);
  const local=Array.isArray(data.contentDaily);
+ const contentRows=local?data.contentDaily.slice(0,days):metrics;
  const sum=contentRows.reduce((a,r)=>{
   for(const k of ['new_topics','new_comments','imported_topics','imported_comments','user_topics','user_comments','unknown_topics','unknown_comments'])
    a[k]=(a[k]||0)+(r[k]||0);
   return a;
  },{});
- const pv=data.metrics.reduce((n,r)=>n+(r.pv||0),0);
- const contentNames=[local?'UTC+08:00 (Asia/Shanghai)':'UTC',t('periodTopics'),t('periodComments'),t('importedContent')+' · '+t('topicCount'),t('importedContent')+' · '+t('commentCount'),t('userContent')+' · '+t('topicCount'),t('userContent')+' · '+t('commentCount')];
- const contentFields=[local?'day_beijing':'day_utc','new_topics','new_comments','imported_topics','imported_comments','user_topics','user_comments'];
- const columnNames=['UTC',t('users'),t('reports'),'UV ≈','PV','5m ≈','Hour UTC','Peak PV'];
- const fields=['day_utc','new_users','new_reports','uv_estimate','pv','peak_active_5m_estimate','peak_hour_utc','peak_hour_pv'];
- return `<h3>${t('periodContent')}</h3>${countTable(sum,true,t,esc)}<div class="stat">PV<strong>${esc(pv)}</strong></div>
- <div class="table-wrap"><table class="metric-table"><thead><tr>${contentNames.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${contentRows.map(r=>`<tr>${contentFields.map(k=>`<td>${esc(r[k]??'—')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+ const pv=metrics.reduce((n,r)=>n+(r.pv||0),0);
+ const columnNames=['UTC',t('users'),t('periodTopics'),t('periodComments'),t('importedContent')+' · '+t('topicCount'),t('importedContent')+' · '+t('commentCount'),t('userContent')+' · '+t('topicCount'),t('userContent')+' · '+t('commentCount'),t('reports'),'UV ≈','PV','5m ≈','Hour UTC','Peak PV'];
+ const fields=['day_utc','new_users','new_topics','new_comments','imported_topics','imported_comments','user_topics','user_comments','new_reports','uv_estimate','pv','peak_active_5m_estimate','peak_hour_utc','peak_hour_pv'];
+ return `<h3>${t('periodContent')} (${local?'UTC+08:00 (Asia/Shanghai)':'UTC'})</h3>${countTable(sum,true,t,esc)}<div class="stat">PV<strong>${esc(pv)}</strong></div>
  ${data.contentUndated.topics||data.contentUndated.comments?`<p class="subtle">${t('undatedContent')}: ${esc(data.contentUndated.topics)} / ${esc(data.contentUndated.comments)}</p>`:''}
- <p class="subtle">${t('analyticsNote')}</p><div class="table-wrap"><table class="metric-table">
+ <p class="subtle">${t('analyticsNote')}</p><div class="table-wrap" id="daily-utc-statistics"><table class="metric-table">
  <thead><tr>${columnNames.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead>
- <tbody>${data.metrics.map(r=>`<tr>${fields.map(k=>`<td>${esc(r[k]??'—')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+ <tbody>${metrics.map(r=>`<tr>${fields.map(k=>`<td>${esc(r[k]??'—')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+ ${local?renderBeijingDays(contentRows,t,esc):''}`;
+}
+function renderBeijingDays(rows,t,esc){
+ const columns=['UTC+08:00 (Asia/Shanghai)',t('periodTopics'),t('periodComments'),t('importedContent')+' · '+t('topicCount'),t('importedContent')+' · '+t('commentCount'),t('userContent')+' · '+t('topicCount'),t('userContent')+' · '+t('commentCount')];
+ const keys=['day_beijing','new_topics','new_comments','imported_topics','imported_comments','user_topics','user_comments'];
+ return `<h3>${t('periodContent')} (UTC+08:00)</h3><div class="table-wrap" id="daily-beijing-statistics"><table class="metric-table"><thead><tr>${columns.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${keys.map(k=>`<td>${esc(r[k]??'—')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
 }
 export function renderContentStats(data,t,esc){
  const days=data.days===30?30:7;
