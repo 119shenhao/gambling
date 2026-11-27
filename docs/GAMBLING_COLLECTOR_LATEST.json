@@ -2,10 +2,606 @@
   "collector_job_result": "failure",
   "events": [
     {
-      "configured_sources": 10,
-      "event": "readiness",
-      "importable_sources": 6,
-      "preview": true
+      "event": "candidate_rejected",
+      "reason": "forum_total_posts_unavailable",
+      "site": "gamcare",
+      "source_id": "the-last-bath-2020-starring-anabella-moreira"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "invalid_gambling_topic",
+      "site": "gamcare",
+      "source_id": "dear-oh-dear-oh-dear-diary-number-53"
+    },
+    {
+      "board": "family-friends",
+      "candidates": 7,
+      "event": "listing_checked",
+      "page": 2,
+      "site": "gamcare"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "personal_identifier_in_public_content",
+      "site": "gamcare",
+      "source_id": "trying-to-hold-a-marriage-together-after-another-relapse"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "personal_identifier_in_public_content",
+      "site": "gamcare",
+      "source_id": "i-feel-so-alone-3"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "invalid_gambling_topic",
+      "site": "gamcare",
+      "source_id": "doing-it-solo"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "pagination_required_but_unavailable",
+      "site": "gamcare",
+      "source_id": "pokemon-trading"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "pagination_required_but_unavailable",
+      "site": "gamcare",
+      "source_id": "hes-doing-it-again-i-think"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "personal_identifier_in_public_content",
+      "site": "gamcare",
+      "source_id": "should-i-leavw-my-gambling-boyfriend"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "personal_identifier_in_public_content",
+      "site": "gamcare",
+      "source_id": "should-i-leavw-my-gambling-boyfriend-2"
+    },
+    {
+      "board": "overcoming-problem-gambling",
+      "candidates": 9,
+      "event": "listing_checked",
+      "page": 2,
+      "site": "gamcare"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "invalid_gambling_topic",
+      "site": "gamcare",
+      "source_id": "humiliating"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "personal_identifier_in_public_content",
+      "site": "gamcare",
+      "source_id": "looking-for-advice-6"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "pagination_required_but_unavailable",
+      "site": "gamcare",
+      "source_id": "21-years-in-the-fight-adhd-and-the-truth-about-foolproof-bans"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "forum_total_posts_unavailable",
+      "site": "gamcare",
+      "source_id": "list-of-reasons-why-an-addict-gambles-and-some-suggestions"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "personal_identifier_in_public_content",
+      "site": "gamcare",
+      "source_id": "still-waiting-on-gamcare-counselling"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "forum_total_posts_unavailable",
+      "site": "gamcare",
+      "source_id": "still-waiting-on-gamcare-counselling-5"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "forum_total_posts_unavailable",
+      "site": "gamcare",
+      "source_id": "quote-of-the-day-9"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "personal_identifier_in_public_content",
+      "site": "gamcare",
+      "source_id": "join-the-guru-challenge"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "invalid_gambling_topic",
+      "site": "gamcare",
+      "source_id": "quote-of-the-day-7"
+    },
+    {
+      "board": "new-members-intros-forum",
+      "candidates": 6,
+      "event": "listing_checked",
+      "page": 2,
+      "site": "gamcare"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "invalid_gambling_topic",
+      "site": "gamcare",
+      "source_id": "hello-everyone-5"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "invalid_gambling_topic",
+      "site": "gamcare",
+      "source_id": "day-1-50"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "invalid_gambling_topic",
+      "site": "gamcare",
+      "source_id": "first-day-9"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "invalid_gambling_topic",
+      "site": "gamcare",
+      "source_id": "im-on-week-2-and-never-felt-this-good-in-years"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "invalid_gambling_topic",
+      "site": "gamcare",
+      "source_id": "any-suggest"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "personal_identifier_in_public_content",
+      "site": "gamcare",
+      "source_id": "struggling-to-breathe"
+    },
+    {
+      "board": "recovery-diaries",
+      "candidates": 7,
+      "event": "listing_checked",
+      "page": 2,
+      "site": "gamcare"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "forum_total_posts_unavailable",
+      "site": "gamcare",
+      "source_id": "cheese-chasers-1951-starring-mel-blanc"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "personal_identifier_in_public_content",
+      "site": "gamcare",
+      "source_id": "homeward-bound-the-incredible-journey-1993-starring-michael-j-fox"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "personal_identifier_in_public_content",
+      "site": "gamcare",
+      "source_id": "maybe-a-little-late"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "invalid_gambling_topic",
+      "site": "gamcare",
+      "source_id": "quotes-7"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "invalid_gambling_topic",
+      "site": "gamcare",
+      "source_id": "quotes-6"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "invalid_gambling_topic",
+      "site": "gamcare",
+      "source_id": "trying-my-best-2"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "forum_total_posts_unavailable",
+      "site": "gamcare",
+      "source_id": "everything-everywhere-all-at-once-2022-starring-michelle-yeoh-2"
+    },
+    {
+      "board": "family-friends",
+      "candidates": 8,
+      "event": "listing_checked",
+      "page": 3,
+      "site": "gamcare"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "personal_identifier_in_public_content",
+      "site": "gamcare",
+      "source_id": "sick-of-husbands-gambling-and-feel-really-depressed"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "personal_identifier_in_public_content",
+      "site": "gamcare",
+      "source_id": "dont-know-if-i-can-get-over-the-betrayal"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "personal_identifier_in_public_content",
+      "site": "gamcare",
+      "source_id": "what-do-i-do-3"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "personal_identifier_in_public_content",
+      "site": "gamcare",
+      "source_id": "hurt-2"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "personal_identifier_in_public_content",
+      "site": "gamcare",
+      "source_id": "reflection-3"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "personal_identifier_in_public_content",
+      "site": "gamcare",
+      "source_id": "relapse-and-ready-to-leave"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "invalid_gambling_topic",
+      "site": "gamcare",
+      "source_id": "what-has-worked-for-you-would-love-to-hear-from-affected-other"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "forum_total_posts_unavailable",
+      "site": "gamcare",
+      "source_id": "new-lived-experience-opportunities"
+    },
+    {
+      "board": "overcoming-problem-gambling",
+      "candidates": 7,
+      "event": "listing_checked",
+      "page": 3,
+      "site": "gamcare"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "invalid_gambling_topic",
+      "site": "gamcare",
+      "source_id": "another-day-another-quote"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "invalid_gambling_topic",
+      "site": "gamcare",
+      "source_id": "quote-of-the-day-6"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "personal_identifier_in_public_content",
+      "site": "gamcare",
+      "source_id": "when-gambling-becomes-a-real-problem"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "personal_identifier_in_public_content",
+      "site": "gamcare",
+      "source_id": "gambling-husband-2"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "personal_identifier_in_public_content",
+      "site": "gamcare",
+      "source_id": "how-to-get-the-money-to-get-myself-out-of-the-rut"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "invalid_gambling_topic",
+      "site": "gamcare",
+      "source_id": "quote-of-the-day-2"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "invalid_gambling_topic",
+      "site": "gamcare",
+      "source_id": "interesting-website"
+    },
+    {
+      "board": "new-members-intros-forum",
+      "candidates": 2,
+      "event": "listing_checked",
+      "page": 3,
+      "site": "gamcare"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "invalid_gambling_topic",
+      "site": "gamcare",
+      "source_id": "failed-as-a-parent"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "personal_identifier_in_public_content",
+      "site": "gamcare",
+      "source_id": "has-anyone-been-to-the-gordon-moody-treatment-centre"
+    },
+    {
+      "board": "recovery-diaries",
+      "candidates": 10,
+      "event": "listing_checked",
+      "page": 3,
+      "site": "gamcare"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "forum_total_posts_unavailable",
+      "site": "gamcare",
+      "source_id": "clash-of-the-titans-2010-starring-sam-worth"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "forum_total_posts_unavailable",
+      "site": "gamcare",
+      "source_id": "christopher-robin-2018-starring-ewan-mcgregor"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "personal_identifier_in_public_content",
+      "site": "gamcare",
+      "source_id": "determined-to-keep-a-diary"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "forum_total_posts_unavailable",
+      "site": "gamcare",
+      "source_id": "24-hours-to-live-2018-starring-ethan-hawke"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "forum_total_posts_unavailable",
+      "site": "gamcare",
+      "source_id": "addams-family-values-1993-starring-anjelica-huston"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "empty_post_or_reply",
+      "site": "gamcare",
+      "source_id": "gctid104132"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "forum_total_posts_unavailable",
+      "site": "gamcare",
+      "source_id": "serenity-2005-starring-nathan-fillion"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "forum_total_posts_unavailable",
+      "site": "gamcare",
+      "source_id": "maximum-risk-1996-jean-claude-van-damme"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "forum_total_posts_unavailable",
+      "site": "gamcare",
+      "source_id": "resistance-2020-starring-jesse-eiseberg"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "forum_total_posts_unavailable",
+      "site": "gamcare",
+      "source_id": "the-appearance-2018-starring-kristian-nairn"
+    },
+    {
+      "board": "family-friends",
+      "candidates": 20,
+      "event": "listing_checked",
+      "page": 4,
+      "site": "gamcare"
+    },
+    {
+      "event": "imported",
+      "replies": 5,
+      "site": "gamcare",
+      "source_id": "men-dont-be-shy-im-a-male-affected-other",
+      "topic_id": "5997fa26-6fc0-4152-906c-2e2a67c0cd8d"
+    },
+    {
+      "event": "imported",
+      "replies": 6,
+      "site": "gamcare",
+      "source_id": "just-discovered-husbands-huge-gambling-debt-addiction-im-pregnant-have-a-toddler-work-for-his-company",
+      "topic_id": "716812ed-6e3d-4eae-b132-e36d92b5fbc9"
+    },
+    {
+      "board": "overcoming-problem-gambling",
+      "candidates": 20,
+      "event": "listing_checked",
+      "page": 4,
+      "site": "gamcare"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "invalid_gambling_topic",
+      "site": "gamcare",
+      "source_id": "quote-4"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "invalid_gambling_topic",
+      "site": "gamcare",
+      "source_id": "quote-to-freedom"
+    },
+    {
+      "event": "imported",
+      "replies": 4,
+      "site": "gamcare",
+      "source_id": "acceptance-3",
+      "topic_id": "ba2635e4-a64a-48f6-9b3a-1bbbd87aa139"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "invalid_gambling_topic",
+      "site": "gamcare",
+      "source_id": "quote-of-the-day"
+    },
+    {
+      "event": "imported",
+      "replies": 3,
+      "site": "gamcare",
+      "source_id": "hopeful-book-club-book-1-the-secret-by-rhonda-byrne",
+      "topic_id": "1ccae217-0d14-46d1-b259-8d16edba227c"
+    },
+    {
+      "board": "new-members-intros-forum",
+      "candidates": 20,
+      "event": "listing_checked",
+      "page": 4,
+      "site": "gamcare"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "invalid_gambling_topic",
+      "site": "gamcare",
+      "source_id": "hello-everyone-ndangolowa"
+    },
+    {
+      "event": "imported",
+      "replies": 3,
+      "site": "gamcare",
+      "source_id": "today-is-the-day-i-stop-this",
+      "topic_id": "3b752193-ebf6-4066-9aec-b616830ebf3e"
+    },
+    {
+      "event": "imported",
+      "replies": 8,
+      "site": "gamcare",
+      "source_id": "the-final-relapse",
+      "topic_id": "bc750fc6-4138-4f27-b59a-f5f9900a2120"
+    },
+    {
+      "board": "recovery-diaries",
+      "candidates": 18,
+      "event": "listing_checked",
+      "page": 4,
+      "site": "gamcare"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "forum_total_posts_unavailable",
+      "site": "gamcare",
+      "source_id": "bradley-walsh-tv-program"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "forum_total_posts_unavailable",
+      "site": "gamcare",
+      "source_id": "the-polar-express-2004-starring-tom-hanks"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "personal_identifier_in_public_content",
+      "site": "gamcare",
+      "source_id": "moving-forward"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "forum_total_posts_unavailable",
+      "site": "gamcare",
+      "source_id": "normal-2025-starring-bob-odenkirk"
+    },
+    {
+      "event": "candidate_rejected",
+      "reason": "forum_total_posts_unavailable",
+      "site": "gamcare",
+      "source_id": "oscillate-2022-starring-crew-mcbean"
+    },
+    {
+      "event": "imported",
+      "replies": 1,
+      "site": "gamcare",
+      "source_id": "beauty-the-beast-2017-starring-luke-evans",
+      "topic_id": "d81a946c-778c-47e8-8bd5-3885506d0a7f"
+    },
+    {
+      "event": "imported",
+      "replies": 1,
+      "site": "gamcare",
+      "source_id": "5000-recoveries-threads-on-here-well-done-gamcare-thats-massively-helped-thousands-of-lives-well-done-all",
+      "topic_id": "6625df4b-4ec1-49af-acd6-1f445354599e"
+    },
+    {
+      "board": "family-friends",
+      "duplicates": 0,
+      "errors": 0,
+      "event": "board_summary",
+      "new_comments": 11,
+      "new_topics": 2,
+      "rejected": 23,
+      "site": "gamcare",
+      "target": 2
+    },
+    {
+      "board": "overcoming-problem-gambling",
+      "duplicates": 0,
+      "errors": 0,
+      "event": "board_summary",
+      "new_comments": 7,
+      "new_topics": 2,
+      "rejected": 30,
+      "site": "gamcare",
+      "target": 2
+    },
+    {
+      "board": "new-members-intros-forum",
+      "duplicates": 0,
+      "errors": 0,
+      "event": "board_summary",
+      "new_comments": 11,
+      "new_topics": 2,
+      "rejected": 15,
+      "site": "gamcare",
+      "target": 2
+    },
+    {
+      "board": "recovery-diaries",
+      "duplicates": 0,
+      "errors": 0,
+      "event": "board_summary",
+      "new_comments": 2,
+      "new_topics": 2,
+      "rejected": 35,
+      "site": "gamcare",
+      "target": 2
+    },
+    {
+      "duplicates": 0,
+      "errors": 0,
+      "event": "site_summary",
+      "new_comments": 31,
+      "new_topics": 8,
+      "rejected": 103,
+      "shortfall": 0,
+      "site": "gamcare",
+      "target": 8
+    },
+    {
+      "event": "source_not_enabled",
+      "reason": "source_not_enabled_or_parser_not_verified",
+      "site": "gamblingtherapy"
     },
     {
       "candidates": 0,
@@ -32,35 +628,115 @@
       "target": 2
     },
     {
+      "event": "source_not_enabled",
+      "reason": "source_not_enabled_or_parser_not_verified",
+      "site": "v2ex"
+    },
+    {
+      "event": "source_not_enabled",
+      "reason": "source_not_enabled_or_parser_not_verified",
+      "site": "psychforums"
+    },
+    {
+      "event": "source_not_enabled",
+      "reason": "source_not_enabled_or_parser_not_verified",
+      "site": "douban"
+    },
+    {
       "duplicates": 0,
-      "errors": 0,
+      "errors": 1,
       "event": "run_summary",
-      "new_comments": 0,
-      "new_topics": 0,
+      "new_comments": 31,
+      "new_topics": 8,
       "ready_for_unattended_collect": true,
-      "rejected": 0,
-      "shortfall": 2,
-      "target": 2
+      "rejected": 109,
+      "shortfall": 10,
+      "target": 18
     }
   ],
   "has_run_summary": true,
   "production_database_writes": false,
-  "reason_counts": {},
+  "reason_counts": {
+    "empty_post_or_reply": 2,
+    "forum_total_posts_unavailable": 36,
+    "http_403": 1,
+    "invalid_gambling_topic": 28,
+    "invalid_story_url": 4,
+    "pagination_required_but_unavailable": 3,
+    "personal_identifier_in_public_content": 34,
+    "reply_too_long": 1,
+    "story_text_container_missing_or_ambiguous": 1
+  },
   "report_type": "gambling_dev_collector_sanitized",
-  "run_id": 45954813515,
+  "run_id": 45955131949,
   "run_summary": {
     "duplicates": 0,
-    "errors": 0,
+    "errors": 1,
     "event": "run_summary",
-    "new_comments": 0,
-    "new_topics": 0,
+    "new_comments": 31,
+    "new_topics": 8,
     "ready_for_unattended_collect": true,
-    "rejected": 0,
-    "shortfall": 2,
-    "target": 2
+    "rejected": 109,
+    "shortfall": 10,
+    "target": 18
   },
-  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45954813515",
+  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45955131949",
   "site_summaries": [
+    {
+      "duplicates": 0,
+      "errors": 1,
+      "event": "site_summary",
+      "new_comments": 0,
+      "new_topics": 0,
+      "rejected": 0,
+      "shortfall": 2,
+      "site": "tacklinggamblingstigma",
+      "target": 2
+    },
+    {
+      "duplicates": 0,
+      "errors": 0,
+      "event": "site_summary",
+      "new_comments": 0,
+      "new_topics": 0,
+      "rejected": 2,
+      "shortfall": 2,
+      "site": "agr",
+      "target": 2
+    },
+    {
+      "duplicates": 0,
+      "errors": 0,
+      "event": "site_summary",
+      "new_comments": 0,
+      "new_topics": 0,
+      "rejected": 4,
+      "shortfall": 2,
+      "site": "gamblingwithlives",
+      "target": 2
+    },
+    {
+      "duplicates": 0,
+      "errors": 0,
+      "event": "site_summary",
+      "new_comments": 0,
+      "new_topics": 0,
+      "rejected": 0,
+      "shortfall": 2,
+      "site": "australiadss",
+      "target": 2
+    },
+    {
+      "duplicates": 0,
+      "errors": 0,
+      "event": "site_summary",
+      "new_comments": 31,
+      "new_topics": 8,
+      "rejected": 103,
+      "shortfall": 0,
+      "site": "gamcare",
+      "target": 8
+    },
     {
       "duplicates": 0,
       "errors": 0,
@@ -73,6 +749,27 @@
       "target": 2
     }
   ],
-  "source_not_enabled": [],
-  "trigger_commit": "eeef13e5d1c1157959d43b7c5abe4dba61199b4f"
+  "source_not_enabled": [
+    {
+      "event": "source_not_enabled",
+      "reason": "source_not_enabled_or_parser_not_verified",
+      "site": "gamblingtherapy"
+    },
+    {
+      "event": "source_not_enabled",
+      "reason": "source_not_enabled_or_parser_not_verified",
+      "site": "v2ex"
+    },
+    {
+      "event": "source_not_enabled",
+      "reason": "source_not_enabled_or_parser_not_verified",
+      "site": "psychforums"
+    },
+    {
+      "event": "source_not_enabled",
+      "reason": "source_not_enabled_or_parser_not_verified",
+      "site": "douban"
+    }
+  ],
+  "trigger_commit": "ef73d5be3810baf5abbc9d854dadf47bb5249048"
 }
