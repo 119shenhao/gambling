@@ -295,3 +295,7 @@ CI 额外校验 UI 纹理、骰子、暖色阅读主题，并断言生产 `IDENT
 - Scoped production release from current main, retaining all production bindings, Secrets, translation budgets, R2/CDN, sync workflow, and source timestamps. The collector recovery remains DEV-only by design; production import and collection stay disabled.
 - Add approved migration 0020 via the protected production D1 executor, checking recovery point and exact aggregate parity. Worker and admin keep explicit UTC fallback until all three new triggers and aggregate table are available. Traffic stays UTC; content calendar is Asia/Shanghai. No source content rewrite or production sync triggered by this release.
 - Deployment success requires migration and actual HTTP/frontend acceptance in gambling-beijing-stats-release.yml, not merely a source commit or local CI.
+
+## 2026-11-27 用户取消北京时间统计（生产修复）
+- 恢复完整原 UTC 统计表，删除额外读查询和后台 schema 查询，0021 停用重复写入触发器。原 UTC 汇总及原始数据不变；旧派生表暂留为不读不写的静态快照，保证滚动部署安全。
+- 仅统计范围，保留采集修复、生产配置、登录、翻译、缓存及同步。生产验收见 gambling-beijing-stats-release.yml 最新运行；提交不等于验收成功。

@@ -3,7 +3,7 @@ import {one} from './core';
 // Migrations do not change schema within a running Worker version in normal operation.
 // Cache only successful, immutable schema capabilities for five minutes.
 // Runtime toggles, metrics and translation cache availability are NEVER cached.
-type Schema={ready:boolean;projection:boolean;demand:boolean;languageSchema:boolean;translation:boolean;beijingStats:boolean};
+type Schema={ready:boolean;projection:boolean;demand:boolean;languageSchema:boolean;translation:boolean};
 const snapshots=new WeakMap<D1Database,{expires:number;value:Schema}>();
 
 export async function healthSchema(db:D1Database):Promise<Schema>{
@@ -13,11 +13,10 @@ export async function healthSchema(db:D1Database):Promise<Schema>{
    EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='public_projection_scan_count') projection,
    EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='public_projection_demand') demand,
    EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='content_language_verifications') languageSchema,
-   ((SELECT count(*) FROM sqlite_master WHERE (type='table' AND name='content_origin_beijing_day_totals') OR (type='trigger' AND name IN ('origin_beijing_add','origin_beijing_remove','origin_beijing_change')))=4) beijingStats,
    EXISTS(SELECT 1 FROM pragma_table_info('topic_translations') WHERE name='projection_key') translation`);
  const schema={ready:Boolean(row?.schemaOk&&row?.languageSchema),
    projection:Boolean(row?.projection),demand:Boolean(row?.demand),
-   languageSchema:Boolean(row?.languageSchema),translation:Boolean(row?.translation),beijingStats:Boolean(row?.beijingStats)};
- if(schema.ready&&schema.beijingStats)snapshots.set(db,{expires:Date.now()+300_000,value:schema});
+   languageSchema:Boolean(row?.languageSchema),translation:Boolean(row?.translation)};
+ if(schema.ready)snapshots.set(db,{expires:Date.now()+300_000,value:schema});
  return schema;
 }

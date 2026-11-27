@@ -1,10 +1,10 @@
-name: Gambling Beijing statistics production migration and acceptance
+name: Gambling UTC statistics restoration and acceptance
 on:
   push:
     branches: [main]
     paths:
       - .github/workflows/gambling-beijing-stats-release.yml
-      - migrations/v1/0020_beijing_content_statistics.sql
+      - migrations/v1/0021_restore_utc_content_statistics.sql
   workflow_dispatch:
 permissions:
   contents: read
@@ -48,7 +48,7 @@ jobs:
             throw Error('Wrong target; no D1 writes');
           const dir=join(process.env.RUNNER_TEMP,'gambling-beijing-stats');
           mkdirSync(join(dir,'migrations'),{recursive:true});
-          copyFileSync('migrations/v1/0020_beijing_content_statistics.sql',join(dir,'migrations','0020_beijing_content_statistics.sql'));
+          copyFileSync('migrations/v1/0021_restore_utc_content_statistics.sql',join(dir,'migrations','0021_restore_utc_content_statistics.sql'));
           writeFileSync(join(dir,'wrangler.json'),JSON.stringify({name:prod.name,compatibility_date:prod.compatibility_date,d1_databases:[{...db,migrations_dir:'migrations'}]}));
           NODE
           echo "CFG=$RUNNER_TEMP/gambling-beijing-stats/wrangler.json" >> "$GITHUB_ENV"
@@ -67,21 +67,21 @@ jobs:
           assert json.load(open(p+'/beijing-restore.json')).get('bookmark'), 'No restore point'
           print('PASS: isolated production D1 and Time Travel restore point verified')
           PY
-      - name: Apply only approved Beijing statistics migration
+      - name: Apply only approved UTC restoration migration
         shell: bash
         run: |
           set -euo pipefail
           ./node_modules/.bin/wrangler d1 migrations apply PRODUCTION_DB --remote --config "$CFG"
-      - name: Verify new triggers and exact backfill counts
+      - name: Verify original UTC triggers and redundant triggers removed
         shell: bash
         run: |
           set -euo pipefail
-          ./node_modules/.bin/wrangler d1 execute PRODUCTION_DB --remote --config "$CFG" --command "WITH expected AS (SELECT COALESCE(date(entered_at,'unixepoch','+8 hours'),'') day_beijing,content_type,source,count(*) n FROM content_origins GROUP BY 1,2,3), actual AS (SELECT day_beijing,content_type,source,n FROM content_origin_beijing_day_totals WHERE n>0) SELECT (SELECT count(*) FROM (SELECT * FROM expected EXCEPT SELECT * FROM actual)) missing,(SELECT count(*) FROM (SELECT * FROM actual EXCEPT SELECT * FROM expected)) extra,(SELECT count(*) FROM sqlite_master WHERE type='trigger' AND name IN ('origin_beijing_add','origin_beijing_remove','origin_beijing_change')) triggers,(SELECT COALESCE(sum(n),0) FROM actual WHERE day_beijing='2026-11-26' AND content_type='topic') beijing_nov26_topics" --json > "$RUNNER_TEMP/beijing-counts.json"
+          ./node_modules/.bin/wrangler d1 execute PRODUCTION_DB --remote --config "$CFG" --command "SELECT (SELECT count(*) FROM sqlite_master WHERE type='trigger' AND name IN ('origin_beijing_add','origin_beijing_remove','origin_beijing_change')) redundant,(SELECT count(*) FROM sqlite_master WHERE type='trigger' AND name LIKE 'origin_daily_%') utc_triggers,(SELECT count(*) FROM sqlite_master WHERE type='table' AND name='content_origin_day_totals') utc_table" --json > "$RUNNER_TEMP/utc-counts.json"
           python3 - <<'PY'
           import json,os
-          x=json.load(open(os.environ['RUNNER_TEMP']+'/beijing-counts.json'))[0]['results'][0]
-          assert x['missing']==0 and x['extra']==0 and x['triggers']==3, 'Backfill or trigger mismatch'
-          print('PASS: production Beijing statistics reconcile exactly:',json.dumps(x))
+          x=json.load(open(os.environ['RUNNER_TEMP']+'/utc-counts.json'))[0]['results'][0]
+          assert x['redundant']==0 and x['utc_triggers']>=1 and x['utc_table']==1, 'UTC trigger verification failed'
+          print('PASS: redundant writes disabled; original UTC aggregates intact:',json.dumps(x))
           PY
   live:
     needs: migrate
@@ -98,17 +98,18 @@ jobs:
           for(let i=0;i<28;i++){
             try{
               const r=await get('/api/health'), h=await r.json();
-              if(!r.ok||h.environment!=='production'||h.databaseReady!==true||h.contentStatisticsTimeZone!=='Asia/Shanghai'||
+              if(!r.ok||h.environment!=='production'||h.databaseReady!==true||h.contentStatisticsTimeZone!=='UTC'||
                  h.translationConfigured!==true||h.collectEnabled!==false||h.importEnabled!==false||!h.publicContent?.ready)
                 throw Error('New capability or existing production readiness not confirmed');
               const html=await (await get('/')).text();
               const entry=html.match(/\/_app\/[a-f0-9]{16}\/app\.js/);
               if(!entry)throw Error('Versioned app asset missing');
               const asset=await get(entry[0].replace(/app\.js$/,'content-stats-ui.js'));
-              if(!asset.ok||!(await asset.text()).includes('UTC+08:00 (Asia/Shanghai)'))throw Error('New frontend not served');
+              const js=await asset.text();
+              if(!asset.ok||!js.includes('daily-utc-statistics')||js.includes('daily-beijing-statistics')||js.includes('Asia/Shanghai')||!js.includes('peak_hour_pv'))throw Error('Restored single UTC frontend not served');
               const me=await (await get('/api/me')).json();
               if(me.identityConfigured!==true)throw Error('Production SSO not ready');
-              ready=true;console.log('PASS: live production Beijing content statistics, versioned frontend, D1, SSO and translation readiness');break;
+              ready=true;console.log('PASS: live production single UTC statistics, versioned frontend, D1, SSO and translation readiness');break;
             }catch(e){console.log('Attempt '+(i+1)+': '+e.message);}
             if(i<27)await new Promise(r=>setTimeout(r,12000));
           }
