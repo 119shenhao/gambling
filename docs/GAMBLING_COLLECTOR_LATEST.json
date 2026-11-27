@@ -8,93 +8,71 @@
       "preview": true
     },
     {
-      "candidates": 2,
-      "eligible": 1,
+      "candidates": 0,
+      "event": "listing_checked",
+      "site": "moneysavingexpert"
+    },
+    {
+      "candidates": 0,
+      "eligible": 0,
       "event": "plan",
-      "excluded": 1,
+      "excluded": 0,
       "import_allowed": true,
       "site": "moneysavingexpert"
     },
     {
-      "capped": false,
-      "captured": 1,
-      "event": "parser_probe_pagination",
-      "pages": 1,
+      "duplicates": 0,
+      "errors": 0,
+      "event": "site_summary",
+      "new_comments": 0,
+      "new_topics": 0,
+      "rejected": 0,
+      "shortfall": 2,
       "site": "moneysavingexpert",
-      "source_id": "6352275",
-      "source_total": 1
-    },
-    {
-      "event": "parser_probe_ok",
-      "replies": 1,
-      "site": "moneysavingexpert",
-      "source_id": "6352275"
-    },
-    {
-      "capped": false,
-      "captured": 1,
-      "event": "parser_probe_pagination",
-      "pages": 1,
-      "site": "moneysavingexpert",
-      "source_id": "6337668",
-      "source_total": 1
-    },
-    {
-      "event": "parser_probe_ok",
-      "replies": 1,
-      "site": "moneysavingexpert",
-      "source_id": "6337668"
-    },
-    {
-      "event": "parser_probe_failed",
-      "reason": "completed_topic_not_visible_in_dev_feed",
-      "site": "moneysavingexpert",
-      "source_id": "6337668"
-    },
-    {
-      "candidates": 1,
-      "eligible": 0,
-      "event": "plan",
-      "excluded": 1,
-      "import_allowed": false,
-      "site": "psychforums"
-    },
-    {
-      "event": "parser_probe_failed",
-      "reason": "network_error_or_timeout",
-      "site": "psychforums",
-      "source_id": "224726"
+      "target": 2
     },
     {
       "duplicates": 0,
-      "errors": 2,
+      "errors": 0,
       "event": "run_summary",
       "new_comments": 0,
       "new_topics": 0,
       "ready_for_unattended_collect": true,
       "rejected": 0,
-      "shortfall": 0,
-      "target": 0
+      "shortfall": 2,
+      "target": 2
     }
   ],
   "has_run_summary": true,
   "production_database_writes": false,
   "reason_counts": {},
   "report_type": "gambling_dev_collector_sanitized",
-  "run_id": 45952065330,
+  "run_id": 45954813515,
   "run_summary": {
     "duplicates": 0,
-    "errors": 2,
+    "errors": 0,
     "event": "run_summary",
     "new_comments": 0,
     "new_topics": 0,
     "ready_for_unattended_collect": true,
     "rejected": 0,
-    "shortfall": 0,
-    "target": 0
+    "shortfall": 2,
+    "target": 2
   },
-  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45952065330",
-  "site_summaries": [],
+  "run_url": "https://github.com/119shenhao/gambling/actions/runs/45954813515",
+  "site_summaries": [
+    {
+      "duplicates": 0,
+      "errors": 0,
+      "event": "site_summary",
+      "new_comments": 0,
+      "new_topics": 0,
+      "rejected": 0,
+      "shortfall": 2,
+      "site": "moneysavingexpert",
+      "target": 2
+    }
+  ],
   "source_not_enabled": [],
-  "trigger_commit": "d9af56cd6dffbed69c522b78a1fa974a13592c0a"
+  "trigger_commit": "eeef13e5d1c1157959d43b7c5abe4dba61199b4f"
 }
