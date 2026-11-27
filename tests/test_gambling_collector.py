@@ -100,6 +100,14 @@ class ParserTests(unittest.TestCase):
         self.assertGreater(len(set(pages)), 1)
         self.assertEqual(pages[0], collect.older_pages_for_request("request-0"))
 
+    def test_report_preserves_known_rejection_and_shortfall(self):
+        from gambling_publish_collection_status import public_event
+        item = public_event({"event": "candidate_rejected", "site": "gamcare",
+            "reason": "forum_total_posts_unavailable", "private": "not retained"})
+        self.assertEqual(item["reason"], "forum_total_posts_unavailable")
+        self.assertNotIn("private", item)
+        self.assertEqual(public_event({"event": "run_summary", "shortfall": 4})["shortfall"], 4)
+
     def test_psychforums_discovery_retries_one_timeout(self):
         listing = "https://www.psychforums.com/gambling-addiction-forum-f204/"
         source = {"id": "psychforums", "listings": [listing]}
@@ -334,7 +342,7 @@ class ParserTests(unittest.TestCase):
         self.assertEqual([p for p, _ in calls], [
             "/api/collect/claim", "/api/collect/complete"])
 
-    def test_unverified_parsing_releases_claim_without_writing(self):
+    def test_unverified_parsing_does_not_claim_or_write(self):
         calls = []
         def fake_api(path, body=None):
             calls.append(path)
@@ -348,7 +356,7 @@ class ParserTests(unittest.TestCase):
                 patch.object(collect, "http", return_value=b"<html>incomplete</html>"):
             with self.assertRaisesRegex(ValueError, "forum_total_posts_unavailable"):
                 collect.collect_one(self.site, {}, "trying-to-stop", self.url, None)
-        self.assertEqual(calls, ["/api/collect/claim", "/api/collect/release"])
+        self.assertEqual(calls, [])
 
 
     def test_readback_fetches_all_comment_pages(self):
@@ -389,7 +397,7 @@ class ParserTests(unittest.TestCase):
             self.assertTrue(collect.readback(
                 "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee", draft, 2))
 
-    def test_incomplete_source_raises_rejected_candidate_and_releases(self):
+    def test_incomplete_source_raises_rejected_candidate_without_claim(self):
         calls = []
         def fake_api(path, body=None):
             calls.append(path)
@@ -403,7 +411,7 @@ class ParserTests(unittest.TestCase):
                 patch.object(collect, "http", return_value=b"<html></html>"):
             with self.assertRaises(collect.RejectedCandidate):
                 collect.collect_one(self.site, {}, "trying-to-stop", self.url, None)
-        self.assertEqual(calls, ["/api/collect/claim", "/api/collect/release"])
+        self.assertEqual(calls, [])
 
 
     def test_audit_completed_uses_exact_published_full_body_readback(self):

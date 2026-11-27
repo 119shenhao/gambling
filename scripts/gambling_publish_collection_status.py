@@ -4,6 +4,7 @@ Only invoked after GitHub Actions collector job. Never writes to forum DB, never
 logs the source post/replies or claim tokens. Repo writes are limited to docs/.
 """
 import base64
+from collections import Counter
 import json
 import os
 import re
@@ -120,6 +121,11 @@ def main():
         "collector_job_result": result,
         "has_run_summary": summary is not None,
         "run_summary": summary,
+        "site_summaries": [e for e in events if e["event"] == "site_summary"],
+        "source_not_enabled": [e for e in events if e["event"] == "source_not_enabled"],
+        "reason_counts": dict(Counter(e["reason"] for e in events
+            if e["event"] in ("candidate_rejected", "candidate_failed", "site_error")
+            and "reason" in e)),
         "events": events[-100:],
         "production_database_writes": False,
     }

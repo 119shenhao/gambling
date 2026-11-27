@@ -311,7 +311,7 @@ def discover_source(source, excluded, cap=60):
                     found.setdefault(identifier, url)
                     if len(found) >= cap:
                         return found
-    if (source["id"] in ("gamcare", "psychforums") or source["id"] in ARTICLE_SOURCES) and not listing_available and not found and listing_error:
+    if not listing_available and not found and listing_error:
         raise listing_error
     return dict(list(found.items())[:cap])
 
@@ -409,15 +409,11 @@ def complete_staged(site, identifier, token, draft, source_total, n):
 
 
 def collect_one(site, source, identifier, url, export_dir):
-    lease = api("/api/collect/claim", {
-        "site": site, "source_ids": [identifier],
-        "collector_id": "gambling-independent-collector",
-    })["results"][0]
-    if lease["result"] != "granted":
-        emit("claim_skipped", site=site, source_id=identifier, reason=lease["result"])
-        return 0, 0, 0
-    token = lease["lease_token"]
-    payload = {"site": site, "source_id": identifier, "lease_token": token}
+    # Validate the entire public source before claiming. Ineligible candidates
+    # must not churn D1 claim/release rows or exhaust the claim quota.
+    # The server still atomically reserves and deduplicates immediately before
+    # any import; a competing collector cannot cause a duplicate write.
+    payload = None
     completed = False
     submitted = False
     try:
@@ -445,11 +441,21 @@ def collect_one(site, source, identifier, url, export_dir):
             n = validate(draft, allow_no_replies=site in ARTICLE_SOURCES)
         except ValueError as error:
             raise RejectedCandidate(str(error)) from None
-        whole_bytes = len(json.dumps({**payload, "topic": draft},
+        whole_bytes = len(json.dumps({"site": site, "source_id": identifier,
+                        "lease_token": "x" * 128, "topic": draft},
                         ensure_ascii=False).encode())
         long_mode = n > 49 or whole_bytes > MAX_BYTES or metadata["pages"] > 1
         if long_mode and n == 0:
             raise RejectedCandidate("standalone_article_payload_too_large")
+        lease = api("/api/collect/claim", {
+            "site": site, "source_ids": [identifier],
+            "collector_id": "gambling-independent-collector",
+        })["results"][0]
+        if lease["result"] != "granted":
+            emit("claim_skipped", site=site, source_id=identifier, reason=lease["result"])
+            return 0, 0, 0
+        token = lease["lease_token"]
+        payload = {"site": site, "source_id": identifier, "lease_token": token}
         submitted = True
         if long_mode:
             receipt = complete_staged(site, identifier, token, draft,
@@ -484,7 +490,7 @@ def collect_one(site, source, identifier, url, export_dir):
              completion_possible=bool(submitted))
         raise
     finally:
-        if not completed:
+        if payload is not None and not completed:
             try:
                 if not submitted:
                     api("/api/collect/release", payload)

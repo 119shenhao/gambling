@@ -526,3 +526,5 @@
 - 11/26 Beijing: five collector reports recorded 10 new topics; eight successful production sync jobs applied 15 (7+6+2). UTC 11/26 included four inserts (2+2); exact user-visible page not directly inspected.
 - Stage separate UTC+8 materialized content-day aggregates, preserving UTC traffic and source timestamps. Migration and CI require DEV verification; production approval separately required.
 - Retain privacy, completeness and source approval gates. Add one bounded rotating older GamCare listing page, per-source targets/shortfalls, sanitized reason codes and nonzero exit for zero imports. Yield improvement requires live verification; no access-control bypass or enabling unapproved sources.
+
+- Collector follow-up: parse/validate before D1 claim so rejected posts issue no claim/release writes. The final server-side reservation, atomic import, readback and uncertain-completion handling remain. Treat failed listings without fallback as failures across sources; persist all sanitized site summaries and rejection counts even when detailed events are truncated. Added regression tests; real live yield still pending.
