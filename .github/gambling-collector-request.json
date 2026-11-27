@@ -1,8 +1,8 @@
 {
-  "request_id": "gambling_20261127_mse_pagination_validation",
+  "request_id": "gambling_20261127_190251_collect",
   "mode": "collect",
   "sites": [
-    "moneysavingexpert"
+    "all"
   ],
   "candidates": {},
   "limit": 2
